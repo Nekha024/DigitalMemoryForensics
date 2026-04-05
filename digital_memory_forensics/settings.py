@@ -6,6 +6,7 @@ SECRET_KEY = 'django-insecure-change-this-later'
 DEBUG = True
 ALLOWED_HOSTS = []
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -13,9 +14,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
     'rest_framework',
-
     'accounts',
     'cases',
     'evidence',
