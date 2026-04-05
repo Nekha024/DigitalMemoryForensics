@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Digital Memory Forensics</title>
+</head>
+<body>
+    <h1>My Cases</h1>
+
+    <p>
+        Welcome, {{ request.user.username }} |
+        <a href="{% url 'create_case' %}">Create Case</a> |
+        <a href="{% url 'upload_evidence' %}">Upload Evidence</a> |
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+        </form>
+    </p>
+
+    <ul>
+        {% for case in case_list %}
+            <li>
+                <a href="{% url 'case_detail' case.id %}">{{ case.title }}</a>
+                - {{ case.status }} - {{ case.created_at }}
+            </li>
+        {% empty %}
+            <li>No cases yet.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
