@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Evidence Detail</title>
+</head>
+<body>
+    <h2>{{ evidence.title }}</h2>
+    <p>Case: {{ evidence.case.title }}</p>
+    <p>Type: {{ evidence.file_type }}</p>
+    <p>Uploaded: {{ evidence.uploaded_at }}</p>
+    <p>File: <a href="{{ evidence.file.url }}">Download</a></p>
+
+    <h3>Extracted Text</h3>
+    <pre style="white-space: pre-wrap;">{{ evidence.extracted_text }}</pre>
+
+    <p><a href="{% url 'case_detail' evidence.case.id %}">Back to Case</a></p>
+</body>
+</html>
