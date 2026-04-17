@@ -18,3 +18,13 @@ class EvidenceFile(models.Model):
 
     def __str__(self):
         return self.title
+    
+class EvidenceChunk(models.Model):
+    evidence_file = models.ForeignKey(EvidenceFile, on_delete=models.CASCADE, related_name='chunks')
+    chunk_index = models.IntegerField()
+    content = models.TextField()
+    qdrant_point_id = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.evidence_file.title} - Chunk {self.chunk_index}"

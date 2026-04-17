@@ -11,6 +11,7 @@ def home(request):
 @login_required
 def create_case(request):
     if request.method == 'POST':
+        
         form = CaseForm(request.POST)
         if form.is_valid():
             case = form.save(commit=False)
@@ -25,3 +26,9 @@ def create_case(request):
 def case_detail(request, case_id):
     case = get_object_or_404(Case, id=case_id, created_by=request.user)
     return render(request, 'cases/case_detail.html', {'case': case})
+
+
+
+
+
+
