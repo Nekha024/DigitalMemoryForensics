@@ -9,21 +9,23 @@
     <p>Status: {{ case.status }}</p>
     <p>Created: {{ case.created_at }}</p>
 
+    <p>
+        <a href="{% url 'upload_evidence' %}">Upload Evidence</a> |
+        <a href="{% url 'semantic_search' %}?case_id={{ case.id }}">Semantic Search</a> |
+        <a href="{% url 'home' %}">Back Home</a>
+    </p>
+
     <h3>Evidence Files</h3>
     <ul>
         {% for evidence in case.evidence_files.all %}
             <li>
                 <a href="{% url 'evidence_detail' evidence.id %}">{{ evidence.title }}</a>
                 ({{ evidence.file_type }})
+                - <a href="{% url 'index_evidence' evidence.id %}">Index</a>
             </li>
         {% empty %}
             <li>No evidence uploaded yet.</li>
         {% endfor %}
     </ul>
-
-    <p>
-        <a href="{% url 'upload_evidence' %}">Upload Evidence</a> |
-        <a href="{% url 'home' %}">Back Home</a>
-    </p>
 </body>
 </html>

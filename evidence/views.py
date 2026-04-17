@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from .models import EvidenceFile
 from .forms import EvidenceFileForm
 from .utils import detect_file_type, extract_text
+from .vector_utils import index_evidence_file, search_similar_chunks
 from cases.models import Case
+
 @login_required
 def upload_evidence(request):
     if request.method == 'POST':
@@ -35,3 +37,37 @@ def evidence_detail(request, evidence_id):
         case__created_by=request.user
     )
     return render(request, 'evidence/evidence_detail.html', {'evidence': evidence})
+
+@login_required
+def index_evidence(request, evidence_id):
+    evidence = get_object_or_404(
+        EvidenceFile,
+        id=evidence_id,
+        case__created_by=request.user
+    )
+
+    if evidence.extracted_text:
+        index_evidence_file(evidence)
+
+    return redirect('evidence_detail', evidence_id=evidence.id)
+
+@login_required
+def semantic_search(request):
+    query = request.GET.get('q', '')
+    case_id = request.GET.get('case_id')
+    results = []
+    cases = Case.objects.filter(created_by=request.user)
+
+    selected_case_id = None
+    if case_id and case_id.isdigit():
+        selected_case_id = int(case_id)
+
+    if query:
+        results = search_similar_chunks(query, case_id=selected_case_id, limit=5)
+
+    return render(request, 'evidence/semantic_search.html', {
+        'query': query,
+        'results': results,
+        'cases': cases,
+        'selected_case_id': selected_case_id,
+    })

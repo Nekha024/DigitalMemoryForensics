@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Semantic Search</title>
+</head>
+<body>
+    <h2>Semantic Search</h2>
+
+    <form method="get">
+        <p>
+            abel>Case:</label>
+            <select name="case_id">
+                <option value="">All Cases</option>
+                {% for case in cases %}
+                    <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
+                        {{ case.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            abel>Search Query:</label>
+            <input type="text" name="q" value="{{ query }}" style="width: 400px;">
+        </p>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <hr>
+
+    {% if query %}
+        <h3>Results for "{{ query }}"</h3>
+
+        {% for result in results %}
+            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                <p><strong>File:</strong> {{ result.title }}</p>
+                <p><strong>Chunk:</strong> {{ result.chunk_index }}</p>
+                <p><strong>Score:</strong> {{ result.score }}</p>
+                <p>{{ result.content }}</p>
+                <p>
+                    <a href="{% url 'evidence_detail' result.evidence_id %}">View Evidence</a>
+                </p>
+            </div>
+        {% empty %}
+            <p>No results found.</p>
+        {% endfor %}
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Back Home</a></p>
+</body>
+</html>

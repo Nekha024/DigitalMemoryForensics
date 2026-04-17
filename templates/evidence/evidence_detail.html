@@ -10,9 +10,12 @@
     <p>Uploaded: {{ evidence.uploaded_at }}</p>
     <p>File: <a href="{{ evidence.file.url }}">Download</a></p>
 
+    <p>
+        <a href="{% url 'index_evidence' evidence.id %}">Index This Evidence</a> |
+        <a href="{% url 'case_detail' evidence.case.id %}">Back to Case</a>
+    </p>
+
     <h3>Extracted Text</h3>
     <pre style="white-space: pre-wrap;">{{ evidence.extracted_text }}</pre>
-
-    <p><a href="{% url 'case_detail' evidence.case.id %}">Back to Case</a></p>
 </body>
 </html>
