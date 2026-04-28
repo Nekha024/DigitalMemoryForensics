@@ -1,26 +1,168 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Verify OTP</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify OTP</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+/* PERFECT CENTERING */
+body{
+    height:100vh;
+    display:grid;
+    place-items:center;
+    background:#020617;
+    overflow:hidden;
+}
+
+/* BACKGROUND */
+.bg{
+    position:fixed;
+    inset:0;
+    z-index:-2;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(124,58,237,.25), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(147,51,234,.25), transparent 40%),
+        #020617;
+    animation: moveBg 6s ease-in-out infinite alternate;
+}
+
+@keyframes moveBg{
+    0%{background-position:0% 50%, 100% 50%}
+    100%{background-position:100% 50%, 0% 50%}
+}
+
+/* SCAN EFFECT */
+.scan{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+}
+
+.scan::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:-20%;
+    height:40%;
+    background:linear-gradient(
+        to bottom,
+        transparent,
+        rgba(124,58,237,0.4),
+        transparent
+    );
+    filter: blur(6px);
+    animation: scan 2s linear infinite;
+}
+
+@keyframes scan{
+    0%{transform:translateY(-100%)}
+    100%{transform:translateY(200%)}
+}
+
+/* OTP CARD */
+.card{
+    width:350px;
+    padding:30px;
+    background:#020617;
+    border:2px solid #7c3aed;
+    box-shadow:0 0 25px #7c3aed;
+    border-radius:12px;
+    text-align:center;
+    position:relative;
+    z-index:10;
+}
+
+.card h2{
+    color:white;
+    margin-bottom:10px;
+}
+
+.card p{
+    color:#aaa;
+    font-size:14px;
+    margin-bottom:20px;
+}
+
+/* INPUT */
+input{
+    width:100%;
+    padding:12px;
+    background:transparent;
+    border:none;
+    border-bottom:2px solid #555;
+    color:white;
+    text-align:center;
+    letter-spacing:6px;
+    font-size:20px;
+    outline:none;
+}
+
+/* BUTTON */
+button{
+    width:100%;
+    margin-top:20px;
+    padding:12px;
+    border:none;
+    border-radius:20px;
+    background:linear-gradient(135deg,#7c3aed,#9333ea);
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    box-shadow:0 0 15px #9333ea;
+}
+
+/* MESSAGE */
+.error{
+    color:#ff4d4d;
+    font-size:13px;
+    margin-bottom:10px;
+}
+
+.success{
+    color:#22c55e;
+    font-size:13px;
+    margin-bottom:10px;
+}
+
+</style>
 </head>
+
 <body>
-    <h2>Verify OTP</h2>
+
+<div class="bg"></div>
+<div class="scan"></div>
+
+<div class="card">
+    <h2>OTP Verification</h2>
+    <p>Enter the OTP sent to your email</p>
 
     {% if messages %}
         {% for message in messages %}
-            <p style="color:red;">{{ message }}</p>
+            <div class="{% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                {{ message }}
+            </div>
         {% endfor %}
     {% endif %}
 
-    <p>Enter the OTP sent to your email.</p>
-
     <form method="post">
         {% csrf_token %}
-        <p>
-            <label for="otp">OTP</label><br>
-            <input type="text" name="otp" maxlength="6" required>
-        </p>
+        <input type="text" name="otp" maxlength="6" placeholder="------" required>
         <button type="submit">Verify</button>
     </form>
+</div>
+
 </body>
 </html>
