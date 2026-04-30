@@ -6,6 +6,8 @@ from .utils import detect_file_type, extract_text
 from .vector_utils import index_evidence_file, search_similar_chunks
 from cases.models import Case
 
+
+
 @login_required
 def upload_evidence(request):
     if request.method == 'POST':
