@@ -6,10 +6,10 @@ from .models import EmailOTP
 from .utils import generate_otp, send_otp_email
 
 
-#home
+#homepage
 
-def home(request):
-    return render(request, 'landing_page/home.html')
+def page(request):
+    return render(request, 'landing_page/page.html')
 
 # login
 def auth_page(request):

@@ -13,23 +13,24 @@
     font-family:'Segoe UI',sans-serif;
 }
 
-/* PERFECT CENTERING */
+/* CENTER */
 body{
     height:100vh;
-    display:grid;
-    place-items:center;
+    display:flex;
+    justify-content:center;
+    align-items:center;
     background:#020617;
     overflow:hidden;
 }
 
-/* BACKGROUND */
+/* BACKGROUND (CYAN THEME) */
 .bg{
     position:fixed;
     inset:0;
     z-index:-2;
     background:
-        radial-gradient(circle at 20% 30%, rgba(124,58,237,.25), transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(147,51,234,.25), transparent 40%),
+        radial-gradient(circle at 20% 30%, rgba(6,182,212,.2), transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(6,182,212,.2), transparent 40%),
         #020617;
     animation: moveBg 6s ease-in-out infinite alternate;
 }
@@ -39,12 +40,17 @@ body{
     100%{background-position:100% 50%, 0% 50%}
 }
 
-/* SCAN EFFECT */
+/* SCAN (INSIDE STYLE MATCH) */
 .scan{
-    position:fixed;
+    position:absolute;
     inset:0;
     pointer-events:none;
-    z-index:-1;
+    opacity:0;
+    z-index:0;
+}
+
+.scan.active{
+    opacity:1;
 }
 
 .scan::after{
@@ -57,37 +63,45 @@ body{
     background:linear-gradient(
         to bottom,
         transparent,
-        rgba(124,58,237,0.4),
+        rgba(6,182,212,0.5),
         transparent
     );
     filter: blur(6px);
-    animation: scan 2s linear infinite;
+    animation: scanMove 4s ease-in-out;
 }
 
-@keyframes scan{
-    0%{transform:translateY(-100%)}
-    100%{transform:translateY(200%)}
+@keyframes scanMove{
+    0%{transform:translateY(-100%); opacity:0;}
+    20%{opacity:1;}
+    80%{opacity:1;}
+    100%{transform:translateY(200%); opacity:0;}
 }
 
-/* OTP CARD */
+/* CARD (GLASS + NEON) */
 .card{
-    width:350px;
+    width:360px;
     padding:30px;
-    background:#020617;
-    border:2px solid #7c3aed;
-    box-shadow:0 0 25px #7c3aed;
-    border-radius:12px;
+
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(12px);
+
+    border:1px solid rgba(6,182,212,0.3);
+    box-shadow:0 0 30px rgba(6,182,212,0.4);
+
+    border-radius:14px;
     text-align:center;
     position:relative;
-    z-index:10;
+    overflow:hidden;
 }
 
-.card h2{
-    color:white;
+/* TEXT */
+h2{
+    color:#22d3ee;
+    text-shadow:0 0 10px #06b6d4;
     margin-bottom:10px;
 }
 
-.card p{
+p{
     color:#aaa;
     font-size:14px;
     margin-bottom:20px;
@@ -105,6 +119,12 @@ input{
     letter-spacing:6px;
     font-size:20px;
     outline:none;
+    transition:.3s;
+}
+
+input:focus{
+    border-bottom:2px solid #06b6d4;
+    box-shadow:0 5px 10px rgba(6,182,212,0.3);
 }
 
 /* BUTTON */
@@ -114,14 +134,14 @@ button{
     padding:12px;
     border:none;
     border-radius:20px;
-    background:linear-gradient(135deg,#7c3aed,#9333ea);
+    background:linear-gradient(135deg,#06b6d4,#0ea5e9);
     color:white;
     cursor:pointer;
     transition:.3s;
 }
 
 button:hover{
-    box-shadow:0 0 15px #9333ea;
+    box-shadow:0 0 15px #06b6d4;
 }
 
 /* MESSAGE */
@@ -136,16 +156,18 @@ button:hover{
     font-size:13px;
     margin-bottom:10px;
 }
-
 </style>
 </head>
 
 <body>
 
 <div class="bg"></div>
-<div class="scan"></div>
 
 <div class="card">
+
+    <!-- SCAN INSIDE CARD -->
+    <div class="scan" id="scan"></div>
+
     <h2>OTP Verification</h2>
     <p>Enter the OTP sent to your email</p>
 
@@ -160,9 +182,18 @@ button:hover{
     <form method="post">
         {% csrf_token %}
         <input type="text" name="otp" maxlength="6" placeholder="------" required>
-        <button type="submit">Verify</button>
+        <button type="submit" onclick="triggerScan()">Verify</button>
     </form>
+
 </div>
+
+<script>
+function triggerScan(){
+    const scan = document.getElementById('scan');
+    scan.classList.add('active');
+    setTimeout(()=>scan.classList.remove('active'),4000);
+}
+</script>
 
 </body>
 </html>
