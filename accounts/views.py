@@ -5,6 +5,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import EmailOTP
 from .utils import generate_otp, send_otp_email
 
+
+#home
+
+def home(request):
+    return render(request, 'landing_page/home.html')
+
 # login
 def auth_page(request):
     if request.method == "POST" and 'login' in request.POST:
