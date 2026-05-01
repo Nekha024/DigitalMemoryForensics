@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMF System</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body {
+  background: radial-gradient(circle at 20% 20%, #0f172a, #020617);
+  color: white;
+}
+
+/* GLASS */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* NEON */
+.neon {
+  box-shadow: 0 0 12px #06b6d4, 0 0 25px rgba(6,182,212,0.5);
+}
+
+/* CARD ANIMATION */
+.card {
+  transition: all 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 0 30px rgba(6,182,212,0.6);
+}
+
+/* FLOW LINE */
+.line {
+  height: 2px;
+  background: linear-gradient(to right, transparent, #06b6d4, transparent);
+  flex: 1;
+}
+</style>
+
+</head>
+
+<body class="font-sans pt-24">
+
+<!-- NAVBAR -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-5 bg-black/30 backdrop-blur-md border-b border-white/10">
+  <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
+
+  <nav class="hidden md:flex space-x-8 text-gray-300">
+    <a href="#" class="hover:text-cyan-400">Features</a>
+    <a href="#" class="hover:text-cyan-400">Workflow</a>
+    <a href="#" class="hover:text-cyan-400">Demo</a>
+    <a href="#" class="hover:text-cyan-400">Pricing</a>
+    <a href="#" class="hover:text-cyan-400">Contact</a>
+  </nav>
+
+  <a href="{% url 'auth' %}">
+  <button class="glass neon px-5 py-2 rounded-lg hover:bg-cyan-500/20">
+    Get Started
+  </button></a>
+</header>
+
+<!-- HERO -->
+<section class="grid md:grid-cols-2 gap-12 px-10 py-20 items-center">
+
+  <!-- TEXT -->
+  <div>
+    <h2 class="text-5xl font-bold leading-tight mb-6">
+      DIGITAL MEMORY <br>
+      <span class="text-cyan-400">FORENSICS SYSTEM</span>
+    </h2>
+
+    <p class="text-gray-400 mb-8 max-w-md">
+      Transforming complex unstructured data into clear, actionable evidence
+      using advanced RAG & Vector Databases.
+    </p>
+
+    <button class="neon bg-cyan-500 px-6 py-3 rounded-lg hover:bg-cyan-600">
+      Watch Demo
+    </button>
+  </div>
+
+  <!-- AI GRAPH IMAGE -->
+  <div class="glass p-6 rounded-2xl neon">
+    <img 
+      src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80"
+      class="rounded-xl"
+      alt="AI Network"
+    >
+  </div>
+
+</section>
+
+<!-- FEATURES -->
+<section class="px-10 py-16">
+
+  <h3 class="text-3xl font-semibold text-center mb-12">
+    SYSTEM KEY FUNCTIONALITIES
+  </h3>
+
+  <div class="grid md:grid-cols-4 gap-8">
+
+    <div class="glass card p-6 rounded-xl text-center">
+      <img src="https://img.icons8.com/fluency/48/upload.png" class="mx-auto mb-3"/>
+      <h4 class="text-cyan-400">Data Ingestion</h4>
+      <p class="text-gray-400 text-sm">PDF, Email, Chat, Docs</p>
+    </div>
+
+    <div class="glass card p-6 rounded-xl text-center">
+      <img src="https://img.icons8.com/fluency/48/search.png" class="mx-auto mb-3"/>
+      <h4 class="text-cyan-400">Semantic Search</h4>
+      <p class="text-gray-400 text-sm">RAG-based Retrieval</p>
+    </div>
+
+    <div class="glass card p-6 rounded-xl text-center">
+      <img src="https://img.icons8.com/fluency/48/database.png" class="mx-auto mb-3"/>
+      <h4 class="text-cyan-400">Vector Storage</h4>
+      <p class="text-gray-400 text-sm">Embeddings + DB</p>
+    </div>
+
+    <div class="glass card p-6 rounded-xl text-center">
+      <img src="https://img.icons8.com/fluency/48/combo-chart.png" class="mx-auto mb-3"/>
+      <h4 class="text-cyan-400">Timeline</h4>
+      <p class="text-gray-400 text-sm">Anomaly Detection</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- WORKFLOW -->
+<section class="px-10 py-16 text-center">
+
+  <h3 class="text-3xl font-semibold mb-12">
+    THE RAG WORKFLOW FOR FORENSICS
+  </h3>
+
+  <div class="flex items-center justify-center flex-wrap gap-4">
+
+    <div class="glass px-5 py-3 rounded-lg">📄 Ingestion</div>
+    <div class="line"></div>
+
+    <div class="glass px-5 py-3 rounded-lg">🧠 Embeddings</div>
+    <div class="line"></div>
+
+    <div class="glass px-5 py-3 rounded-lg">🗄 Vector DB</div>
+    <div class="line"></div>
+
+    <div class="glass px-5 py-3 rounded-lg">🤖 RAG + LLM</div>
+    <div class="line"></div>
+
+    <div class="glass px-5 py-3 rounded-lg">📊 Insights</div>
+
+  </div>
+
+  <!-- EXTRA IMAGE -->
+  <div class="mt-12 flex justify-center">
+    <img 
+      src="https://images.unsplash.com/photo-1667372335962-5fd503a38a7f?auto=format&fit=crop&w=900&q=80"
+      class="rounded-xl w-[600px] opacity-80"
+    >
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="text-center py-8 text-gray-500">
+  © 2026 DMF System
+</footer>
+
+<script>
+window.addEventListener("scroll", function() {
+  const nav = document.querySelector("header");
+  if (window.scrollY > 50) {
+    nav.classList.add("bg-black/60");
+  } else {
+    nav.classList.remove("bg-black/60");
+  }
+});
+</script>
+
+</body>
+</html>

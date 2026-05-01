@@ -1,52 +1,173 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Semantic Search</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Semantic Search</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body{
+    background:#020617;
+    color:white;
+}
+
+/* NAVBAR */
+.navbar{
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.4);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+/* GLASS */
+.glass{
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(6,182,212,0.2);
+}
+
+/* INPUT */
+input, select{
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    background:transparent;
+    border:1px solid #334155;
+    color:white;
+    outline:none;
+}
+
+input:focus, select:focus{
+    border:1px solid #06b6d4;
+    box-shadow:0 0 10px rgba(6,182,212,0.3);
+}
+
+/* BUTTON */
+.btn{
+    padding:10px 16px;
+    border-radius:8px;
+    background:#06b6d4;
+    color:white;
+    transition:0.3s;
+}
+.btn:hover{
+    background:#0891b2;
+    box-shadow:0 0 10px #06b6d4;
+}
+
+/* RESULT CARD */
+.card{
+    transition:0.3s;
+}
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 0 20px rgba(6,182,212,0.6);
+}
+</style>
 </head>
-<body>
-    <h2>Semantic Search</h2>
 
-    <form method="get">
-        <p>
-            abel>Case:</label>
-            <select name="case_id">
-                <option value="">All Cases</option>
-                {% for case in cases %}
-                    <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
-                        {{ case.title }}
-                    </option>
-                {% endfor %}
-            </select>
-        </p>
+<body class="pt-24 px-6">
 
-        <p>
-            abel>Search Query:</label>
-            <input type="text" name="q" value="{{ query }}" style="width: 400px;">
-        </p>
+<!-- NAVBAR -->
+<header class="navbar fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-4">
 
-        <button type="submit">Search</button>
-    </form>
+    <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
 
-    <hr>
+    <nav class="flex gap-6 text-gray-300">
+        <a href="{% url 'cases:home' %}" class="hover:text-cyan-400">Dashboard</a>
+    </nav>
 
-    {% if query %}
-        <h3>Results for "{{ query }}"</h3>
+    <span class="text-sm text-gray-400">
+        {{ request.user.username }}
+    </span>
 
-        {% for result in results %}
-            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                <p><strong>File:</strong> {{ result.title }}</p>
-                <p><strong>Chunk:</strong> {{ result.chunk_index }}</p>
-                <p><strong>Score:</strong> {{ result.score }}</p>
-                <p>{{ result.content }}</p>
-                <p>
-                    <a href="{% url 'evidence_detail' result.evidence_id %}">View Evidence</a>
-                </p>
+</header>
+
+<!-- SEARCH FORM -->
+<div class="max-w-4xl mx-auto">
+
+    <div class="glass p-6 rounded-xl mb-8">
+
+        <h2 class="text-2xl text-cyan-400 mb-6">Semantic Search</h2>
+
+        <form method="get" class="grid md:grid-cols-2 gap-4">
+
+            <!-- CASE SELECT -->
+            <div>
+                <label class="text-sm text-gray-300">Case</label>
+                <select name="case_id">
+                    <option value="">All Cases</option>
+                    {% for case in cases %}
+                        <option value="{{ case.id }}" 
+                        {% if selected_case_id == case.id %}selected{% endif %}>
+                            {{ case.title }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
-        {% empty %}
-            <p>No results found.</p>
-        {% endfor %}
+
+            <!-- QUERY -->
+            <div>
+                <label class="text-sm text-gray-300">Search Query</label>
+                <input type="text" name="q" value="{{ query }}" placeholder="Enter keywords...">
+            </div>
+
+            <div class="md:col-span-2 text-right">
+                <button type="submit" class="btn">Search</button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- RESULTS -->
+    {% if query %}
+        <h3 class="text-xl text-cyan-400 mb-6">
+            Results for "{{ query }}"
+        </h3>
+
+        <div class="grid gap-6">
+
+            {% for result in results %}
+            <div class="glass card p-5 rounded-xl">
+
+                <div class="flex justify-between text-sm text-gray-400 mb-2">
+                    <span>File: <span class="text-cyan-400">{{ result.title }}</span></span>
+                    <span>Score: {{ result.score }}</span>
+                </div>
+
+                <p class="text-gray-300 text-sm mb-3">
+                    Chunk #{{ result.chunk_index }}
+                </p>
+
+                <p class="text-gray-200 mb-4">
+                    {{ result.content }}
+                </p>
+
+                <a href="{% url 'evidence_detail' result.evidence_id %}" 
+                   class="text-cyan-400 hover:underline">
+                   View Evidence →
+                </a>
+
+            </div>
+            {% empty %}
+                <p class="text-gray-400">No results found.</p>
+            {% endfor %}
+
+        </div>
     {% endif %}
 
-    <p><a href="{% url 'home' %}">Back Home</a></p>
+    <!-- BACK -->
+    <div class="mt-10">
+        <a href="{% url 'home' %}" 
+           class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+</div>
+
 </body>
 </html>
