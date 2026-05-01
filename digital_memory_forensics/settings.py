@@ -72,7 +72,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_URL = "/accounts/auth/"
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/accounts/login/"
+LOGOUT_REDIRECT_URL = "/accounts/auth/"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "noreply@example.com"
