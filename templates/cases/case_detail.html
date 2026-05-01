@@ -12,6 +12,7 @@
     <p>
         <a href="{% url 'upload_evidence' %}">Upload Evidence</a> |
         <a href="{% url 'semantic_search' %}?case_id={{ case.id }}">Semantic Search</a> |
+        <a href="{% url 'rag_query' %}?case_id={{ case.id }}">Ask RAG</a> |
         <a href="{% url 'home' %}">Back Home</a>
     </p>
 

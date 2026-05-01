@@ -4,14 +4,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 
 GLM_BASE_URL = os.getenv("GLM_BASE_URL", "").rstrip("/")
 GLM_API_KEY = os.getenv("GLM_API_KEY", "")
-GLM_MODEL = os.getenv("GLM_MODEL", "glm-5")
+GLM_MODEL = os.getenv("GLM_MODEL", "glm-5.1")
 
-DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "ollama")
+DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "glm").lower()
 
 
 def build_rag_prompt(question, chunks):
@@ -73,8 +73,8 @@ def generate_with_glm(prompt, model=None):
         raise ValueError("GLM_BASE_URL or GLM_API_KEY is not set in environment variables.")
 
     model = model or GLM_MODEL
-    url = f"{GLM_BASE_URL}/chat/completions"
 
+    url = f"{GLM_BASE_URL.rstrip('/')}/chat/completions"
     headers = {
         "Authorization": f"Bearer {GLM_API_KEY}",
         "Content-Type": "application/json",
@@ -83,30 +83,22 @@ def generate_with_glm(prompt, model=None):
     payload = {
         "model": model,
         "messages": [
-            {
-                "role": "system",
-                "content": "You are a digital forensics assistant. Answer only from the provided evidence context."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role": "system", "content": "You are a digital forensics assistant. Answer only from the provided evidence context."},
+            {"role": "user", "content": prompt}
         ],
         "temperature": 0.2,
-        "max_tokens": 800
+        "max_tokens": 800,
     }
 
     response = requests.post(url, headers=headers, json=payload, timeout=120)
     response.raise_for_status()
-
     data = response.json()
 
     choices = data.get("choices", [])
     if not choices:
         return "No response generated from GLM."
 
-    message = choices[0].get("message", {})
-    return message.get("content", "").strip()
+    return choices[0].get("message", {}).get("content", "").strip()
 
 
 def generate_rag_answer(question, retrieved_chunks, provider=None):

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RAG Query</title>
+</head>
+<body>
+    <h2>RAG Question Answering</h2>
+
+    <form method="get">
+        <p>
+            <label>Case:</label>
+            <select name="case_id">
+                <option value="">All Cases</option>
+                {% for case in cases %}
+                    <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
+                        {{ case.title }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            <label>LLM Provider:</label>
+            <select name="provider">
+                <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>Ollama</option>
+                <option value="glm" {% if provider == 'glm' %}selected{% endif %}>GLM</option>
+            </select>
+        </p>
+
+        <p>
+            <label>Question:</label><br>
+            <input type="text" name="q" value="{{ question }}" style="width: 500px;" required>
+        </p>
+
+        <button type="submit">Ask</button>
+    </form>
+
+    <hr>
+
+    {% if error_message %}
+        <p style="color: red;"><strong>Error:</strong> {{ error_message }}</p>
+    {% endif %}
+
+    {% if answer_data %}
+        <h3>Generated Answer</h3>
+        <div style="border: 1px solid #ccc; padding: 12px; margin-bottom: 20px;">
+            <pre style="white-space: pre-wrap;">{{ answer_data.answer }}</pre>
+        </div>
+
+        <h3>Sources Used</h3>
+        {% for source in answer_data.sources %}
+            <div style="border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                <p><strong>Source {{ source.source_no }}</strong></p>
+                <p><strong>File:</strong> {{ source.title }}</p>
+                <p><strong>Chunk:</strong> {{ source.chunk_index }}</p>
+                <p><strong>Score:</strong> {{ source.score }}</p>
+                <p>{{ source.content }}</p>
+                <p>
+                    <a href="{% url 'evidence_detail' source.evidence_id %}">View Evidence</a>
+                </p>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <p><a href="{% url 'home' %}">Back Home</a></p>
+</body>
+</html>
