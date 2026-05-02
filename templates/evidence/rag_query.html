@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Question Answering{% endblock %}
+
+{% block content %}
+
+<!-- MAIN -->
+<div class="max-w-5xl mx-auto">
+
+    <!-- INPUT PANEL -->
+    <div class="glass p-6 rounded-xl mb-8">
+
+        <h2 class="text-2xl text-cyan-400 mb-6">
+            RAG Question Answering
+        </h2>
+
+        <form method="get" class="grid md:grid-cols-3 gap-4">
+
+            <!-- CASE -->
+            <div>
+                <label class="text-sm text-gray-300">Case</label>
+                <select name="case_id">
+                    <option value="">All Cases</option>
+                    {% for case in cases %}
+                        <option value="{{ case.id }}" 
+                        {% if selected_case_id == case.id %}selected{% endif %}>
+                            {{ case.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- PROVIDER -->
+            <div>
+                <label class="text-sm text-gray-300">LLM Provider</label>
+                <select name="provider">
+                    <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>Ollama</option>
+                    <option value="glm" {% if provider == 'glm' %}selected{% endif %}>GLM</option>
+                </select>
+            </div>
+
+            <!-- BUTTON -->
+            <div class="flex items-end">
+                <button type="submit" class="btn w-full">Ask</button>
+            </div>
+
+            <!-- QUESTION -->
+            <div class="md:col-span-3">
+                <label class="text-sm text-gray-300">Question</label>
+                <input type="text" name="q" value="{{ question }}" placeholder="Ask something about evidence..." required>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- ERROR -->
+    {% if error_message %}
+        <div class="text-red-400 mb-6">
+            <strong>Error:</strong> {{ error_message }}
+        </div>
+    {% endif %}
+
+    <!-- ANSWER -->
+    {% if answer_data %}
+        <div class="glass p-6 rounded-xl mb-8">
+
+            <h3 class="text-xl text-cyan-400 mb-4">
+                Generated Answer
+            </h3>
+
+            <div class="chat">
+                {{ answer_data.answer }}
+            </div>
+
+        </div>
+
+        <!-- SOURCES -->
+        <h3 class="text-xl text-cyan-400 mb-6">
+            Sources Used
+        </h3>
+
+        <div class="grid gap-6">
+
+            {% for source in answer_data.sources %}
+            <div class="glass p-5 rounded-xl">
+
+                <div class="flex justify-between text-sm text-gray-400 mb-2">
+                    <span>Source {{ source.source_no }}</span>
+                    <span>Score: {{ source.score }}</span>
+                </div>
+
+                <p class="text-sm text-gray-300 mb-2">
+                    File: <span class="text-cyan-400">{{ source.title }}</span>
+                </p>
+
+                <p class="text-sm text-gray-400 mb-3">
+                    Chunk #{{ source.chunk_index }}
+                </p>
+
+                <p class="text-gray-200 mb-4">
+                    {{ source.content }}
+                </p>
+
+                <a href="{% url 'evidence_detail' source.evidence_id %}" 
+                   class="text-cyan-400 hover:underline">
+                   View Evidence →
+                </a>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+    <!-- BACK -->
+    <div class="mt-10">
+        <a href="{% url 'home' %}" 
+           class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

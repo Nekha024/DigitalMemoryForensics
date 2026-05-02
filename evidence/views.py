@@ -4,6 +4,7 @@ from .models import EvidenceFile
 from .forms import EvidenceFileForm
 from .utils import detect_file_type, extract_text
 from .vector_utils import index_evidence_file, search_similar_chunks
+from .llm_utils import generate_rag_answer, DEFAULT_LLM_PROVIDER
 from cases.models import Case
 
 @login_required
@@ -71,3 +72,46 @@ def semantic_search(request):
         'cases': cases,
         'selected_case_id': selected_case_id,
     })
+
+@login_required
+def rag_query(request):
+    question = request.GET.get('q','')
+    case_id = request.GET.get('case_id')
+    provider = request.GET.get('provider',DEFAULT_LLM_PROVIDER)
+
+    cases = Case.objects.filter(created_by=request.user)
+    selected_case_id = None
+    retrieved_chunks = []
+    answer_data = None
+    error_message = None
+
+    if case_id and case_id.isdigit():
+        selected_case_id = int(case_id)
+
+    if question:
+        try:
+            retrieved_chunks = search_similar_chunks(
+                question,
+                case_id=selected_case_id,
+                limit=5
+            )
+
+            answer_data = generate_rag_answer(
+                question=question,
+                retrieved_chunks=retrieved_chunks,
+                provider=provider
+            )
+
+        except Exception as e:
+            error_message = str(e)
+
+    return render(request, 'evidence/rag_query.html', {
+        'question': question,
+        'provider': provider,
+        'cases': cases,
+        'selected_case_id': selected_case_id,
+        'retrieved_chunks': retrieved_chunks,
+        'answer_data': answer_data,
+        'error_message': error_message,
+    })
+

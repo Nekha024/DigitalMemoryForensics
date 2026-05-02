@@ -1,184 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DMF System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEMOIR | Advanced Digital Forensics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: radial-gradient(circle at 20% 20%, #0f172a, #020617);
+            color: white;
+            scroll-behavior: smooth;
+        }
 
-<script src="https://cdn.tailwindcss.com"></script>
+        /* GLASS */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
 
-<style>
-body {
-  background: radial-gradient(circle at 20% 20%, #0f172a, #020617);
-  color: white;
-}
+        /* NEON */
+        .neon {
+            box-shadow: 0 0 12px #06b6d4, 0 0 25px rgba(6,182,212,0.3);
+        }
 
-/* GLASS */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.1);
-}
+        /* CARD ANIMATION */
+        .card {
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 30px rgba(6,182,212,0.4);
+            border-color: rgba(6,182,212,0.5);
+        }
 
-/* NEON */
-.neon {
-  box-shadow: 0 0 12px #06b6d4, 0 0 25px rgba(6,182,212,0.5);
-}
+        /* FLOW LINE */
+        .line {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #06b6d4, transparent);
+            flex: 1;
+            min-width: 20px;
+        }
 
-/* CARD ANIMATION */
-.card {
-  transition: all 0.3s ease;
-}
-.card:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 0 30px rgba(6,182,212,0.6);
-}
-
-/* FLOW LINE */
-.line {
-  height: 2px;
-  background: linear-gradient(to right, transparent, #06b6d4, transparent);
-  flex: 1;
-}
-</style>
-
+        .text-gradient {
+            background: linear-gradient(to right, #fff, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .faq-answer {
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+        
+    </style>
 </head>
 
 <body class="font-sans pt-24">
 
 <!-- NAVBAR -->
-<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-5 bg-black/30 backdrop-blur-md border-b border-white/10">
-  <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
+<header class="absolute top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-5 bg-black/30 backdrop-blur-md border-b border-white/10">
+    <h1 class="text-3xl font-bold text-cyan-400 tracking-wider">MEMO<span class="text-white">IR</span></h1>
 
-  <nav class="hidden md:flex space-x-8 text-gray-300">
-    <a href="#" class="hover:text-cyan-400">Features</a>
-    <a href="#" class="hover:text-cyan-400">Workflow</a>
-    <a href="#" class="hover:text-cyan-400">Demo</a>
-    <a href="#" class="hover:text-cyan-400">Pricing</a>
-    <a href="#" class="hover:text-cyan-400">Contact</a>
-  </nav>
+    <nav class="hidden md:flex space-x-8 text-sm font-medium tracking-wide text-gray-200">
+        <a href="#features" class="hover:text-cyan-400 transition">Capabilities</a>
+        <a href="#workflow" class="hover:text-cyan-400 transition">Architecture</a>
+        <a href="#use-cases" class="hover:text-cyan-400 transition">Use Cases</a>
+          <a href="#pricing" class="hover:text-cyan-400 transition">Pricing</a>
+        <a href="#compliance" class="hover:text-cyan-400 transition">Security</a>
+    </nav>
 
-  <a href="{% url 'auth' %}">
-  <button class="glass neon px-5 py-2 rounded-lg hover:bg-cyan-500/20">
-    Get Started
-  </button></a>
+    <a href="{% url 'auth' %}">
+        <button class="glass neon px-6 py-2 rounded-lg hover:bg-cyan-500/20 transition-all text-sm font-bold text-cyan-400">
+            SECURE ACCESS
+        </button>
+    </a>
 </header>
 
 <!-- HERO -->
-<section class="grid md:grid-cols-2 gap-12 px-10 py-20 items-center">
-
-  <!-- TEXT -->
-  <div>
-    <h2 class="text-5xl font-bold leading-tight mb-6">
-      DIGITAL MEMORY <br>
-      <span class="text-cyan-400">FORENSICS SYSTEM</span>
-    </h2>
-
-    <p class="text-gray-400 mb-8 max-w-md">
-      Transforming complex unstructured data into clear, actionable evidence
-      using advanced RAG & Vector Databases.
-    </p>
-
-    <button class="neon bg-cyan-500 px-6 py-3 rounded-lg hover:bg-cyan-600">
-      Watch Demo
-    </button>
-  </div>
-
-  <!-- AI GRAPH IMAGE -->
-  <div class="glass p-6 rounded-2xl neon">
-    <img 
-      src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80"
-      class="rounded-xl"
-      alt="AI Network"
-    >
-  </div>
-
+<section class="flex flex-col items-center text-center px-10 py-32">
+    <div class="max-w-4xl">
+        <div class="inline-block px-4 py-1 mb-6 border border-cyan-500/30 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-bold tracking-widest uppercase">
+            Next-Gen Investigative Intelligence
+        </div>
+        <h2 class="text-6xl md:text-7xl font-bold leading-tight mb-8 text-gradient">
+            DIGITAL MEMORY <br> FORENSICS
+        </h2>
+        <p class="text-gray-400 text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+            Eliminate manual evidence review. Our RAG-driven engine synthesizes unstructured data into human-readable investigative leads in seconds.
+        </p>
+        <div class="flex gap-4 justify-center">
+            <button class="neon bg-cyan-500 px-8 py-4 rounded-lg hover:bg-cyan-600 font-bold transition-all">
+                Request Deployment
+            </button>
+            <button class="glass px-8 py-4 rounded-lg hover:bg-white/10 font-bold transition-all">
+                Technical Whitepaper
+            </button>
+        </div>
+    </div>
 </section>
 
-<!-- FEATURES -->
-<section class="px-10 py-16">
+<!-- FEATURES (CAPABILITIES) -->
+<section id="features" class="px-10 py-24 bg-black/20">
+    <div class="max-w-7xl mx-auto">
+        <h3 class="text-xs font-bold text-cyan-500 tracking-[0.3em] uppercase mb-4 text-center">Core Capabilities</h3>
+        <h4 class="text-4xl font-semibold text-center mb-16">INTELLIGENT DATA ANALYSIS</h4>
+        
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="glass card p-8 rounded-2xl border-l-4 border-l-cyan-500">
+                <img src="https://img.icons8.com/fluency/48/upload.png" class="mb-4 w-10 h-10"/>
+                <h4 class="text-xl font-bold mb-3">Multimodal Ingestion</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Automated parsing of PDF, PST/OST, Slack exports, and forensic disk images.</p>
+            </div>
 
-  <h3 class="text-3xl font-semibold text-center mb-12">
-    SYSTEM KEY FUNCTIONALITIES
-  </h3>
+            <div class="glass card p-8 rounded-2xl">
+                <img src="https://img.icons8.com/fluency/48/search.png" class="mb-4 w-10 h-10"/>
+                <h4 class="text-xl font-bold mb-3">Contextual Retrieval</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Semantic search that understands intent, moving beyond simple keyword matching.</p>
+            </div>
 
-  <div class="grid md:grid-cols-4 gap-8">
+            <div class="glass card p-8 rounded-2xl">
+                <img src="https://img.icons8.com/fluency/48/database.png" class="mb-4 w-10 h-10"/>
+                <h4 class="text-xl font-bold mb-3">Vectorized Storage</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">High-dimensional embeddings allow for cross-case similarity detection.</p>
+            </div>
 
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/upload.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Data Ingestion</h4>
-      <p class="text-gray-400 text-sm">PDF, Email, Chat, Docs</p>
+            <div class="glass card p-8 rounded-2xl">
+                <img src="https://img.icons8.com/fluency/48/combo-chart.png" class="mb-4 w-10 h-10"/>
+                <h4 class="text-xl font-bold mb-3">Timeline Mapping</h4>
+                <p class="text-gray-400 text-sm leading-relaxed">Automated chronological reconstruction of events across disparate data sources.</p>
+            </div>
+        </div>
     </div>
-
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/search.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Semantic Search</h4>
-      <p class="text-gray-400 text-sm">RAG-based Retrieval</p>
-    </div>
-
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/database.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Vector Storage</h4>
-      <p class="text-gray-400 text-sm">Embeddings + DB</p>
-    </div>
-
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/combo-chart.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Timeline</h4>
-      <p class="text-gray-400 text-sm">Anomaly Detection</p>
-    </div>
-
-  </div>
 </section>
 
-<!-- WORKFLOW -->
-<section class="px-10 py-16 text-center">
-
-  <h3 class="text-3xl font-semibold mb-12">
-    THE RAG WORKFLOW FOR FORENSICS
-  </h3>
-
-  <div class="flex items-center justify-center flex-wrap gap-4">
-
-    <div class="glass px-5 py-3 rounded-lg">📄 Ingestion</div>
-    <div class="line"></div>
-
-    <div class="glass px-5 py-3 rounded-lg">🧠 Embeddings</div>
-    <div class="line"></div>
-
-    <div class="glass px-5 py-3 rounded-lg">🗄 Vector DB</div>
-    <div class="line"></div>
-
-    <div class="glass px-5 py-3 rounded-lg">🤖 RAG + LLM</div>
-    <div class="line"></div>
-
-    <div class="glass px-5 py-3 rounded-lg">📊 Insights</div>
-
-  </div>
-
-  <!-- EXTRA IMAGE -->
-  <div class="mt-12 flex justify-center">
-    <img 
-      src="https://images.unsplash.com/photo-1667372335962-5fd503a38a7f?auto=format&fit=crop&w=900&q=80"
-      class="rounded-xl w-[600px] opacity-80"
-    >
-  </div>
-
+<!-- USE CASES -->
+<section id="use-cases" class="px-10 py-24">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+                <h3 class="text-xs font-bold text-cyan-500 tracking-[0.3em] uppercase mb-4">Practical Application</h3>
+                <h4 class="text-4xl font-semibold mb-8">TAILORED FOR MODERN INVESTIGATIONS</h4>
+                
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="mt-1 text-cyan-400">01.</div>
+                        <div>
+                            <h5 class="font-bold text-lg">Corporate Espionage</h5>
+                            <p class="text-gray-400">Detect subtle patterns of data exfiltration and unauthorized communication within encrypted channels.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="mt-1 text-cyan-400">02.</div>
+                        <div>
+                            <h5 class="font-bold text-lg">Legal Discovery (eDiscovery)</h5>
+                            <p class="text-gray-400">Rapidly summarize thousands of documents to identify relevant privilege or evidence for litigation.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="mt-1 text-cyan-400">03.</div>
+                        <div>
+                            <h5 class="font-bold text-lg">Incident Response</h5>
+                            <p class="text-gray-400">Analyze log files and system memory snapshots to trace the origin of a security breach.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="glass p-10 rounded-3xl border border-cyan-500/20">
+                <h5 class="text-cyan-400 font-mono mb-4">> System_Diagnostics: Analysis Active</h5>
+                <div class="space-y-4 font-mono text-sm">
+                    <div class="p-3 bg-white/5 rounded border-l-2 border-green-500">Scanning 1.2TB Unstructured Data...</div>
+                    <div class="p-3 bg-white/5 rounded border-l-2 border-cyan-500">Entity Resolution: Completed</div>
+                    <div class="p-3 bg-white/5 rounded border-l-2 border-cyan-500">Cross-Reference Timeline: 84% Match</div>
+                    <div class="p-3 bg-white/5 rounded border-l-2 border-yellow-500">Anomaly Detected: Unauthorized API Call</div>
+                    <div class="mt-6 p-4 bg-cyan-500/10 rounded border border-cyan-500/50 text-cyan-400">
+                        Recommendation: Review user_admin_01 login activity between 02:00 and 04:00 UTC.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+
+<!-- WORKFLOW (TECHNICAL) -->
+<section id="workflow" class="px-10 py-24 bg-black/40 text-center">
+    <h3 class="text-3xl font-bold mb-16 tracking-tight">ARCHITECTURAL PIPELINE</h3>
+
+    <div class="flex items-center justify-center flex-wrap gap-4 max-w-6xl mx-auto">
+        <div class="glass px-6 py-4 rounded-xl border border-white/10 hover:border-cyan-500/50 transition">
+            <span class="block text-xs text-gray-500 mb-1">STEP 01</span>
+            <span class="font-bold">Raw Ingestion</span>
+        </div>
+        <div class="line"></div>
+
+        <div class="glass px-6 py-4 rounded-xl border border-white/10 hover:border-cyan-500/50 transition">
+            <span class="block text-xs text-gray-500 mb-1">STEP 02</span>
+            <span class="font-bold">Embedding Gen</span>
+        </div>
+        <div class="line"></div>
+
+        <div class="glass px-6 py-4 rounded-xl border border-white/10 hover:border-cyan-500/50 transition">
+            <span class="block text-xs text-gray-500 mb-1">STEP 03</span>
+            <span class="font-bold">Vector Indexing</span>
+        </div>
+        <div class="line"></div>
+
+        <div class="glass px-6 py-4 rounded-xl border border-white/10 hover:border-cyan-500/50 transition">
+            <span class="block text-xs text-gray-500 mb-1">STEP 04</span>
+            <span class="font-bold">RAG Orchestration</span>
+        </div>
+        <div class="line"></div>
+
+        <div class="glass px-6 py-4 rounded-xl border border-cyan-500/50 bg-cyan-500/5">
+            <span class="block text-xs text-cyan-500 mb-1">OUTPUT</span>
+            <span class="font-bold">Insight Discovery</span>
+        </div>
+    </div>
+</section>
+
+<!-- DASHBOARD PREVIEW SECTION -->
+<section id="dashboard" class="px-10 py-24 bg-black/40">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <h3 class="text-xs font-bold text-cyan-500 tracking-[0.3em] uppercase mb-4">Live Interface</h3>
+            <h4 class="text-4xl font-semibold">INVESTIGATIVE INTELLIGENCE HUB</h4>
+        </div>
+
+        <!-- MOCKUP UI -->
+        <div class="glass rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
+            <!-- UI Header -->
+            <div class="bg-white/5 border-b border-white/10 px-6 py-4 flex justify-between items-center">
+                <div class="flex space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                </div>
+                <div class="text-xs font-mono text-gray-500 uppercase tracking-widest">Case_Ref: #8802-Delta</div>
+                <div class="w-20"></div>
+            </div>
+            
+            <div class="grid md:grid-cols-12 min-h-[500px]">
+                <!-- Sidebar -->
+                <div class="md:col-span-3 border-r border-white/10 p-6 space-y-6 bg-black/20">
+                    <div>
+                        <p class="text-[10px] text-gray-500 mb-3 uppercase">Evidence Sources</p>
+                        <div class="space-y-2">
+                            <div class="text-sm p-2 bg-cyan-500/10 rounded border border-cyan-500/30 text-cyan-400">📧 Exchange_Server_Dump.pst</div>
+                            <div class="text-sm p-2 hover:bg-white/5 rounded transition cursor-pointer">💬 Slack_Export_Jan26.json</div>
+                            <div class="text-sm p-2 hover:bg-white/5 rounded transition cursor-pointer">📄 Financial_Statements_Q4.pdf</div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-gray-500 mb-3 uppercase">Top Entities</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-white/5 rounded text-[10px] border border-white/10 text-gray-300">IP: 192.168.1.104</span>
+                            <span class="px-2 py-1 bg-white/5 rounded text-[10px] border border-white/10 text-gray-300">User: Admin_X</span>
+                            <span class="px-2 py-1 bg-white/5 rounded text-[10px] border border-white/10 text-gray-300">BTC_Wallet_...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Chat/Analysis -->
+                <div class="md:col-span-9 p-8 flex flex-col justify-between">
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-8 h-8 rounded bg-white/10 flex items-center justify-center text-xs font-bold">U</div>
+                            <div class="bg-white/5 p-4 rounded-xl rounded-tl-none border border-white/10 max-w-lg">
+                                <p class="text-sm text-gray-300">Summarize any communication between Admin_X and external vendors regarding "Project Phoenix" after midnight.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 justify-end">
+                            <div class="bg-cyan-500/10 p-4 rounded-xl rounded-tr-none border border-cyan-500/30 max-w-lg">
+                                <p class="text-sm text-cyan-100">Analyzing 14,000 emails... Found 3 relevant threads. Admin_X shared encrypted zip files with vendor 'Alpha_Sec' at 02:14 AM on Feb 12th. Zip hash: <span class="text-cyan-400">SHA-256: 8e3...</span></p>
+                                <div class="mt-3 pt-3 border-t border-cyan-500/20 text-[10px] text-cyan-500/70 italic">
+                                    Sources: PST_Export_01.pst (Page 442), Slack_Archive (Timestamp 02:15:01)
+                                </div>
+                            </div>
+                            <div class="w-8 h-8 rounded bg-cyan-500 flex items-center justify-center text-xs font-bold">AI</div>
+                        </div>
+                    </div>
+
+                    <!-- Input -->
+                    <div class="mt-8 flex gap-4">
+                        <input type="text" placeholder="Ask the evidence a question..." class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                        <button class="bg-cyan-500 px-6 py-3 rounded-lg text-sm font-bold">ANALYZE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SECURITY & AIR-GAP SECTION -->
+<section id="compliance" class="px-10 py-24">
+    <div class="max-w-7xl mx-auto">
+        <div class="grid md:grid-cols-2 gap-16 items-center">
+            <div class="space-y-6">
+                <h3 class="text-xs font-bold text-cyan-500 tracking-[0.3em] uppercase">Security First</h3>
+                <h4 class="text-4xl font-semibold">SOVEREIGN DATA CONTROL</h4>
+                <p class="text-gray-400 leading-relaxed">
+                    Digital evidence is sensitive. Unlike traditional AI tools, MEMOIR is built to function in high-security environments where data leakage is not an option.
+                </p>
+                
+                <div class="grid grid-cols-1 gap-4 mt-8">
+                    <div class="glass p-4 rounded-xl flex items-center gap-4 border-l-4 border-cyan-500">
+                        <div class="p-2 bg-cyan-500/20 rounded">🔒</div>
+                        <div>
+                            <h5 class="font-bold text-sm">Full Air-Gapped Deployment</h5>
+                            <p class="text-xs text-gray-500">Run entirely on local hardware with no internet connection required.</p>
+                        </div>
+                    </div>
+                    <div class="glass p-4 rounded-xl flex items-center gap-4">
+                        <div class="p-2 bg-cyan-500/20 rounded">🛡️</div>
+                        <div>
+                            <h5 class="font-bold text-sm">Zero-Knowledge Architecture</h5>
+                            <p class="text-xs text-gray-500">We never see your data. Embeddings and keys stay within your perimeter.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative">
+                <!-- Decorative Circle -->
+                <div class="absolute inset-0 bg-cyan-500/20 rounded-full blur-[100px]"></div>
+                <div class="glass p-8 rounded-3xl relative z-10 border border-white/10 text-center">
+                    <div class="inline-block p-4 rounded-full bg-cyan-500/10 mb-6">
+                        <svg class="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m17.236 0a11.955 11.955 0 00-11.764 0 11.955 11.955 0 00-11.764 0m15.656 5.5A11.955 11.955 0 0112 21.5a11.955 11.955 0 01-8.656-4.428M12 12.879V12m0 0a3 3 0 100-6 3 3 0 000 6z" />
+                        </svg>
+                    </div>
+                    <h5 class="text-xl font-bold mb-4">Admissibility Ready</h5>
+                    <p class="text-sm text-gray-400 mb-6">Every AI-generated insight includes a cryptographic link to the raw source file, ensuring the chain of custody remains unbroken for legal proceedings.</p>
+                    <div class="flex justify-center gap-4">
+                        <span class="text-[10px] font-mono border border-white/20 px-2 py-1 rounded">FIPS 140-2</span>
+                        <span class="text-[10px] font-mono border border-white/20 px-2 py-1 rounded">GDPR Compliant</span>
+                        <span class="text-[10px] font-mono border border-white/20 px-2 py-1 rounded">ISO 27001</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="pricing" class="px-6 md:px-16 py-24">
+        <div class="text-center mb-16">
+            <h3 class="text-cyan-400 font-bold tracking-[0.2em] uppercase text-sm mb-2">Deployment</h3>
+            <h2 class="text-4xl font-bold">LICENSING & TIERS</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div class="glass p-10 rounded-3xl border border-white/10 hover:border-cyan-400/30 transition-all">
+                <h4 class="text-gray-400 font-bold mb-4 uppercase tracking-widest text-xs">Standard</h4>
+                <div class="text-4xl font-bold mb-6">$199<span class="text-lg font-normal text-gray-500">/mo</span></div>
+                <ul class="space-y-4 text-sm text-gray-300 mb-10">
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> 50GB Secure Processing</li>
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> Single User License</li>
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> Standard LLM Models</li>
+                </ul>
+                <button class="w-full py-3 rounded-xl border border-white/20 hover:bg-white/10 transition-all font-bold">Select Plan</button>
+            </div>
+
+            <div class="glass p-10 rounded-3xl border-2 border-cyan-400 relative shadow-2xl bg-cyan-400/5">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-cyan-400 text-black px-4 py-1 rounded-full text-xs font-black uppercase">Most Secure</div>
+                <h4 class="text-cyan-400 font-bold mb-4 uppercase tracking-widest text-xs">Professional</h4>
+                <div class="text-4xl font-bold mb-6">$499<span class="text-lg font-normal text-gray-500">/mo</span></div>
+                <ul class="space-y-4 text-sm text-gray-200 mb-10">
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> Unlimited Vector Storage</li>
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> Advanced Anomaly Detection</li>
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> Multi-Node Collaboration</li>
+                </ul>
+                <button class="w-full py-3 rounded-xl bg-cyan-400 text-black font-extrabold hover:bg-cyan-300 transition-all shadow-lg">Get Pro Access</button>
+            </div>
+
+            <div class="glass p-10 rounded-3xl border border-white/10 hover:border-cyan-400/30 transition-all">
+                <h4 class="text-gray-400 font-bold mb-4 uppercase tracking-widest text-xs">Enterprise</h4>
+                <div class="text-4xl font-bold mb-6 text-white">Custom</div>
+                <ul class="space-y-4 text-sm text-gray-300 mb-10">
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> On-Prem / Air-Gapped</li>
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> Custom Model Training</li>
+                    <li class="flex items-center"><span class="text-cyan-400 mr-2">✓</span> 24/7 Forensic Support</li>
+                </ul>
+                <button class="w-full py-3 rounded-xl border border-white/20 hover:bg-white/10 transition-all font-bold">Talk to Sales</button>
+            </div>
+        </div>
+    </section>
+
+<!-- FAQ SECTION -->
+<section class="px-10 py-24 bg-black/20">
+    <div class="max-w-6xl mx-auto">
+        <h3 class="text-4xl font-bold text-center mb-12 uppercase tracking-tight">System FAQ</h3>
+        
+        <div class="space-y-4">
+            
+            <!-- Q1 -->
+            <div class="glass rounded-xl border border-white/10 overflow-hidden faq-item">
+                <button class="flex justify-between items-center w-full px-6 py-5 text-left cursor-pointer hover:bg-white/5 transition-all focus:outline-none" onclick="toggleFAQ(this)">
+                    <span class="font-medium text-gray-200">How does the system prevent AI hallucinations?</span>
+                    <span class="text-cyan-400 transition-transform duration-300 icon">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                    <div class="px-6 pb-6 text-sm text-gray-400 leading-relaxed">
+                        We use a strict **Retrieval-Augmented Generation (RAG)** framework. The AI is architecturally restricted to only generate responses based on the provided evidence blocks. If a data point is not present in the ingested evidence, the system provides a "null" status rather than inferring information.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="glass rounded-xl border border-white/10 overflow-hidden faq-item">
+                <button class="flex justify-between items-center w-full px-6 py-5 text-left cursor-pointer hover:bg-white/5 transition-all focus:outline-none" onclick="toggleFAQ(this)">
+                    <span class="font-medium text-gray-200">Can it handle encrypted or deleted files?</span>
+                    <span class="text-cyan-400 transition-transform duration-300 icon">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                    <div class="px-6 pb-6 text-sm text-gray-400 leading-relaxed">
+                        MEMOIR integrates with standard forensic imaging protocols to ingest recovered deleted items from unallocated space. For encrypted data, once the investigator provides the decryption key or certificate, the engine indexes the contents into the secure vector database for semantic analysis.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="glass rounded-xl border border-white/10 overflow-hidden faq-item">
+                <button class="flex justify-between items-center w-full px-6 py-5 text-left cursor-pointer hover:bg-white/5 transition-all focus:outline-none" onclick="toggleFAQ(this)">
+                    <span class="font-medium text-gray-200">What is the maximum data capacity?</span>
+                    <span class="text-cyan-400 transition-transform duration-300 icon">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </span>
+                </button>
+                <div class="faq-answer max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+                    <div class="px-6 pb-6 text-sm text-gray-400 leading-relaxed">
+                        The system is designed for horizontal scalability. Utilizing a distributed vector database architecture, DMF can process and index petabytes of data across multiple nodes, maintaining sub-second query latency even as the investigative corpus grows.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Go to Top Button    -->
+<button id="goToTop" class="fixed bottom-8 right-8 z-[60] glass neon p-3 rounded-full opacity-0 translate-y-10 transition-all duration-500 cursor-pointer text-cyan-400 hover:bg-cyan-500/20" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7" />
+    </svg>
+</button>
 
 <!-- FOOTER -->
-<footer class="text-center py-8 text-gray-500">
-  © 2026 DMF System
+<footer class="bg-black/60 pt-20 pb-10 border-t border-white/5 px-10">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-12 mb-16">
+        <div class="col-span-1 md:col-span-1">
+            <h1 class="text-xl font-bold text-cyan-400 mb-6">MEMOIR</h1>
+            <p class="text-gray-500 text-sm leading-relaxed">
+                Empowering forensic investigators with the power of Large Language Models and Vector search. Precision in every byte.
+            </p>
+        </div>
+        <div>
+            <h5 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Platform</h5>
+            <ul class="text-gray-500 text-sm space-y-4">
+                <li><a href="#" class="hover:text-cyan-400">Documentation</a></li>
+                <li><a href="#" class="hover:text-cyan-400">API Reference</a></li>
+                <li><a href="#" class="hover:text-cyan-400">Integrations</a></li>
+                <li><a href="#" class="hover:text-cyan-400">System Status</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Company</h5>
+            <ul class="text-gray-500 text-sm space-y-4">
+                <li><a href="#" class="hover:text-cyan-400">About Us</a></li>
+                <li><a href="#" class="hover:text-cyan-400">Security Labs</a></li>
+                <li><a href="#" class="hover:text-cyan-400">Contact Sales</a></li>
+                <li><a href="#" class="hover:text-cyan-400">Privacy Policy</a></li>
+            </ul>
+        </div>
+        <div>
+            <h5 class="text-white font-bold mb-6 uppercase text-xs tracking-widest">Newsletter</h5>
+            <p class="text-gray-500 text-xs mb-4">Get forensic insights monthly.</p>
+            <div class="flex border border-white/10 rounded-lg overflow-hidden">
+                <input type="email" placeholder="Email" class="bg-white/5 px-4 py-2 text-sm outline-none w-full">
+                <button class="bg-cyan-500 px-4 py-2 text-xs font-bold">JOIN</button>
+            </div>
+        </div>
+    </div>
+    <div class="text-center pt-10 border-t border-white/5 text-gray-600 text-xs">
+        © 2026 Digital Memory Forensics System. All rights reserved. Encrypted for your protection.
+    </div>
 </footer>
 
 <script>
 window.addEventListener("scroll", function() {
-  const nav = document.querySelector("header");
-  if (window.scrollY > 50) {
-    nav.classList.add("bg-black/60");
-  } else {
-    nav.classList.remove("bg-black/60");
-  }
+    const nav = document.querySelector("header");
+    if (window.scrollY > 50) {
+        nav.classList.add("bg-black/80");
+        nav.classList.add("py-3");
+    } else {
+        nav.classList.remove("bg-black/80");
+        nav.classList.remove("py-3");
+    }
+});
+
+function toggleFAQ(element) {
+    const item = element.parentElement;
+    const answer = item.querySelector('.faq-answer');
+    const icon = item.querySelector('.icon');
+    
+    // Check if it's already open
+    const isOpen = item.classList.contains('faq-open');
+    
+    // Close all other FAQs (Optional: remove this part if you want multiple open at once)
+    document.querySelectorAll('.faq-item').forEach(otherItem => {
+        otherItem.classList.remove('faq-open');
+        otherItem.querySelector('.faq-answer').style.maxHeight = '0px';
+        otherItem.querySelector('.icon').style.transform = 'rotate(0deg)';
+    });
+
+    if (!isOpen) {
+        item.classList.add('faq-open');
+        // Set maxHeight to scrollHeight to allow smooth transition
+        answer.style.maxHeight = answer.scrollHeight + "px";
+        icon.style.transform = 'rotate(45deg)';
+    } else {
+        item.classList.remove('faq-open');
+        answer.style.maxHeight = '0px';
+        icon.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Logic for Go To Top visibility
+window.addEventListener("scroll", function() {
+    const topBtn = document.getElementById("goToTop");
+    if (window.scrollY > 400) {
+        topBtn.classList.remove("opacity-0", "translate-y-10");
+        topBtn.classList.add("opacity-100", "translate-y-0");
+    } else {
+        topBtn.classList.add("opacity-0", "translate-y-10");
+        topBtn.classList.remove("opacity-100", "translate-y-0");
+    }
 });
 </script>
 

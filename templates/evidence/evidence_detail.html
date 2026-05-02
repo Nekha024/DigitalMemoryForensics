@@ -1,81 +1,8 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evidence Detail</title>
+{% extends "base.html" %}
 
-<script src="https://cdn.tailwindcss.com"></script>
+{% block title %}Semantic Search{% endblock %}
 
-<style>
-body{
-    background:#020617;
-    color:white;
-}
-
-/* NAVBAR */
-.navbar{
-    backdrop-filter: blur(10px);
-    background: rgba(0,0,0,0.4);
-    border-bottom:1px solid rgba(255,255,255,0.1);
-}
-
-/* GLASS */
-.glass{
-    background:rgba(255,255,255,0.05);
-    backdrop-filter:blur(12px);
-    border:1px solid rgba(6,182,212,0.2);
-}
-
-/* CARD HOVER */
-.card:hover{
-    box-shadow:0 0 20px rgba(6,182,212,0.6);
-}
-
-/* BUTTON */
-.btn{
-    padding:8px 14px;
-    border-radius:6px;
-    background:#06b6d4;
-    color:white;
-    transition:0.3s;
-}
-.btn:hover{
-    background:#0891b2;
-    box-shadow:0 0 10px #06b6d4;
-}
-
-/* TEXT BOX */
-.text-box{
-    background:#020617;
-    border:1px solid rgba(6,182,212,0.2);
-    padding:15px;
-    border-radius:10px;
-    max-height:300px;
-    overflow:auto;
-    font-size:14px;
-    color:#cbd5f5;
-}
-</style>
-</head>
-
-<body class="pt-24 px-6">
-
-<!-- NAVBAR -->
-<header class="navbar fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-4">
-
-    <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
-
-    <nav class="flex gap-6 text-gray-300">
-        <a href="{% url 'home' %}" class="hover:text-cyan-400">Dashboard</a>
-    </nav>
-
-    <span class="text-sm text-gray-400">
-        {{ request.user.username }}
-    </span>
-
-</header>
+{% block content %}
 
 <!-- MAIN -->
 <div class="max-w-4xl mx-auto">
@@ -110,7 +37,7 @@ body{
                 Index Evidence
             </a>
 
-            <a href="{% url 'cases:case_detail' evidence.case.id %}" 
+            <a href="{% url 'case_detail' evidence.case.id %}" 
                class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
                 ← Back to Case
             </a>
@@ -133,6 +60,4 @@ body{
     </div>
 
 </div>
-
-</body>
-</html>
+{% endblock %}

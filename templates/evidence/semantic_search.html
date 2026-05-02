@@ -1,91 +1,9 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Semantic Search</title>
+{% extends "base.html" %}
 
-<script src="https://cdn.tailwindcss.com"></script>
+{% block title %}Semantic Search{% endblock %}
 
-<style>
-body{
-    background:#020617;
-    color:white;
-}
+{% block content %}
 
-/* NAVBAR */
-.navbar{
-    backdrop-filter: blur(10px);
-    background: rgba(0,0,0,0.4);
-    border-bottom:1px solid rgba(255,255,255,0.1);
-}
-
-/* GLASS */
-.glass{
-    background:rgba(255,255,255,0.05);
-    backdrop-filter:blur(12px);
-    border:1px solid rgba(6,182,212,0.2);
-}
-
-/* INPUT */
-input, select{
-    width:100%;
-    padding:10px;
-    border-radius:6px;
-    background:transparent;
-    border:1px solid #334155;
-    color:white;
-    outline:none;
-}
-
-input:focus, select:focus{
-    border:1px solid #06b6d4;
-    box-shadow:0 0 10px rgba(6,182,212,0.3);
-}
-
-/* BUTTON */
-.btn{
-    padding:10px 16px;
-    border-radius:8px;
-    background:#06b6d4;
-    color:white;
-    transition:0.3s;
-}
-.btn:hover{
-    background:#0891b2;
-    box-shadow:0 0 10px #06b6d4;
-}
-
-/* RESULT CARD */
-.card{
-    transition:0.3s;
-}
-.card:hover{
-    transform:translateY(-5px);
-    box-shadow:0 0 20px rgba(6,182,212,0.6);
-}
-</style>
-</head>
-
-<body class="pt-24 px-6">
-
-<!-- NAVBAR -->
-<header class="navbar fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-4">
-
-    <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
-
-    <nav class="flex gap-6 text-gray-300">
-        <a href="{% url 'cases:home' %}" class="hover:text-cyan-400">Dashboard</a>
-    </nav>
-
-    <span class="text-sm text-gray-400">
-        {{ request.user.username }}
-    </span>
-
-</header>
-
-<!-- SEARCH FORM -->
 <div class="max-w-4xl mx-auto">
 
     <div class="glass p-6 rounded-xl mb-8">
@@ -120,7 +38,7 @@ input:focus, select:focus{
 
         </form>
 
-    </div>
+    </div>-
 
     <!-- RESULTS -->
     {% if query %}
@@ -168,6 +86,4 @@ input:focus, select:focus{
     </div>
 
 </div>
-
-</body>
-</html>
+{% endblock %}

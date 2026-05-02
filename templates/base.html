@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>{% block title %}DMF{% endblock %}</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body{
+    background:#020617;
+    color:white;
+}
+
+/* NAVBAR */
+.navbar{
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.4);
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+/* SIDEBAR */
+.sidebar{
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(12px);
+    border-right:1px solid rgba(6,182,212,0.2);
+}
+
+/* GLASS */
+.glass{
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(6,182,212,0.2);
+}
+
+/* BUTTON */
+.btn{
+    padding:10px 16px;
+    border-radius:8px;
+    background:#06b6d4;
+    color:white;
+    transition:0.3s;
+}
+.btn:hover{
+    background:#0891b2;
+    box-shadow:0 0 10px #06b6d4;
+}
+
+/* INPUT */
+input, textarea, select{
+    width:100%;
+    padding:10px;
+    margin-top:6px;
+    border-radius:6px;
+    background:transparent;
+    border:1px solid #334155;
+    color:white;
+    outline:none;
+}
+input:focus, textarea:focus{
+    border:1px solid #06b6d4;
+    box-shadow:0 0 10px rgba(6,182,212,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-4">
+
+    <h1 class="text-3xl font-bold text-cyan-400 tracking-wider">MEMO<span class="text-white">IR</span></h1>
+
+    <div class="flex items-center gap-4">
+
+        <!-- USER -->
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                 class="w-5 h-5 text-cyan-400" 
+                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M5.121 17.804A9 9 0 1118.879 17.804M15 11a3 3 0 11-6 0"/>
+            </svg>
+
+            <span class="text-gray-300 text-sm">
+                {{ request.user.username }}
+            </span>
+        </div>
+
+        <!-- LOGOUT -->
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button class="px-4 py-2 border border-cyan-400 rounded-lg hover:bg-cyan-500/20">
+                Logout
+            </button>
+        </form>
+
+    </div>
+
+</header>
+
+<!-- LAYOUT -->
+<div class="flex pt-20">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar w-60 min-h-screen p-6">
+
+        <h2 class="text-cyan-400 text-lg mb-6">Menu</h2>
+
+        <nav class="flex flex-col gap-4 text-gray-300">
+
+            <a href="{% url 'profile' %}"
+               class="{% if request.path == '/cases/profile/' %}text-cyan-400{% else %}hover:text-cyan-400{% endif %}">
+                Profile
+            </a>
+
+            <a href="{% url 'home' %}"
+               class="{% if request.path == '/cases/' %}text-cyan-400{% else %}hover:text-cyan-400{% endif %}">
+                My Cases
+            </a>
+
+            <a href="{% url 'create_case' %}"
+               class="hover:text-cyan-400">
+                Create Case
+            </a>
+
+            <a href="{% url 'upload_evidence' %}"
+               class="hover:text-cyan-400">
+                Upload Evidence
+            </a>
+
+        </nav>
+
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 p-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</div>
+
+</body>
+</html>

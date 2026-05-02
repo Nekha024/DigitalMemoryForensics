@@ -4,6 +4,13 @@ from .models import Case
 from .forms import CaseForm
 
 @login_required
+def profile(request):
+    total_cases = Case.objects.filter(created_by=request.user).count()
+
+    return render(request, "cases/profile.html", {
+        "total_cases": total_cases
+    })
+@login_required
 def home(request):
     case_list = Case.objects.filter(created_by=request.user).order_by('-created_at')
     return render(request, 'cases/home.html', {'case_list': case_list})

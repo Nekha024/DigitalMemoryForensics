@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <div class="glass p-8 rounded-xl text-center">
+
+        <!-- AVATAR -->
+        <div class="w-20 h-20 mx-auto rounded-full bg-cyan-500 flex items-center justify-center text-2xl font-bold text-black mb-4">
+            {{ user.username|first|upper }}
+        </div>
+
+        <h2 class="text-2xl text-cyan-400 mb-2">
+            {{ user.username }}
+        </h2>
+
+        <p class="text-gray-400 mb-6">
+            {{ user.email }}
+        </p>
+
+        <div class="grid grid-cols-2 gap-6 text-center">
+
+            <div class="glass p-4 rounded-lg">
+                <p class="text-xl text-cyan-400">{{ total_cases }}</p>
+                <p class="text-gray-400 text-sm">Total Cases</p>
+            </div>
+
+            <div class="glass p-4 rounded-lg">
+                <p class="text-xl text-cyan-400">Active</p>
+                <p class="text-gray-400 text-sm">Account Status</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

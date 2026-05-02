@@ -24,7 +24,7 @@ def auth_page(request):
 
             if otp_obj and otp_obj.is_verified:
                 login(request, user)
-                return redirect("home")
+                return redirect("profile")
             else:
                 messages.error(request, "Please verify your email using OTP before login.")
         else:
