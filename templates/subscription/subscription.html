@@ -1,0 +1,302 @@
+<!-- templates/subscription.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Subscription Plans</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Plus Jakarta Sans',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:#020617;
+    overflow-x:hidden;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:60px 20px;
+    position:relative;
+}
+
+/* BACKGROUND GLOW */
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background:
+    radial-gradient(circle at 20% 30%, rgba(124,58,237,.25), transparent 35%),
+    radial-gradient(circle at 80% 70%, rgba(249,115,22,.18), transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(59,130,246,.12), transparent 40%);
+    z-index:-2;
+}
+
+/* GRID EFFECT */
+body::after{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size:40px 40px;
+    z-index:-1;
+}
+
+/* CONTAINER */
+.wrapper{
+    width:100%;
+    max-width:1300px;
+}
+
+/* TITLE */
+.title{
+    text-align:center;
+    margin-bottom:60px;
+}
+
+.title h1{
+    font-size:56px;
+    font-weight:800;
+    margin-bottom:15px;
+    background:linear-gradient(to right,#7c3aed,#9333ea,#f97316);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.title p{
+    color:#94a3b8;
+    font-size:17px;
+}
+
+/* CARD CONTAINER */
+.container{
+    display:flex;
+    justify-content:center;
+    gap:35px;
+    flex-wrap:wrap;
+}
+
+/* CARD */
+.card{
+    width:320px;
+    padding:35px 30px;
+    border-radius:24px;
+
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+
+    position:relative;
+    overflow:hidden;
+
+    transition:.45s ease;
+
+    box-shadow:
+    0 0 20px rgba(124,58,237,.15),
+    inset 0 0 20px rgba(255,255,255,.03);
+}
+
+/* TOP GLOW */
+.card::before{
+    content:'';
+    position:absolute;
+    top:-50%;
+    left:-50%;
+    width:200%;
+    height:200%;
+    background:linear-gradient(
+        45deg,
+        transparent,
+        rgba(255,255,255,.08),
+        transparent
+    );
+    transform:rotate(25deg);
+    transition:.8s;
+}
+
+.card:hover::before{
+    left:120%;
+}
+
+/* HOVER */
+.card:hover{
+    transform:translateY(-12px) scale(1.02);
+
+    border:1px solid rgba(168,85,247,.5);
+
+    box-shadow:
+    0 0 30px rgba(124,58,237,.45),
+    0 0 60px rgba(249,115,22,.18);
+}
+
+/* PLAN NAME */
+.card h2{
+    font-size:30px;
+    margin-bottom:20px;
+    text-align:center;
+    font-weight:700;
+}
+
+/* PRICE */
+.price{
+    font-size:52px;
+    font-weight:800;
+    text-align:center;
+    margin-bottom:30px;
+
+    background:linear-gradient(to right,#7c3aed,#f97316);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+/* FEATURES */
+ul{
+    list-style:none;
+    margin-bottom:35px;
+}
+
+li{
+    padding:12px 0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    color:#cbd5e1;
+    font-size:15px;
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+li::before{
+    content:'✓';
+    color:#a855f7;
+    font-weight:bold;
+}
+
+/* BUTTON */
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+
+    background:linear-gradient(135deg,#7c3aed,#9333ea);
+
+    color:white;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+
+    transition:.35s;
+}
+
+button:hover{
+    transform:scale(1.03);
+
+    box-shadow:
+    0 0 20px rgba(124,58,237,.6),
+    0 0 40px rgba(249,115,22,.25);
+}
+
+/* POPULAR CARD */
+.popular{
+    border:1px solid rgba(249,115,22,.45);
+
+    transform:scale(1.05);
+
+    box-shadow:
+    0 0 25px rgba(249,115,22,.35);
+}
+
+.badge{
+    position:absolute;
+    top:18px;
+    right:18px;
+
+    background:#f97316;
+    color:white;
+
+    padding:6px 12px;
+    border-radius:30px;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+/* RESPONSIVE */
+@media(max-width:1000px){
+    .container{
+        flex-direction:column;
+        align-items:center;
+    }
+
+    .popular{
+        transform:none;
+    }
+
+    .title h1{
+        font-size:42px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <div class="title">
+        <h1>Subscription Plans</h1>
+        <p>Choose the perfect forensic intelligence package</p>
+    </div>
+
+    <div class="container">
+
+        {% for plan in plans %}
+
+        <div class="card {% if forloop.counter == 2 %}popular{% endif %}">
+
+            {% if forloop.counter == 2 %}
+            <div class="badge">POPULAR</div>
+            {% endif %}
+
+            <h2>{{ plan.name }}</h2>
+
+            <div class="price">₹{{ plan.price }}</div>
+
+            <ul>
+                {% for feature in plan.features %}
+                    <li>{{ feature }}</li>
+                {% endfor %}
+            </ul>
+
+            <button>
+                Subscribe Now
+            </button>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

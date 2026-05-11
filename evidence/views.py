@@ -77,6 +77,7 @@ def semantic_search(request):
 def rag_query(request):
     question = request.GET.get('q','')
     case_id = request.GET.get('case_id')
+    print(case_id)
     provider = request.GET.get('provider',DEFAULT_LLM_PROVIDER)
 
     cases = Case.objects.filter(created_by=request.user)

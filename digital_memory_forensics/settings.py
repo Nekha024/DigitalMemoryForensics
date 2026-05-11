@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     'accounts',
     'cases',
     'evidence',
+    'subscription',
 ]
 
 
