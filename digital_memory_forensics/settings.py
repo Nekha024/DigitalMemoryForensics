@@ -1,5 +1,6 @@
 from pathlib import Path
-
+from dotenv import load_dotenv
+import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-change-this-later'
@@ -78,6 +79,8 @@ LOGOUT_REDIRECT_URL = "/accounts/auth/"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "noreply@example.com"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+load_dotenv()
+RAZORPAY_KEY_ID=os.getenv('RAZORPAY_ID')
+RAZORPAY_KEY_SECRET=os.getenv('RAZORPAY_SECRET')
 
-RAZORPAY_KEY_ID = "rzp_test_SoNBxA32maML5X"
-RAZORPAY_KEY_SECRET = "7YGG4u1dlDKvzrIL8KO490eT"
+print(RAZORPAY_KEY_ID)

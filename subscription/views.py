@@ -25,7 +25,7 @@ def subscription_page(request):
 
         plan = Subscription.objects.get(id=plan_id)
 
-        amount = int(plan.price * 100)
+        amount = int(plan.price * 100)#convert to paisa for rasorpay
 
         payment = client.order.create({
             'amount': amount,
