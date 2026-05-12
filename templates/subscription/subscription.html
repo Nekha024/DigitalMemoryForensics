@@ -1,14 +1,15 @@
-<!-- templates/subscription.html -->
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Subscription Plans</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
+
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -37,10 +38,12 @@ body::before{
     content:'';
     position:fixed;
     inset:0;
+
     background:
     radial-gradient(circle at 20% 30%, rgba(124,58,237,.25), transparent 35%),
     radial-gradient(circle at 80% 70%, rgba(249,115,22,.18), transparent 35%),
     radial-gradient(circle at 50% 50%, rgba(59,130,246,.12), transparent 40%);
+
     z-index:-2;
 }
 
@@ -49,14 +52,17 @@ body::after{
     content:'';
     position:fixed;
     inset:0;
+
     background-image:
     linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+
     background-size:40px 40px;
+
     z-index:-1;
 }
 
-/* CONTAINER */
+/* WRAPPER */
 .wrapper{
     width:100%;
     max-width:1300px;
@@ -72,7 +78,9 @@ body::after{
     font-size:56px;
     font-weight:800;
     margin-bottom:15px;
+
     background:linear-gradient(to right,#7c3aed,#9333ea,#f97316);
+
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
@@ -97,6 +105,7 @@ body::after{
     border-radius:24px;
 
     background:rgba(255,255,255,0.05);
+
     border:1px solid rgba(255,255,255,0.08);
 
     backdrop-filter:blur(18px);
@@ -120,13 +129,16 @@ body::after{
     left:-50%;
     width:200%;
     height:200%;
+
     background:linear-gradient(
         45deg,
         transparent,
         rgba(255,255,255,.08),
         transparent
     );
+
     transform:rotate(25deg);
+
     transition:.8s;
 }
 
@@ -158,54 +170,51 @@ body::after{
     font-size:52px;
     font-weight:800;
     text-align:center;
-    margin-bottom:30px;
+    margin-bottom:25px;
 
     background:linear-gradient(to right,#7c3aed,#f97316);
+
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
 
-/* FEATURES */
-ul{
-    list-style:none;
-    margin-bottom:35px;
-}
-
-li{
-    padding:12px 0;
-    border-bottom:1px solid rgba(255,255,255,.06);
+/* DESCRIPTION */
+.description{
     color:#cbd5e1;
-    font-size:15px;
-
-    display:flex;
-    align-items:center;
-    gap:10px;
+    text-align:center;
+    line-height:1.7;
+    margin-bottom:20px;
 }
 
-li::before{
-    content:'✓';
-    color:#a855f7;
-    font-weight:bold;
+/* DURATION */
+.duration{
+    text-align:center;
+    margin-bottom:30px;
+    color:#94a3b8;
 }
 
 /* BUTTON */
 button{
     width:100%;
     padding:14px;
+
     border:none;
     border-radius:14px;
 
     background:linear-gradient(135deg,#7c3aed,#9333ea);
 
     color:white;
+
     font-size:15px;
     font-weight:700;
+
     cursor:pointer;
 
     transition:.35s;
 }
 
 button:hover{
+
     transform:scale(1.03);
 
     box-shadow:
@@ -240,6 +249,7 @@ button:hover{
 
 /* RESPONSIVE */
 @media(max-width:1000px){
+
     .container{
         flex-direction:column;
         align-items:center;
@@ -255,6 +265,7 @@ button:hover{
 }
 
 </style>
+
 </head>
 
 <body>
@@ -262,8 +273,13 @@ button:hover{
 <div class="wrapper">
 
     <div class="title">
+
         <h1>Subscription Plans</h1>
-        <p>Choose the perfect forensic intelligence package</p>
+
+        <p>
+            Choose the perfect forensic intelligence package
+        </p>
+
     </div>
 
     <div class="container">
@@ -273,22 +289,36 @@ button:hover{
         <div class="card {% if forloop.counter == 2 %}popular{% endif %}">
 
             {% if forloop.counter == 2 %}
-            <div class="badge">POPULAR</div>
+            <div class="badge">
+                POPULAR
+            </div>
             {% endif %}
 
             <h2>{{ plan.name }}</h2>
 
-            <div class="price">₹{{ plan.price }}</div>
+            <div class="price">
+                ₹{{ plan.price }}
+            </div>
 
-            <ul>
-                {% for feature in plan.features %}
-                    <li>{{ feature }}</li>
-                {% endfor %}
-            </ul>
+            <p class="description">
+                {{ plan.description }}
+            </p>
 
-            <button>
-                Subscribe Now
-            </button>
+            <p class="duration">
+                {{ plan.duration }} Days Access
+            </p>
+
+            <form method="POST">
+
+                {% csrf_token %}
+
+                <input type="hidden" name="plan_id" value="{{ plan.id }}">
+
+                <button type="submit">
+                    Subscribe
+                </button>
+
+            </form>
 
         </div>
 

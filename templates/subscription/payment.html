@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Payment</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Plus Jakarta Sans',sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            background:#020617;
+            overflow:hidden;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            padding:20px;
+            position:relative;
+        }
+
+        /* BACKGROUND GLOW */
+        body::before{
+            content:'';
+            position:fixed;
+            inset:0;
+
+            background:
+            radial-gradient(circle at 20% 30%, rgba(124,58,237,.25), transparent 35%),
+            radial-gradient(circle at 80% 70%, rgba(249,115,22,.18), transparent 35%),
+            radial-gradient(circle at 50% 50%, rgba(59,130,246,.12), transparent 40%);
+
+            z-index:-2;
+        }
+
+        /* GRID EFFECT */
+        body::after{
+            content:'';
+            position:fixed;
+            inset:0;
+
+            background-image:
+            linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+
+            background-size:40px 40px;
+
+            z-index:-1;
+        }
+
+        .payment-card{
+
+            width:100%;
+            max-width:500px;
+
+            padding:45px 40px;
+
+            border-radius:24px;
+
+            background:rgba(255,255,255,0.05);
+
+            border:1px solid rgba(255,255,255,0.08);
+
+            backdrop-filter:blur(18px);
+            -webkit-backdrop-filter:blur(18px);
+
+            text-align:center;
+
+            box-shadow:
+            0 0 30px rgba(124,58,237,.25);
+        }
+
+        h1{
+            font-size:42px;
+            margin-bottom:20px;
+
+            background:linear-gradient(to right,#7c3aed,#f97316);
+
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        p{
+            color:#cbd5e1;
+            margin-bottom:15px;
+            font-size:16px;
+        }
+
+        .price{
+            font-size:60px;
+            font-weight:800;
+
+            margin:30px 0;
+
+            background:linear-gradient(to right,#7c3aed,#f97316);
+
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        button{
+
+            width:100%;
+
+            padding:15px;
+
+            border:none;
+            border-radius:14px;
+
+            background:linear-gradient(135deg,#7c3aed,#9333ea);
+
+            color:white;
+
+            font-size:16px;
+            font-weight:700;
+
+            cursor:pointer;
+
+            transition:.35s;
+        }
+
+        button:hover{
+
+            transform:scale(1.03);
+
+            box-shadow:
+            0 0 20px rgba(124,58,237,.6),
+            0 0 40px rgba(249,115,22,.25);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="payment-card">
+
+        <h1>Complete Payment</h1>
+
+        <p>
+            You selected the
+            <strong>{{ plan.name }}</strong>
+            subscription
+        </p>
+
+        <div class="price">
+            ₹{{ plan.price }}
+        </div>
+
+        <p>
+            {{ plan.duration }} Days Access
+        </p>
+
+        <button id="rzp-button1">
+            Pay Now
+        </button>
+
+        <form action="{% url 'payment_success' %}" method="POST">
+
+            {% csrf_token %}
+
+            <input type="hidden" name="plan_id" value="{{ plan.id }}">
+
+            <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+
+            <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+
+            <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+
+        </form>
+
+    </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+var options = {
+
+    "key": "{{ razorpay_key }}",
+
+    "amount": "{{ payment.amount }}",
+
+    "currency": "INR",
+
+    "name": "Digital Forensics",
+
+    "description": "Subscription Payment",
+
+    "order_id": "{{ payment.id }}",
+
+    "handler": function (response){
+
+        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+
+        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+
+        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+
+        document.forms[0].submit();
+    }
+};
+
+var rzp1 = new Razorpay(options);
+
+document.getElementById('rzp-button1').onclick = function(e){
+
+    rzp1.open();
+
+    e.preventDefault();
+}
+
+</script>
+
+</body>
+</html>

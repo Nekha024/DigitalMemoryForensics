@@ -78,3 +78,6 @@ LOGOUT_REDIRECT_URL = "/accounts/auth/"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "noreply@example.com"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+RAZORPAY_KEY_ID = "rzp_test_SoNBxA32maML5X"
+RAZORPAY_KEY_SECRET = "7YGG4u1dlDKvzrIL8KO490eT"
