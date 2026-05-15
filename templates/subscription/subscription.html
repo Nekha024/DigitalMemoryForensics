@@ -33,7 +33,8 @@ body{
     position:relative;
 }
 
-/* BACKGROUND GLOW */
+/* BACKGROUND */
+
 body::before{
     content:'';
     position:fixed;
@@ -47,7 +48,6 @@ body::before{
     z-index:-2;
 }
 
-/* GRID EFFECT */
 body::after{
     content:'';
     position:fixed;
@@ -62,16 +62,16 @@ body::after{
     z-index:-1;
 }
 
-/* WRAPPER */
 .wrapper{
     width:100%;
     max-width:1300px;
 }
 
 /* TITLE */
+
 .title{
     text-align:center;
-    margin-bottom:60px;
+    margin-bottom:40px;
 }
 
 .title h1{
@@ -90,7 +90,60 @@ body::after{
     font-size:17px;
 }
 
-/* CARD CONTAINER */
+/* TOGGLE */
+
+.toggle-wrapper{
+
+    width:max-content;
+
+    margin:auto;
+    margin-bottom:60px;
+
+    padding:8px;
+
+    border-radius:18px;
+
+    background:rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(18px);
+
+    display:flex;
+    gap:10px;
+}
+
+.toggle-btn{
+
+    padding:12px 24px;
+
+    border:none;
+    border-radius:12px;
+
+    background:transparent;
+
+    color:#cbd5e1;
+
+    font-size:14px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.35s;
+}
+
+.toggle-btn.active{
+
+    background:linear-gradient(135deg,#7c3aed,#9333ea);
+
+    color:white;
+
+    box-shadow:
+    0 0 15px rgba(124,58,237,.4);
+}
+
+/* CARDS */
+
 .container{
     display:flex;
     justify-content:center;
@@ -98,7 +151,6 @@ body::after{
     flex-wrap:wrap;
 }
 
-/* CARD */
 .card{
     width:320px;
     padding:35px 30px;
@@ -109,7 +161,6 @@ body::after{
     border:1px solid rgba(255,255,255,0.08);
 
     backdrop-filter:blur(18px);
-    -webkit-backdrop-filter:blur(18px);
 
     position:relative;
     overflow:hidden;
@@ -121,32 +172,6 @@ body::after{
     inset 0 0 20px rgba(255,255,255,.03);
 }
 
-/* TOP GLOW */
-.card::before{
-    content:'';
-    position:absolute;
-    top:-50%;
-    left:-50%;
-    width:200%;
-    height:200%;
-
-    background:linear-gradient(
-        45deg,
-        transparent,
-        rgba(255,255,255,.08),
-        transparent
-    );
-
-    transform:rotate(25deg);
-
-    transition:.8s;
-}
-
-.card:hover::before{
-    left:120%;
-}
-
-/* HOVER */
 .card:hover{
     transform:translateY(-12px) scale(1.02);
 
@@ -157,7 +182,6 @@ body::after{
     0 0 60px rgba(249,115,22,.18);
 }
 
-/* PLAN NAME */
 .card h2{
     font-size:30px;
     margin-bottom:20px;
@@ -165,7 +189,6 @@ body::after{
     font-weight:700;
 }
 
-/* PRICE */
 .price{
     font-size:52px;
     font-weight:800;
@@ -178,7 +201,6 @@ body::after{
     -webkit-text-fill-color:transparent;
 }
 
-/* DESCRIPTION */
 .description{
     color:#cbd5e1;
     text-align:center;
@@ -186,15 +208,13 @@ body::after{
     margin-bottom:20px;
 }
 
-/* DURATION */
 .duration{
     text-align:center;
     margin-bottom:30px;
     color:#94a3b8;
 }
 
-/* BUTTON */
-button{
+.subscribe-btn{
     width:100%;
     padding:14px;
 
@@ -213,7 +233,7 @@ button{
     transition:.35s;
 }
 
-button:hover{
+.subscribe-btn:hover{
 
     transform:scale(1.03);
 
@@ -222,7 +242,6 @@ button:hover{
     0 0 40px rgba(249,115,22,.25);
 }
 
-/* POPULAR CARD */
 .popular{
     border:1px solid rgba(249,115,22,.45);
 
@@ -247,7 +266,6 @@ button:hover{
     font-weight:700;
 }
 
-/* RESPONSIVE */
 @media(max-width:1000px){
 
     .container{
@@ -282,6 +300,26 @@ button:hover{
 
     </div>
 
+    <!-- TOGGLE -->
+
+    <div class="toggle-wrapper">
+
+        <button class="toggle-btn active" data-type="month">
+            1 Month
+        </button>
+
+        <button class="toggle-btn" data-type="six">
+            6 Months
+        </button>
+
+        <button class="toggle-btn" data-type="year">
+            1 Year
+        </button>
+
+    </div>
+
+    <!-- CARDS -->
+
     <div class="container">
 
         {% for plan in plans %}
@@ -296,16 +334,25 @@ button:hover{
 
             <h2>{{ plan.name }}</h2>
 
-            <div class="price">
+            <!-- PRICE -->
+
+            <div class="price"
+                 data-month="{{ plan.price }}"
+                 data-six="{% if plan.name == 'SILVER' %}799{% elif plan.name == 'GOLD' %}1099{% else %}1599{% endif %}"
+                 data-year="{% if plan.name == 'SILVER' %}1499{% elif plan.name == 'GOLD' %}1999{% else %}2999{% endif %}">
+
                 ₹{{ plan.price }}
+
             </div>
 
             <p class="description">
                 {{ plan.description }}
             </p>
 
+            <!-- DURATION -->
+
             <p class="duration">
-                {{ plan.duration }} Days Access
+                1 Month Access
             </p>
 
             <form method="POST">
@@ -314,7 +361,7 @@ button:hover{
 
                 <input type="hidden" name="plan_id" value="{{ plan.id }}">
 
-                <button type="submit">
+                <button type="submit" class="subscribe-btn">
                     Subscribe
                 </button>
 
@@ -327,6 +374,54 @@ button:hover{
     </div>
 
 </div>
+
+<script>
+
+const buttons = document.querySelectorAll(".toggle-btn");
+
+const prices = document.querySelectorAll(".price");
+
+const durations = document.querySelectorAll(".duration");
+
+buttons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        buttons.forEach(btn => btn.classList.remove("active"));
+
+        button.classList.add("active");
+
+        const type = button.getAttribute("data-type");
+
+        prices.forEach(price => {
+
+            const value = price.getAttribute(`data-${type}`);
+
+            price.innerHTML = `₹${value}`;
+
+        });
+
+        durations.forEach(duration => {
+
+            if(type === "month"){
+                duration.innerHTML = "1 Month Access";
+            }
+
+            else if(type === "six"){
+                duration.innerHTML = "6 Months Access";
+            }
+
+            else{
+                duration.innerHTML = "1 Year Access";
+            }
+
+        });
+
+    });
+
+});
+
+</script>
 
 </body>
 </html>
