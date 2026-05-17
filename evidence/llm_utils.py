@@ -58,10 +58,14 @@ def generate_with_ollama(prompt, model=None):
     payload = {
         "model": model,
         "prompt": prompt,
-        "stream": False
+        "stream": False,
+        "options": {
+            "num_predict": 512,   # limit response length for speed
+            "temperature": 0.2,
+        }
     }
 
-    response = requests.post(url, json=payload, timeout=300)
+    response = requests.post(url, json=payload, timeout=120)
     response.raise_for_status()
 
     data = response.json()
@@ -90,15 +94,25 @@ def generate_with_glm(prompt, model=None):
         "max_tokens": 800,
     }
 
-    response = requests.post(url, headers=headers, json=payload, timeout=300)
-    response.raise_for_status()
-    data = response.json()
+    max_retries = 3
+    for attempt in range(max_retries):
+        response = requests.post(url, headers=headers, json=payload, timeout=300)
 
-    choices = data.get("choices", [])
-    if not choices:
-        return "No response generated from GLM."
+        if response.status_code == 429:
+            wait = 10 * (attempt + 1)  # 10s, 20s, 30s
+            print(f"[GLM] Rate limited (429). Retrying in {wait}s... (attempt {attempt + 1}/{max_retries})")
+            import time
+            time.sleep(wait)
+            continue
 
-    return choices[0].get("message", {}).get("content", "").strip()
+        response.raise_for_status()
+        data = response.json()
+        choices = data.get("choices", [])
+        if not choices:
+            return "No response generated from GLM."
+        return choices[0].get("message", {}).get("content", "").strip()
+
+    raise Exception("GLM API rate limit exceeded after multiple retries. Please try again in a minute or switch to Ollama.")
 
 
 def generate_rag_answer(question, retrieved_chunks, provider=None):

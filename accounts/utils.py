@@ -6,6 +6,10 @@ def generate_otp():
     return str(random.randint(100000, 999999))
 
 def send_otp_email(email, otp):
+    print(f"-------------------------------------------------------------------------------")
+    print(f"Your OTP is: {otp}")
+    print(f"-------------------------------------------------------------------------------")
+    
     subject = "Your OTP Verification Code"
     message = f"Your OTP is: {otp}"
     from_email = settings.DEFAULT_FROM_EMAIL

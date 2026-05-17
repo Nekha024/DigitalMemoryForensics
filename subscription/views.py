@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
@@ -113,11 +114,9 @@ def payment_success(request):
         }
 
         try:
-
             client.utility.verify_payment_signature(params_dict)
-
-        except:
-
+        except Exception as e:
+            messages.error(request, "Payment verification failed. Please try again.")
             return redirect('subscription_page')
 
         UserSubscription.objects.filter(

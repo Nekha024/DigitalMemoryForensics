@@ -4,124 +4,216 @@
 
 {% block content %}
 
-<!-- MAIN -->
-<div class="max-w-5xl mx-auto">
+<style>
+.rag-answer {
+    white-space: pre-wrap;
+    line-height: 1.85;
+    font-size: 15px;
+    color: #e2e8f0;
+}
 
-    <!-- INPUT PANEL -->
-    <div class="glass p-6 rounded-xl mb-8">
+.source-card {
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.03);
+    overflow: hidden;
+    margin-bottom: 10px;
+}
 
-        <h2 class="text-2xl text-cyan-400 mb-6">
-            RAG Question Answering
-        </h2>
+.source-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.04);
+    user-select: none;
+    flex-wrap: wrap;
+    gap: 8px;
+}
 
-        <form method="get" class="grid md:grid-cols-3 gap-4">
+.source-header:hover {
+    background: rgba(255,255,255,0.07);
+}
 
-            <!-- CASE -->
-            <div>
-                <label class="text-sm text-gray-300">Case</label>
-                <select name="case_id">
-                    <option value="">All Cases</option>
-                    {% for case in cases %}
-                        <option value="{{ case.id }}" 
-                        {% if selected_case_id == case.id %}selected{% endif %}>
-                            {{ case.title }}
-                        </option>
-                    {% endfor %}
-                </select>
+.source-body {
+    padding: 16px 18px;
+    font-size: 14px;
+    color: #cbd5e1;
+    line-height: 1.75;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.relevance-label {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.5px;
+}
+
+.rel-high   { background: rgba(34,197,94,.15);  color: #4ade80; }
+.rel-medium { background: rgba(234,179,8,.15);  color: #facc15; }
+.rel-low    { background: rgba(148,163,184,.12); color: #94a3b8; }
+
+.answer-box {
+    background: rgba(6,182,212,0.05);
+    border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.form-row > div { flex: 1; min-width: 140px; }
+</style>
+
+<div class="max-w-4xl mx-auto">
+
+    <!-- HEADER -->
+    <div style="margin-bottom:20px;">
+        <h2 style="font-size:22px;font-weight:700;color:#67e8f9;">🔍 Evidence Q&A</h2>
+        <p style="color:#64748b;font-size:13px;margin-top:4px;">Ask a question — the AI answers only from your uploaded evidence files.</p>
+    </div>
+
+    <!-- FORM -->
+    <div class="glass p-6 rounded-xl mb-6">
+        <form method="get" action="">
+
+            <!-- QUESTION (top, most important) -->
+            <div style="margin-bottom:12px;">
+                <label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:6px;font-weight:600;">Your Question</label>
+                <input type="text" name="q" value="{{ question }}"
+                       id="rag-question-input"
+                       placeholder="e.g. What programming languages does this person know?"
+                       style="width:100%;font-size:15px;"
+                       autocomplete="off">
             </div>
 
-            <!-- PROVIDER -->
-            <div>
-                <label class="text-sm text-gray-300">LLM Provider</label>
-                <select name="provider">
-                    <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>Ollama</option>
-                    <option value="glm" {% if provider == 'glm' %}selected{% endif %}>GLM</option>
-                </select>
-            </div>
+            <!-- SELECTS + BUTTON -->
+            <div class="form-row">
 
-            <!-- BUTTON -->
-            <div class="flex items-end">
-                <button type="submit" class="btn w-full">Ask</button>
-            </div>
+                <div>
+                    <label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:6px;font-weight:600;">Case</label>
+                    <select name="case_id" style="width:100%;">
+                        <option value="">All Cases</option>
+                        {% for case in cases %}
+                            <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
+                                {{ case.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <!-- QUESTION -->
-            <div class="md:col-span-3">
-                <label class="text-sm text-gray-300">Question</label>
-                <input type="text" name="q" value="{{ question }}" placeholder="Ask something about evidence..." required>
+                <div>
+                    <label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:6px;font-weight:600;">AI Provider</label>
+                    <select name="provider" style="width:100%;">
+                        <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>Ollama (Local)</option>
+                        <option value="glm"    {% if provider == 'glm'    %}selected{% endif %}>GLM (Cloud)</option>
+                    </select>
+                </div>
+
+                <div style="display:flex;align-items:flex-end;">
+                    <button type="submit" class="btn" style="width:100%;padding:10px 24px;font-size:15px;">
+                        🔎 Ask
+                    </button>
+                </div>
+
             </div>
 
         </form>
-
     </div>
 
     <!-- ERROR -->
     {% if error_message %}
-        <div class="text-red-400 mb-6">
-            <strong>Error:</strong> {{ error_message }}
+        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 18px;color:#fca5a5;margin-bottom:20px;">
+            ⚠️ <strong>Error:</strong> {{ error_message }}
         </div>
     {% endif %}
 
-    <!-- ANSWER -->
+    <!-- RESULTS -->
     {% if answer_data %}
-        <div class="glass p-6 rounded-xl mb-8">
 
-            <h3 class="text-xl text-cyan-400 mb-4">
-                Generated Answer
-            </h3>
-
-            <div class="chat">
-                {{ answer_data.answer }}
+        <!-- ANSWER -->
+        <div class="answer-box">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                <span style="font-size:18px;">🤖</span>
+                <span style="font-size:13px;font-weight:700;color:#67e8f9;text-transform:uppercase;letter-spacing:1px;">AI Answer</span>
+                <span style="font-size:11px;color:#475569;background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:99px;margin-left:auto;">
+                    via {{ provider|upper }}
+                </span>
             </div>
-
+            <div class="rag-answer">{{ answer_data.answer }}</div>
         </div>
 
         <!-- SOURCES -->
-        <h3 class="text-xl text-cyan-400 mb-6">
-            Sources Used
-        </h3>
-
-        <div class="grid gap-6">
-
-            {% for source in answer_data.sources %}
-            <div class="glass p-5 rounded-xl">
-
-                <div class="flex justify-between text-sm text-gray-400 mb-2">
-                    <span>Source {{ source.source_no }}</span>
-                    <span>Score: {{ source.score }}</span>
-                </div>
-
-                <p class="text-sm text-gray-300 mb-2">
-                    File: <span class="text-cyan-400">{{ source.title }}</span>
-                </p>
-
-                <p class="text-sm text-gray-400 mb-3">
-                    Chunk #{{ source.chunk_index }}
-                </p>
-
-                <p class="text-gray-200 mb-4">
-                    {{ source.content }}
-                </p>
-
-                <a href="{% url 'evidence_detail' source.evidence_id %}" 
-                   class="text-cyan-400 hover:underline">
-                   View Evidence →
-                </a>
-
-            </div>
-            {% endfor %}
-
+        {% if answer_data.sources %}
+        <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">📎 Evidence Sources Used</span>
+            <span style="font-size:12px;color:#475569;">({{ answer_data.sources|length }} found)</span>
         </div>
 
+        {% for source in answer_data.sources %}
+        <div class="source-card">
+
+            <div class="source-header">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="font-size:13px;font-weight:700;color:#e2e8f0;">Source {{ source.source_no }}</span>
+                    <span style="font-size:12px;color:#67e8f9;">📄 {{ source.title }}</span>
+
+                    {% if source.score >= 0.3 %}
+                        <span class="relevance-label rel-high">High Match</span>
+                    {% elif source.score >= 0.15 %}
+                        <span class="relevance-label rel-medium">Medium Match</span>
+                    {% else %}
+                        <span class="relevance-label rel-low">Low Match</span>
+                    {% endif %}
+                </div>
+                <span style="font-size:12px;color:#475569;">Score: {{ source.score|floatformat:2 }}</span>
+            </div>
+
+            <!-- BODY always visible -->
+            <div class="source-body">
+                <p style="margin-bottom:12px;">{{ source.content }}</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                    <span style="font-size:11px;color:#475569;">Chunk #{{ source.chunk_index }}</span>
+                    <a href="{% url 'evidence_detail' source.evidence_id %}"
+                       style="font-size:12px;color:#67e8f9;text-decoration:none;font-weight:600;">
+                        View Full Evidence →
+                    </a>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+
+        {% endif %}
+
+    {% elif question %}
+        <!-- Submitted but no answer -->
+        <div style="text-align:center;padding:40px;color:#475569;">
+            <div style="font-size:40px;margin-bottom:12px;">🔍</div>
+            <p>No relevant evidence found for this question.</p>
+            <p style="font-size:13px;margin-top:6px;">Make sure you have indexed your evidence files first.</p>
+        </div>
     {% endif %}
 
     <!-- BACK -->
-    <div class="mt-10">
-        <a href="{% url 'home' %}" 
-           class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
-            ← Back to Dashboard
-        </a>
+    <div style="margin-top:30px;">
+        <a href="{% url 'home' %}" style="color:#64748b;font-size:13px;text-decoration:none;">← Back to Dashboard</a>
     </div>
 
 </div>
+
+<script>
+// Auto-focus question box on page load
+document.getElementById('rag-question-input').focus();
+</script>
 
 {% endblock %}

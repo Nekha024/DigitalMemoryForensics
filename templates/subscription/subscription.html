@@ -360,6 +360,7 @@ body::after{
                 {% csrf_token %}
 
                 <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                <input type="hidden" name="billing_type" class="billing-type-input" value="month">
 
                 <button type="submit" class="subscribe-btn">
                     Subscribe
@@ -415,6 +416,11 @@ buttons.forEach(button => {
                 duration.innerHTML = "1 Year Access";
             }
 
+        });
+
+        const billingTypeInputs = document.querySelectorAll(".billing-type-input");
+        billingTypeInputs.forEach(input => {
+            input.value = type;
         });
 
     });

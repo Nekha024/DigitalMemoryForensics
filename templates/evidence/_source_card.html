@@ -1,0 +1,29 @@
+<div class="source-card">
+    <div class="source-header">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:13px;font-weight:700;color:#e2e8f0;">Source {{ source.source_no }}</span>
+            <span style="font-size:12px;color:#67e8f9;">{{ source.title }}</span>
+            <span class="relevance-label {{ rel_class }}">{{ rel_label }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:80px;">
+                <div class="score-bar-track">
+                    <div class="score-bar-fill" style="width:{{ source.score|floatformat:0 }}0%;"></div>
+                </div>
+            </div>
+            <span style="font-size:12px;color:#475569;">{{ source.score|floatformat:2 }}</span>
+            <span class="arrow" style="font-size:11px;color:#475569;">▼</span>
+        </div>
+    </div>
+
+    <div class="source-body">
+        <p style="margin-bottom:12px;color:#cbd5e1;">{{ source.content }}</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:11px;color:#475569;">Chunk #{{ source.chunk_index }}</span>
+            <a href="{% url 'evidence_detail' source.evidence_id %}"
+               style="font-size:12px;color:#67e8f9;text-decoration:none;font-weight:600;">
+                View Full Evidence →
+            </a>
+        </div>
+    </div>
+</div>
