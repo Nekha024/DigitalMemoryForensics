@@ -6,7 +6,9 @@ from .utils import detect_file_type, extract_text
 from .vector_utils import index_evidence_file, search_similar_chunks
 from .llm_utils import generate_rag_answer, DEFAULT_LLM_PROVIDER
 from cases.models import Case
+from subscription.decorators import subscription_required
 
+@subscription_required
 @login_required
 def upload_evidence(request):
     if request.method == 'POST':
@@ -30,6 +32,7 @@ def upload_evidence(request):
 
     return render(request, 'evidence/upload_evidence.html', {'form': form})
 
+@subscription_required
 @login_required
 def evidence_detail(request, evidence_id):
     evidence = get_object_or_404(

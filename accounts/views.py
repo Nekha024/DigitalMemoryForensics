@@ -4,12 +4,14 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import EmailOTP
 from .utils import generate_otp, send_otp_email
+from subscription.models import Subscription
 
 
 #homepage
 
 def page(request):
-    return render(request, 'landing_page/page.html')
+    plans=Subscription.objects.all()
+    return render(request, 'landing_page/page.html',{'plans':plans})
 
 # login
 def auth_page(request):
