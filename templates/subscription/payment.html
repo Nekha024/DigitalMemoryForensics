@@ -1,3 +1,8 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -14,22 +19,10 @@
 
 <style>
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Plus Jakarta Sans',sans-serif;
-}
-
 body{
-    min-height:100vh;
-    background:#020617;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    padding:20px;
+    background-image:
+    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
 }
 
 .payment-card{
@@ -38,26 +31,32 @@ body{
     max-width:500px;
 
     padding:45px 40px;
+    margin:auto;
 
     border-radius:24px;
 
-    background:rgba(255,255,255,0.05);
+    background:linear-gradient(
+        145deg,
+        rgba(15,35,55,0.85),
+        rgba(2,8,23,0.92)
+    );
 
-    border:1px solid rgba(255,255,255,0.08);
+    border:1px solid rgba(0,255,255,0.12);
 
     backdrop-filter:blur(18px);
 
     text-align:center;
 
     box-shadow:
-    0 0 30px rgba(124,58,237,.25);
+    0 0 35px rgba(0,255,255,.12),
+    inset 0 0 25px rgba(255,255,255,.02);
 }
 
 h1{
     font-size:42px;
     margin-bottom:20px;
 
-    background:linear-gradient(to right,#7c3aed,#f97316);
+    background:linear-gradient(to right,#67e8f9,#22d3ee);
 
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
@@ -69,10 +68,12 @@ h1{
 
     margin:30px 0;
 
-    background:linear-gradient(to right,#7c3aed,#f97316);
+    background:linear-gradient(to right,#67e8f9,#06b6d4);
 
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
+
+    text-shadow:0 0 18px rgba(34,211,238,.35);
 }
 
 p{
@@ -89,22 +90,25 @@ button{
     border:none;
     border-radius:14px;
 
-    background:linear-gradient(135deg,#7c3aed,#9333ea);
+    background:linear-gradient(
+        135deg,
+        #06b6d4,
+        #22d3ee
+    );
 
-    color:white;
+    color:#02111b;
 
     font-size:16px;
     font-weight:700;
 
     cursor:pointer;
 
-    transition:0.3s;
+    transition:.3s ease;
 }
 
 button:hover{
-    opacity:0.88;
-    transform:scale(1.02);
-    box-shadow:0 0 20px rgba(124,58,237,.5);
+    transform:translateY(-2px);
+    box-shadow:0 0 20px rgba(34,211,238,.45);
 }
 
 .error-msg{
@@ -134,7 +138,7 @@ button:hover{
     </p>
 
     <div class="price">
-        ₹{{ final_price }}
+        ₹{{ final_price }}.00
     </div>
 
     <p>
@@ -235,3 +239,5 @@ document.getElementById('rzp-button1').onclick = function(e){
 
 </body>
 </html>
+
+{% endblock %}

@@ -65,7 +65,7 @@ def generate_with_ollama(prompt, model=None):
         }
     }
 
-    response = requests.post(url, json=payload, timeout=120)
+    response = requests.post(url, json=payload, timeout=220)
     response.raise_for_status()
 
     data = response.json()
@@ -99,7 +99,7 @@ def generate_with_glm(prompt, model=None):
         response = requests.post(url, headers=headers, json=payload, timeout=300)
 
         if response.status_code == 429:
-            wait = 10 * (attempt + 1)  # 10s, 20s, 30s
+            wait = 40 * (attempt + 1)  # 10s, 20s, 30s
             print(f"[GLM] Rate limited (429). Retrying in {wait}s... (attempt {attempt + 1}/{max_retries})")
             import time
             time.sleep(wait)
