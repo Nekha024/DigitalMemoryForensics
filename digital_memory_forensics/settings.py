@@ -77,9 +77,9 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-LOGIN_URL = "/accounts/auth/"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/accounts/auth/"
+LOGIN_URL          = "/auth/"
+LOGIN_REDIRECT_URL = "/cases/"
+LOGOUT_REDIRECT_URL = "/auth/"
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
