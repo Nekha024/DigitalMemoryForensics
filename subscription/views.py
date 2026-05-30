@@ -1,4 +1,6 @@
 import razorpay
+import uuid
+import logging
 
 from datetime import timedelta
 
@@ -9,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
 from .models import Subscription, UserSubscription
+
+logger = logging.getLogger(__name__)
 
 
 client = razorpay.Client(
@@ -66,11 +70,23 @@ def subscription_page(request):
 
         amount = int(final_price * 100)
 
-        payment = client.order.create({
-            'amount': amount,
-            'currency': 'INR',
-            'payment_capture': '1'
-        })
+        receipt = f"receipt_{uuid.uuid4().hex[:16]}"
+
+        try:
+            payment = client.order.create({
+                'amount': amount,
+                'currency': 'INR',
+                'payment_capture': 1,
+                'receipt': receipt,
+                'notes': {
+                    'plan': plan.name,
+                    'user': request.user.username,
+                }
+            })
+        except Exception as e:
+            logger.error(f"Razorpay order creation failed: {e}")
+            messages.error(request, f"Payment gateway error: {e}. Please try again.")
+            return redirect('subscription_page')
 
         context = {
             'plan': plan,
@@ -79,6 +95,8 @@ def subscription_page(request):
             'final_price': final_price,
             'duration': duration,
             'billing_type': billing_type,
+            'user_name': request.user.get_full_name() or request.user.username,
+            'user_email': request.user.email,
         }
 
         return render(request, 'subscription/payment.html', context)
@@ -116,7 +134,8 @@ def payment_success(request):
         try:
             client.utility.verify_payment_signature(params_dict)
         except Exception as e:
-            messages.error(request, "Payment verification failed. Please try again.")
+            logger.error(f"Razorpay signature verification failed: {e} | params: {params_dict}")
+            messages.error(request, "Payment verification failed. Please contact support.")
             return redirect('subscription_page')
 
         UserSubscription.objects.filter(

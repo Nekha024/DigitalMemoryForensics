@@ -2,9 +2,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
+# Load .env from project root explicitly (works regardless of cwd)
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=BASE_DIR / '.env', override=True)
+
+# BASE_DIR already set above
 
 SECRET_KEY = 'django-insecure-change-this-later'
 DEBUG = True
@@ -87,5 +89,9 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'your_email@gmail.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'your_app_password')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-RAZORPAY_KEY_ID=os.getenv('RAZORPAY_ID')
-RAZORPAY_KEY_SECRET=os.getenv('RAZORPAY_SECRET')
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_ID', '')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_SECRET', '')
+
+if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
+    import warnings
+    warnings.warn('Razorpay keys not set! Payment will not work. Set RAZORPAY_ID and RAZORPAY_SECRET in .env', stacklevel=2)

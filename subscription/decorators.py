@@ -10,7 +10,7 @@ def subscription_required(view_func):
     def _wrapped_view(request, *args, **kwargs): # This is the actual function that will replace the original view function when decorated. It takes the same arguments as the original view function.
 
         if not request.user.is_authenticated:
-            return redirect('login')
+            return redirect('auth')
 
         # Get latest subscription
         user_subscription = UserSubscription.objects.filter(
