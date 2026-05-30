@@ -51,25 +51,87 @@ Instructions:
     return prompt
 
 
+def _ollama_list_models():
+    """Return list of locally available Ollama model names, or [] on failure."""
+    import json as _json
+    try:
+        r = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=5)
+        if r.ok:
+            return [m.get("name", "") for m in r.json().get("models", [])]
+    except Exception:
+        pass
+    return []
+
+
 def generate_with_ollama(prompt, model=None):
+    import json as _json
     model = model or OLLAMA_MODEL
     url = f"{OLLAMA_BASE_URL}/api/generate"
 
     payload = {
         "model": model,
         "prompt": prompt,
-        "stream": False,
+        "stream": True,          # streaming = tokens arrive fast, no read-timeout
         "options": {
-            "num_predict": 512,   # limit response length for speed
+            "num_predict": 512,
             "temperature": 0.2,
         }
     }
 
-    response = requests.post(url, json=payload, timeout=220)
+    # connect timeout 30s, read timeout 600s (stream keeps the socket alive)
+    try:
+        response = requests.post(url, json=payload, timeout=(30, 600), stream=True)
+    except requests.exceptions.ConnectionError:
+        raise Exception(
+            "Cannot connect to Ollama at localhost:11434. "
+            "Make sure Ollama is running: open a terminal and run  ollama serve"
+        )
+
+    # Ollama returns 500 when the model isn't pulled yet.
+    # Read the error body and give a clear actionable message.
+    if response.status_code == 500:
+        try:
+            err_body = response.json()
+            ollama_msg = err_body.get("error", "")
+        except Exception:
+            ollama_msg = response.text[:300]
+
+        available = _ollama_list_models()
+        avail_str = ", ".join(available) if available else "none found"
+
+        raise Exception(
+            f"Ollama model '{model}' failed with: {ollama_msg or 'Internal Server Error'}. "
+            f"Available models on this machine: [{avail_str}]. "
+            f"To download the model run:  ollama pull {model}"
+        )
+
     response.raise_for_status()
 
-    data = response.json()
-    return data.get("response", "").strip()
+    full_text = []
+    for raw_line in response.iter_lines():
+        if not raw_line:
+            continue
+        try:
+            chunk = _json.loads(raw_line)
+        except ValueError:
+            continue
+
+        # Ollama also streams error objects mid-stream (e.g. context overflow)
+        if chunk.get("error"):
+            raise Exception(f"Ollama stream error: {chunk['error']}")
+
+        token = chunk.get("response", "")
+        full_text.append(token)
+        if chunk.get("done", False):
+            break
+
+    result = "".join(full_text).strip()
+    if not result:
+        raise Exception(
+            f"Ollama returned an empty response for model '{model}'. "
+            "The model may still be loading — wait a moment and try again."
+        )
+    return result
 
 
 def generate_with_glm(prompt, model=None):

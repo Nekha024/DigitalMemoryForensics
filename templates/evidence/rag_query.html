@@ -1,41 +1,338 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}RAG Question Answering{% endblock %}
+{% block title %}RAG Evidence Q&A{% endblock %}
 
 {% block content %}
 
 <style>
-.rag-answer {
-    white-space: pre-wrap;
-    line-height: 1.85;
-    font-size: 15px;
-    color: #e2e8f0;
+/* ── Typography ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ── Layout ─────────────────────────────────────────── */
+.rag-wrap { max-width: 860px; margin: 0 auto; }
+
+/* ── Form card ───────────────────────────────────────── */
+.rag-form-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 28px 30px 24px;
+    margin-bottom: 24px;
+    backdrop-filter: blur(10px);
 }
 
+.rag-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 7px;
+}
+
+#rag-question-input {
+    width: 100%;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+    background: rgba(0,0,0,0.25);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    color: #e2e8f0;
+    padding: 13px 16px;
+    transition: border-color .2s, box-shadow .2s;
+    box-sizing: border-box;
+    outline: none;
+}
+#rag-question-input:focus {
+    border-color: rgba(103,232,249,0.5);
+    box-shadow: 0 0 0 3px rgba(103,232,249,0.08);
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+.form-row > .fr-cell { flex: 1; min-width: 140px; }
+
+select {
+    width: 100%;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    background: rgba(0,0,0,0.25);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #e2e8f0;
+    padding: 11px 14px;
+    outline: none;
+    cursor: pointer;
+}
+select:focus { border-color: rgba(103,232,249,0.4); }
+select option { background: #0f172a; }
+
+/* ── Ask Button ──────────────────────────────────────── */
+#ask-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 28px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+    box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    position: relative;
+    overflow: hidden;
+}
+#ask-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+    opacity: 0;
+    transition: opacity .2s;
+}
+#ask-btn:hover:not(:disabled)::after { opacity: 1; }
+#ask-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(99,102,241,0.5);
+}
+#ask-btn:active:not(:disabled) { transform: translateY(0); }
+#ask-btn:disabled { opacity: .65; cursor: not-allowed; }
+
+/* ── LOADING OVERLAY ─────────────────────────────────── */
+#loading-screen {
+    display: none;
+    position: relative;
+    margin-bottom: 28px;
+    padding: 56px 28px;
+    background: rgba(6,182,212,0.04);
+    border: 1px solid rgba(6,182,212,0.15);
+    border-radius: 20px;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* animated gradient sweep */
+#loading-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.06) 50%, transparent 100%);
+    animation: sweep 2.2s ease-in-out infinite;
+}
+@keyframes sweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+}
+
+/* Neural Pulse Orb */
+.neural-orb {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 28px;
+    position: relative;
+}
+.neural-orb .core {
+    position: absolute;
+    inset: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #67e8f9, #6366f1);
+    animation: pulse-core 1.8s ease-in-out infinite;
+    box-shadow: 0 0 24px rgba(103,232,249,0.6);
+}
+.neural-orb .ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(103,232,249,0.4);
+    animation: ring-expand 1.8s ease-out infinite;
+}
+.neural-orb .ring2 {
+    animation-delay: .6s;
+}
+.neural-orb .ring3 {
+    animation-delay: 1.2s;
+}
+@keyframes pulse-core {
+    0%, 100% { transform: scale(1);   box-shadow: 0 0 20px rgba(103,232,249,0.6); }
+    50%       { transform: scale(1.15); box-shadow: 0 0 36px rgba(103,232,249,0.9); }
+}
+@keyframes ring-expand {
+    0%   { transform: scale(.9); opacity: .8; }
+    100% { transform: scale(1.9); opacity: 0; }
+}
+
+.loading-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #67e8f9;
+    margin-bottom: 8px;
+    position: relative;
+}
+.loading-sub {
+    font-size: 13px;
+    color: #475569;
+    position: relative;
+}
+
+/* Typing dots */
+.dots span {
+    animation: blink .9s infinite;
+}
+.dots span:nth-child(2) { animation-delay: .3s; }
+.dots span:nth-child(3) { animation-delay: .6s; }
+@keyframes blink {
+    0%, 80%, 100% { opacity: 0; }
+    40%           { opacity: 1; }
+}
+
+/* Progress bar */
+.progress-bar-wrap {
+    margin: 22px auto 0;
+    max-width: 340px;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+}
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #06b6d4, #6366f1);
+    animation: progress-indeterminate 2s ease-in-out infinite;
+    width: 40%;
+}
+@keyframes progress-indeterminate {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+}
+
+/* Provider badge inside loading */
+.provider-tag {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 99px;
+    position: relative;
+}
+.provider-tag.ollama {
+    background: rgba(34,197,94,0.12);
+    color: #4ade80;
+    border: 1px solid rgba(34,197,94,0.2);
+}
+.provider-tag.glm {
+    background: rgba(99,102,241,0.12);
+    color: #a5b4fc;
+    border: 1px solid rgba(99,102,241,0.2);
+}
+
+/* ── ERROR BOX ───────────────────────────────────────── */
+#error-box {
+    display: none;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: #fca5a5;
+    margin-bottom: 22px;
+    font-size: 14px;
+}
+#error-box strong { color: #f87171; }
+
+/* ── RESULT AREA ─────────────────────────────────────── */
+#result-area { display: none; animation: fadeSlideUp .5s ease; }
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.answer-box {
+    background: rgba(6,182,212,0.05);
+    border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 16px;
+    padding: 26px 30px;
+    margin-bottom: 24px;
+}
+.answer-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+.answer-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #67e8f9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.via-badge {
+    font-size: 11px;
+    color: #475569;
+    background: rgba(255,255,255,0.05);
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-left: auto;
+    font-weight: 600;
+}
+.rag-answer {
+    white-space: pre-wrap;
+    line-height: 1.9;
+    font-size: 15px;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ── SOURCE CARDS ────────────────────────────────────── */
+.sources-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 .source-card {
     border: 1px solid rgba(255,255,255,0.07);
     border-radius: 14px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255,255,255,0.02);
     overflow: hidden;
     margin-bottom: 10px;
+    transition: border-color .2s;
 }
-
+.source-card:hover { border-color: rgba(103,232,249,0.2); }
 .source-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: 13px 18px;
     cursor: pointer;
-    background: rgba(255,255,255,0.04);
+    background: rgba(255,255,255,0.03);
     user-select: none;
     flex-wrap: wrap;
     gap: 8px;
 }
-
-.source-header:hover {
-    background: rgba(255,255,255,0.07);
-}
-
+.source-header:hover { background: rgba(255,255,255,0.055); }
 .source-body {
     padding: 16px 18px;
     font-size: 14px;
@@ -43,177 +340,353 @@
     line-height: 1.75;
     border-top: 1px solid rgba(255,255,255,0.05);
 }
-
 .relevance-label {
     font-size: 11px;
     font-weight: 700;
     padding: 3px 10px;
     border-radius: 99px;
-    letter-spacing: 0.5px;
+    letter-spacing: .5px;
 }
-
-.rel-high   { background: rgba(34,197,94,.15);  color: #4ade80; }
-.rel-medium { background: rgba(234,179,8,.15);  color: #facc15; }
+.rel-high   { background: rgba(34,197,94,.15);   color: #4ade80; }
+.rel-medium { background: rgba(234,179,8,.15);   color: #facc15; }
 .rel-low    { background: rgba(148,163,184,.12); color: #94a3b8; }
 
-.answer-box {
-    background: rgba(6,182,212,0.05);
-    border: 1px solid rgba(6,182,212,0.2);
-    border-radius: 14px;
-    padding: 24px 28px;
-    margin-bottom: 24px;
+/* ── EMPTY STATE ─────────────────────────────────────── */
+#empty-state {
+    display: none;
+    text-align: center;
+    padding: 48px 20px;
+    color: #475569;
 }
-
-.form-row {
-    display: flex;
-    gap: 12px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-}
-
-.form-row > div { flex: 1; min-width: 140px; }
 </style>
 
-<div class="max-w-4xl mx-auto">
+<div class="rag-wrap">
 
     <!-- HEADER -->
-    <div style="margin-bottom:20px;">
-        <h2 style="font-size:22px;font-weight:700;color:#67e8f9;">🔍 Evidence Q&A</h2>
-        <p style="color:#64748b;font-size:13px;margin-top:4px;">Ask a question — the AI answers only from your uploaded evidence files.</p>
+    <div style="margin-bottom:24px;">
+        <h2 style="font-size:24px;font-weight:800;color:#67e8f9;margin-bottom:6px;">🔍 Evidence Q&amp;A</h2>
+        <p style="color:#475569;font-size:14px;">Ask a question — the AI answers <em>only</em> from your uploaded evidence files.</p>
     </div>
 
     <!-- FORM -->
-    <div class="glass p-6 rounded-xl mb-6">
-        <form method="get" action="">
+    <div class="rag-form-card">
+        <div style="margin-bottom:12px;">
+            <label class="rag-label" for="rag-question-input">Your Question</label>
+            <input type="text"
+                   id="rag-question-input"
+                   placeholder="e.g. What programming languages does this person know?"
+                   autocomplete="off"
+                   value="{{ question }}">
+        </div>
 
-            <!-- QUESTION (top, most important) -->
-            <div style="margin-bottom:12px;">
-                <label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:6px;font-weight:600;">Your Question</label>
-                <input type="text" name="q" value="{{ question }}"
-                       id="rag-question-input"
-                       placeholder="e.g. What programming languages does this person know?"
-                       style="width:100%;font-size:15px;"
-                       autocomplete="off">
+        <div class="form-row">
+            <div class="fr-cell">
+                <label class="rag-label" for="rag-case-select">Case</label>
+                <select id="rag-case-select">
+                    <option value="">All Cases</option>
+                    {% for case in cases %}
+                        <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
+                            {{ case.title }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
 
-            <!-- SELECTS + BUTTON -->
-            <div class="form-row">
-
-                <div>
-                    <label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:6px;font-weight:600;">Case</label>
-                    <select name="case_id" style="width:100%;">
-                        <option value="">All Cases</option>
-                        {% for case in cases %}
-                            <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
-                                {{ case.title }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <label style="font-size:12px;color:#94a3b8;display:block;margin-bottom:6px;font-weight:600;">AI Provider</label>
-                    <select name="provider" style="width:100%;">
-                        <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>Ollama (Local)</option>
-                        <option value="glm"    {% if provider == 'glm'    %}selected{% endif %}>GLM (Cloud)</option>
-                    </select>
-                </div>
-
-                <div style="display:flex;align-items:flex-end;">
-                    <button type="submit" class="btn" style="width:100%;padding:10px 24px;font-size:15px;">
-                        🔎 Ask
-                    </button>
-                </div>
-
+            <div class="fr-cell">
+                <label class="rag-label" for="rag-provider-select">AI Provider</label>
+                <select id="rag-provider-select">
+                    <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>🖥️ Ollama (Local)</option>
+                    <option value="glm"    {% if provider == 'glm'    %}selected{% endif %}>☁️ GLM (Cloud)</option>
+                </select>
             </div>
 
-        </form>
+            <div class="fr-cell" style="min-width:120px;max-width:180px;">
+                <label class="rag-label">&nbsp;</label>
+                <button type="button" id="ask-btn">
+                    <span id="btn-icon">🔎</span>
+                    <span id="btn-text">Ask</span>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- ERROR -->
-    {% if error_message %}
-        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px 18px;color:#fca5a5;margin-bottom:20px;">
-            ⚠️ <strong>Error:</strong> {{ error_message }}
+    <!-- ── LOADING SCREEN ── -->
+    <div id="loading-screen">
+        <div class="neural-orb">
+            <div class="core"></div>
+            <div class="ring"></div>
+            <div class="ring ring2"></div>
+            <div class="ring ring3"></div>
         </div>
-    {% endif %}
+        <div class="loading-title">
+            Thinking<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+        </div>
+        <div class="loading-sub" id="loading-sub-text">Searching evidence &amp; generating answer</div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill"></div>
+        </div>
+        <div id="loading-provider-tag" class="provider-tag ollama">via Ollama</div>
+    </div>
 
-    <!-- RESULTS -->
-    {% if answer_data %}
+    <!-- ── ERROR BOX ── -->
+    <div id="error-box">
+        <strong>⚠️ Error:</strong> <span id="error-text"></span>
+    </div>
+
+    <!-- ── RESULT AREA ── -->
+    <div id="result-area">
 
         <!-- ANSWER -->
         <div class="answer-box">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                <span style="font-size:18px;">🤖</span>
-                <span style="font-size:13px;font-weight:700;color:#67e8f9;text-transform:uppercase;letter-spacing:1px;">AI Answer</span>
-                <span style="font-size:11px;color:#475569;background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:99px;margin-left:auto;">
-                    via {{ provider|upper }}
-                </span>
+            <div class="answer-header">
+                <span style="font-size:20px;">🤖</span>
+                <span class="answer-label">AI Answer</span>
+                <span class="via-badge" id="via-badge">via GLM</span>
             </div>
-            <div class="rag-answer">{{ answer_data.answer }}</div>
+            <div class="rag-answer" id="answer-text"></div>
         </div>
 
         <!-- SOURCES -->
-        {% if answer_data.sources %}
-        <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-            <span style="font-size:13px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">📎 Evidence Sources Used</span>
-            <span style="font-size:12px;color:#475569;">({{ answer_data.sources|length }} found)</span>
-        </div>
-
-        {% for source in answer_data.sources %}
-        <div class="source-card">
-
-            <div class="source-header">
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <span style="font-size:13px;font-weight:700;color:#e2e8f0;">Source {{ source.source_no }}</span>
-                    <span style="font-size:12px;color:#67e8f9;">📄 {{ source.title }}</span>
-
-                    {% if source.score >= 0.3 %}
-                        <span class="relevance-label rel-high">High Match</span>
-                    {% elif source.score >= 0.15 %}
-                        <span class="relevance-label rel-medium">Medium Match</span>
-                    {% else %}
-                        <span class="relevance-label rel-low">Low Match</span>
-                    {% endif %}
-                </div>
-                <span style="font-size:12px;color:#475569;">Score: {{ source.score|floatformat:2 }}</span>
+        <div id="sources-wrap" style="display:none;">
+            <div class="sources-heading">
+                📎 Evidence Sources Used
+                <span style="font-weight:500;color:#334155;" id="source-count"></span>
             </div>
-
-            <!-- BODY always visible -->
-            <div class="source-body">
-                <p style="margin-bottom:12px;">{{ source.content }}</p>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-                    <span style="font-size:11px;color:#475569;">Chunk #{{ source.chunk_index }}</span>
-                    <a href="{% url 'evidence_detail' source.evidence_id %}"
-                       style="font-size:12px;color:#67e8f9;text-decoration:none;font-weight:600;">
-                        View Full Evidence →
-                    </a>
-                </div>
-            </div>
-
+            <div id="sources-list"></div>
         </div>
-        {% endfor %}
 
-        {% endif %}
+    </div>
 
-    {% elif question %}
-        <!-- Submitted but no answer -->
-        <div style="text-align:center;padding:40px;color:#475569;">
-            <div style="font-size:40px;margin-bottom:12px;">🔍</div>
-            <p>No relevant evidence found for this question.</p>
-            <p style="font-size:13px;margin-top:6px;">Make sure you have indexed your evidence files first.</p>
-        </div>
-    {% endif %}
+    <!-- EMPTY STATE -->
+    <div id="empty-state">
+        <div style="font-size:48px;margin-bottom:14px;">🔍</div>
+        <p style="font-size:16px;font-weight:600;color:#64748b;">No relevant evidence found</p>
+        <p style="font-size:13px;margin-top:6px;color:#334155;">Make sure you've indexed your evidence files first.</p>
+    </div>
 
     <!-- BACK -->
-    <div style="margin-top:30px;">
-        <a href="{% url 'home' %}" style="color:#64748b;font-size:13px;text-decoration:none;">← Back to Dashboard</a>
+    <div style="margin-top:32px;">
+        <a href="{% url 'home' %}" style="color:#334155;font-size:13px;text-decoration:none;">← Back to Dashboard</a>
     </div>
 
 </div>
 
 <script>
-// Auto-focus question box on page load
-document.getElementById('rag-question-input').focus();
+(function () {
+    const input      = document.getElementById('rag-question-input');
+    const caseSelect = document.getElementById('rag-case-select');
+    const provSel    = document.getElementById('rag-provider-select');
+    const askBtn     = document.getElementById('ask-btn');
+
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingSubTxt = document.getElementById('loading-sub-text');
+    const loadingProvTag = document.getElementById('loading-provider-tag');
+
+    const errorBox   = document.getElementById('error-box');
+    const errorText  = document.getElementById('error-text');
+
+    const resultArea = document.getElementById('result-area');
+    const answerTxt  = document.getElementById('answer-text');
+    const viaBadge   = document.getElementById('via-badge');
+    const srcWrap    = document.getElementById('sources-wrap');
+    const srcCount   = document.getElementById('source-count');
+    const srcList    = document.getElementById('sources-list');
+    const emptyState = document.getElementById('empty-state');
+
+    const btnIcon    = document.getElementById('btn-icon');
+    const btnText    = document.getElementById('btn-text');
+
+    function hideAll() {
+        loadingScreen.style.display = 'none';
+        errorBox.style.display      = 'none';
+        resultArea.style.display    = 'none';
+        emptyState.style.display    = 'none';
+    }
+
+    function showLoading(provider) {
+        hideAll();
+        // set provider tag style
+        loadingProvTag.className = 'provider-tag ' + provider;
+        loadingProvTag.textContent = provider === 'ollama' ? '🖥️ via Ollama (Local LLM)' : '☁️ via GLM Cloud';
+
+        // dynamic sub text
+        if (provider === 'ollama') {
+            loadingSubTxt.textContent = 'Running local model — this may take 30–90 seconds…';
+        } else {
+            loadingSubTxt.textContent = 'Searching evidence & calling GLM Cloud…';
+        }
+
+        loadingScreen.style.display = 'block';
+        // animate btn
+        btnIcon.textContent = '⏳';
+        btnText.textContent = 'Thinking…';
+        askBtn.disabled = true;
+    }
+
+    function showError(msg) {
+        hideAll();
+        errorText.textContent = msg;
+        errorBox.style.display = 'block';
+    }
+
+    function relClass(score) {
+        if (score >= 0.3)  return 'rel-high';
+        if (score >= 0.15) return 'rel-medium';
+        return 'rel-low';
+    }
+    function relLabel(score) {
+        if (score >= 0.3)  return 'High Match';
+        if (score >= 0.15) return 'Medium Match';
+        return 'Low Match';
+    }
+
+    function buildSourceCard(src) {
+        const scoreFixed = (src.score || 0).toFixed(2);
+        const rc  = relClass(src.score || 0);
+        const rl  = relLabel(src.score || 0);
+        const evidUrl = `/evidence/${src.evidence_id}/`;
+
+        return `
+        <div class="source-card">
+            <div class="source-header">
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="font-size:13px;font-weight:700;color:#e2e8f0;">Source ${src.source_no}</span>
+                    <span style="font-size:12px;color:#67e8f9;">📄 ${esc(src.title || 'Unknown')}</span>
+                    <span class="relevance-label ${rc}">${rl}</span>
+                </div>
+                <span style="font-size:12px;color:#475569;">Score: ${scoreFixed}</span>
+            </div>
+            <div class="source-body">
+                <p style="margin-bottom:12px;">${esc(src.content || '')}</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                    <span style="font-size:11px;color:#475569;">Chunk #${src.chunk_index}</span>
+                    <a href="${evidUrl}" style="font-size:12px;color:#67e8f9;text-decoration:none;font-weight:600;">
+                        View Full Evidence →
+                    </a>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function esc(str) {
+        return String(str)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;');
+    }
+
+    function showResult(data, provider) {
+        hideAll();
+
+        // No answer / no chunks
+        if (!data || !data.answer) {
+            emptyState.style.display = 'block';
+            return;
+        }
+
+        answerTxt.textContent = data.answer;
+        viaBadge.textContent  = 'via ' + provider.toUpperCase();
+
+        // Sources
+        const sources = data.sources || [];
+        if (sources.length > 0) {
+            srcCount.textContent = `(${sources.length} found)`;
+            srcList.innerHTML = sources.map(buildSourceCard).join('');
+            srcWrap.style.display = 'block';
+        } else {
+            srcWrap.style.display = 'none';
+        }
+
+        resultArea.style.display = 'block';
+    }
+
+    async function doAsk() {
+        const q        = input.value.trim();
+        const caseId   = caseSelect.value;
+        const provider = provSel.value;
+
+        if (!q) {
+            input.focus();
+            input.style.borderColor = 'rgba(239,68,68,0.6)';
+            setTimeout(() => input.style.borderColor = '', 1500);
+            return;
+        }
+
+        showLoading(provider);
+
+        const params = new URLSearchParams({ q, case_id: caseId, provider });
+        const url    = `{% url 'rag_query_ajax' %}?${params}`;
+
+        try {
+            const res = await fetch(url, { credentials: 'same-origin' });
+
+            // Safety: if server returned HTML (e.g. login page), tell user clearly
+            const ct = res.headers.get('content-type') || '';
+            if (!ct.includes('application/json')) {
+                btnIcon.textContent = '🔎';
+                btnText.textContent = 'Ask';
+                askBtn.disabled = false;
+                showError(`Unexpected response from server (status ${res.status}). Try refreshing the page.`);
+                return;
+            }
+
+            const json = await res.json();
+
+            // restore button
+            btnIcon.textContent = '🔎';
+            btnText.textContent = 'Ask';
+            askBtn.disabled = false;
+
+            if (!res.ok || !json.ok) {
+                showError(json.error || `Server error ${res.status}`);
+            } else {
+                showResult(json.data, json.provider || provider);
+            }
+
+        } catch (err) {
+            btnIcon.textContent = '🔎';
+            btnText.textContent = 'Ask';
+            askBtn.disabled = false;
+            showError('Network error: ' + err.message);
+        }
+    }
+
+    askBtn.addEventListener('click', doAsk);
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') doAsk();
+    });
+
+    // Auto-focus
+    input.focus();
+
+    // ── If Django server-side already has an answer (e.g. direct URL with params), show it ──
+    {% if answer_data %}
+    (function(){
+        // server_data injected safely via json_script tag below
+        const el = document.getElementById('server-answer-data');
+        if (!el) return;
+        try {
+            const serverData = JSON.parse(el.textContent);
+            showResult(serverData, '{{ provider|escapejs }}');
+        } catch(e) { /* ignore */ }
+    })();
+    {% endif %}
+
+    {% if error_message %}
+    (function(){
+        const errEl = document.getElementById('rag-server-err');
+        if (errEl) showError(JSON.parse(errEl.textContent));
+    })();
+    {% endif %}
+})();
 </script>
+
+{% if answer_data %}
+    {{ answer_data|json_script:"server-answer-data" }}
+{% endif %}
+{% if error_message %}
+    {{ error_message|json_script:"rag-server-err" }}
+{% endif %}
 
 {% endblock %}
