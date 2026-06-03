@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto">
+
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-cyan-400">
+            Dashboard
+        </h1>
+
+        <p class="text-gray-400 mt-2">
+            Digital Memory Forensics Overview
+        </p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+
+        <div class="glass p-6 rounded-xl">
+            <p class="text-gray-400">Total Cases</p>
+            <h2 class="text-4xl font-bold text-cyan-400">
+                {{ total_cases }}
+            </h2>
+        </div>
+
+        <div class="glass p-6 rounded-xl">
+            <p class="text-gray-400">Open Cases</p>
+            <h2 class="text-4xl font-bold text-green-400">
+                {{ open_cases }}
+            </h2>
+        </div>
+
+        <div class="glass p-6 rounded-xl">
+            <p class="text-gray-400">Closed Cases</p>
+            <h2 class="text-4xl font-bold text-red-400">
+                {{ closed_cases }}
+            </h2>
+        </div>
+
+        <div class="glass p-6 rounded-xl">
+            <p class="text-gray-400">Days Remaining</p>
+            <h2 class="text-4xl font-bold text-yellow-400">
+                {{ remaining_days }}
+            </h2>
+        </div>
+
+    </div>
+
+    <!-- Charts -->
+    <div class="grid lg:grid-cols-2 gap-6 mb-8">
+
+        <div class="glass p-6 rounded-xl">
+            <h3 class="text-xl text-cyan-400 mb-4">
+                Case Status Overview
+            </h3>
+
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        <div class="glass p-6 rounded-xl">
+            <h3 class="text-xl text-cyan-400 mb-4">
+                Monthly Cases
+            </h3>
+
+            <canvas id="monthlyChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid md:grid-cols-4 gap-6 mb-8">
+
+        <a href="{% url 'create_case' %}"
+           class="glass p-5 rounded-xl text-center hover:scale-105 transition">
+
+            ➕ Create Case
+
+        </a>
+
+        <a href="{% url 'home' %}"
+           class="glass p-5 rounded-xl text-center hover:scale-105 transition">
+
+            📂 View Cases
+
+        </a>
+
+        <a href="#"
+           class="glass p-5 rounded-xl text-center hover:scale-105 transition">
+
+            📄 Reports
+
+        </a>
+
+        <a href="#"
+           class="glass p-5 rounded-xl text-center hover:scale-105 transition">
+
+            🔍 Search Evidence
+
+        </a>
+
+    </div>
+
+    <!-- Recent Cases -->
+    <div class="glass p-6 rounded-xl">
+
+        <h3 class="text-xl text-cyan-400 mb-4">
+            Recent Cases
+        </h3>
+
+        <table class="w-full">
+
+            <thead>
+                <tr class="border-b border-gray-700">
+                    <th class="text-left py-3">Title</th>
+                    <th class="text-left py-3">Status</th>
+                    <th class="text-left py-3">Created</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for case in recent_cases %}
+                <tr class="border-b border-gray-800">
+
+                    <td class="py-3">
+                        {{ case.title }}
+                    </td>
+
+                    <td class="py-3">
+                        {{ case.status }}
+                    </td>
+
+                    <td class="py-3">
+                        {{ case.created_at|date:"d M Y" }}
+                    </td>
+
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- ChartJS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+new Chart(document.getElementById('statusChart'), {
+    type: 'pie',
+    data: {
+        labels: ['Open', 'Closed'],
+        datasets: [{
+            data: [{{ open_cases }}, {{ closed_cases }}]
+        }]
+    }
+});
+
+new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+        labels: {{ months|safe }},
+        datasets: [{
+            label: 'Cases',
+            data: {{ monthly_counts|safe }}
+        }]
+    }
+});
+
+</script>
+
+{% endblock %}

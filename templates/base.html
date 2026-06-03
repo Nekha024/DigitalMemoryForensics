@@ -90,6 +90,12 @@ input:focus, textarea:focus{
         </div>
 
         <!-- LOGOUT -->
+        <form action="{% url 'profile' %}" method="post">
+            {% csrf_token %}
+            <button class="px-4 py-2 border border-cyan-400 rounded-lg hover:bg-cyan-500/20">
+                Profile
+            </button>
+        </form>
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
             <button class="px-4 py-2 border border-cyan-400 rounded-lg hover:bg-cyan-500/20">
@@ -111,13 +117,12 @@ input:focus, textarea:focus{
 
         <nav class="flex flex-col gap-4 text-gray-300">
 
-            <a href="{% url 'profile' %}"
-               class="{% if request.path == '/cases/profile/' %}text-cyan-400{% else %}hover:text-cyan-400{% endif %}">
-                Profile
+            <a href="{% url 'dashboard' %}"
+               class="hover:text-cyan-400">
+                Dasboard
             </a>
-
             <a href="{% url 'home' %}"
-               class="{% if request.path == '/cases/' %}text-cyan-400{% else %}hover:text-cyan-400{% endif %}">
+               class="hover:text-cyan-400">
                 My Cases
             </a>
 

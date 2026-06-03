@@ -7,6 +7,7 @@ from .utils import generate_otp, send_otp_email
 from subscription.models import Subscription
 
 
+
 #homepage
 
 def page(request):
@@ -92,3 +93,6 @@ def verify_otp(request, user_id):
             messages.error(request, "Invalid OTP")
 
     return render(request, "accounts/verify_otp.html", {"user": user})
+
+
+

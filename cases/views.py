@@ -4,14 +4,72 @@ from .models import Case
 from .forms import CaseForm
 from subscription.decorators import subscription_required
 from subscription.models import UserSubscription
+from django.utils import timezone as tz
 
 @login_required
 def profile(request):
     total_cases = Case.objects.filter(created_by=request.user).count()
     plans=UserSubscription.objects.filter(user=request.user,active=True).first()
+    remaining_days = None
+
+    if plans:
+        remaining_days = max(
+            0,
+            (plans.ended_at - tz.now()).days
+        )
     return render(request, "cases/profile.html", {
-        "total_cases": total_cases,'plans':plans
+        "total_cases": total_cases,'plans':plans,'remaining_days':remaining_days
         })
+
+@login_required
+def dashboard(request):
+
+    total_cases = Case.objects.filter(
+        created_by=request.user
+    ).count()
+
+    open_cases = Case.objects.filter(
+        created_by=request.user,
+        status='Open'
+    ).count()
+
+    closed_cases = Case.objects.filter(
+        created_by=request.user,
+        status='Closed'
+    ).count()
+
+    recent_cases = Case.objects.filter(
+        created_by=request.user
+    ).order_by('-created_at')[:5]
+
+    plan = UserSubscription.objects.filter(
+        user=request.user,
+        active=True
+    ).first()
+
+    remaining_days = 0
+
+    if plan:
+        remaining_days = (
+            plan.ended_at.date() -
+            tz.now().date()
+        ).days
+
+    context = {
+        "total_cases": total_cases,
+        "open_cases": open_cases,
+        "closed_cases": closed_cases,
+        "recent_cases": recent_cases,
+        "remaining_days": remaining_days,
+        "months": ["Jan","Feb","Mar","Apr","May","Jun"],
+        "monthly_counts": [2,5,3,7,4,6]
+    }
+
+    return render(
+        request,
+        "cases/dashboard.html",
+        context
+    )
 
 @subscription_required
 @login_required
