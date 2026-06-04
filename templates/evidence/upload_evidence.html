@@ -3,42 +3,40 @@
 {% block title %}Upload Evidence{% endblock %}
 
 {% block content %}
-
 <div class="max-w-2xl mx-auto">
 
-    <div class="glass p-8 rounded-xl">
+    <div class="glass p-8 rounded-3xl">
 
-        <h2 class="text-2xl text-cyan-400 mb-6">
+        <h2 class="text-2xl text-cyan-400 font-bold tracking-wide mb-6">
             Upload Evidence
         </h2>
 
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
             {% csrf_token %}
 
             {% for field in form %}
-                <div class="mb-4">
-                    <label class="text-sm text-gray-300">
+                <div class="flex flex-col">
+                    <label class="text-slate-400 text-sm font-medium tracking-wide">
                         {{ field.label }}
                     </label>
 
                     {{ field }}
 
                     {% if field.errors %}
-                        <p class="text-red-400 text-sm">
-                            {{ field.errors }}
+                        <p class="text-red-400 text-xs mt-1 font-medium">
+                            {{ field.errors|striptags }}
                         </p>
                     {% endif %}
                 </div>
             {% endfor %}
 
-            <div class="flex justify-between mt-6">
+            <div class="flex justify-between items-center pt-4 mt-6">
 
-                <a href="{% url 'profile' %}" 
-                   class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
-                    ← Back
+                <a href="{% url 'home' %}" class="btn-outline flex items-center justify-center text-sm font-semibold">
+                    ← Cancel
                 </a>
 
-                <button type="submit" class="btn">
+                <button type="submit" class="btn-primary">
                     Upload
                 </button>
 
@@ -49,5 +47,4 @@
     </div>
 
 </div>
-
 {% endblock %}

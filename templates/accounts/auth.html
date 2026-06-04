@@ -1,318 +1,500 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Auth</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Hub</title>
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
 
-body{
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#020617;
-    overflow:hidden;
-}
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #010409;
+            overflow: hidden;
+            perspective: 1200px;
+        }
 
-/* BACKGROUND */
-.bg{
-    position:fixed;
-    inset:0;
-    z-index:-2;
-    background:
-        radial-gradient(circle at 20% 30%, rgba(6,182,212,.2), transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(6,182,212,.2), transparent 40%),
-        #020617;
-    animation: move 6s infinite alternate ease-in-out;
-}
+        /* DEEP DEEP SPACE NEBULA BG */
+        .bg {
+            position: fixed;
+            inset: -40px;
+            z-index: -2;
+            background:
+                radial-gradient(circle at 25% 20%, rgba(6, 182, 212, 0.12), transparent 50%),
+                radial-gradient(circle at 75% 80%, rgba(99, 102, 241, 0.15), transparent 50%),
+                #030712;
+            background-size: 110% 110%;
+            transform: translate3d(0, 0, 0);
+            animation: nebulaDrift 20s infinite alternate ease-in-out;
+            will-change: transform;
+        }
 
-@keyframes move{
-    0%{background-position:0% 50%,100% 50%}
-    100%{background-position:100% 50%,0% 50%}
-}
+        @keyframes nebulaDrift {
+            0% { transform: translate3d(-15px, -15px, 0) scale(1); }
+            100% { transform: translate3d(15px, 15px, 0) scale(1.05); }
+        }
 
-/* SCAN EFFECT */
-.scan{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    opacity:0;
-    z-index:-1;
-}
+        /* CORE HUD FRAME */
+        .container {
+            width: 800px;
+            height: 500px;
+            border: 1px solid rgba(6, 182, 212, 0.15);
+            box-shadow: 
+                0 30px 70px -20px rgba(0, 0, 0, 0.8), 
+                0 0 60px rgba(6, 182, 212, 0.05),
+                inset 0 0 20px rgba(6, 182, 212, 0.05);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            background: rgba(10, 15, 30, 0.3);
+        }
 
-.scan.active{opacity:1;}
+        /* INTEGRATED SCI-FI BIOMETRIC SCANNER */
+        .scan-wrapper {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 8;
+            opacity: 0;
+            will-change: opacity;
+        }
 
-.scan::after{
-    content:"";
-    position:absolute;
-    left:0;
-    right:0;
-    top:-20%;
-    height:40%;
-    background:linear-gradient(to bottom,transparent,#06b6d4,transparent);
-    filter: blur(6px);
-    animation: scanMove 1.5s linear;
-}
+        /* The Laser / Material Sweep line */
+        .scan-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            top: 0;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(34, 211, 238, 0.4) 15%, 
+                #22d3ee 50%, 
+                rgba(34, 211, 238, 0.4) 85%, 
+                transparent
+            );
+            box-shadow: 
+                0 0 12px #22d3ee,
+                0 -10px 30px rgba(6, 182, 212, 0.2),
+                0 10px 30px rgba(6, 182, 212, 0.2);
+            transform: translate3d(0, -10px, 0);
+            will-change: transform;
+        }
 
-@keyframes scanMove{
-    0%{transform:translateY(-100%)}
-    100%{transform:translateY(200%)}
-}
+        /* Blended tech-grid that fades in dynamically behind the active form */
+        .scan-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(6, 182, 212, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
+            background-size: 30px 30px;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
 
-/* CONTAINER */
-.container{
-    width:750px;
-    height:450px;
-    border:1px solid rgba(6,182,212,0.3);
-    box-shadow:0 0 30px rgba(6,182,212,0.4);
-    border-radius:14px;
-    position:relative;
-    overflow:hidden;
-    backdrop-filter: blur(10px);
-}
+        /* Retinal Biometric Target Ring */
+        .scan-target {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 1px dashed rgba(34, 211, 238, 0.4);
+            border-radius: 50%;
+            top: 0;
+            left: 50%;
+            margin-left: -60px; /* Centered relative to the form panel width */
+            transform: translate3d(0, -60px, 0) scale(0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            will-change: transform;
+        }
 
-/* LEFT PANEL (UPDATED THEME) */
-.left{
-    position:absolute;
-    width:50%;
-    height:100%;
+        .scan-target::before {
+            content: '';
+            width: 70%;
+            height: 70%;
+            border: 2px solid rgba(99, 102, 241, 0.3);
+            border-left-color: transparent;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 3s linear infinite;
+        }
 
-    background: linear-gradient(
-        to right,
-        rgba(6,182,212,0.15),
-        rgba(6,182,212,0.6),
-        rgba(6,182,212,0.15)
-    );
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-    backdrop-filter: blur(12px);
-    box-shadow: 0 0 40px rgba(6,182,212,0.6);
+        /* Scanning Trigger State Orchestration */
+        .scan-wrapper.active {
+            animation: wrapperFade 1.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        .scan-wrapper.active .scan-line {
+            animation: sweepLine 1.3s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+        }
+        .scan-wrapper.active .scan-target {
+            animation: sweepTarget 1.3s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+        }
+        .scan-wrapper.active .scan-grid {
+            opacity: 1;
+        }
 
-    color:white;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding:40px;
+        @keyframes wrapperFade {
+            0%, 100% { opacity: 0; }
+            15%, 85% { opacity: 1; }
+        }
+        @keyframes sweepLine {
+            0% { transform: translate3d(0, -2px, 0); }
+            100% { transform: translate3d(0, 502px, 0); }
+        }
+        @keyframes sweepTarget {
+            0% { transform: translate3d(0, -60px, 0) scale(0.5); }
+            50% { transform: translate3d(0, 250px, 0) scale(1); rgba(34, 211, 238, 0.6); }
+            100% { transform: translate3d(0, 560px, 0) scale(0.5); }
+        }
 
-    clip-path:polygon(0 0,100% 0,80% 100%,0% 100%);
-    transition:.6s;
-}
+        /* BLENDED HOLOGRAPHIC CHAMELEON SLIDER */
+        .left {
+            position: absolute;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(99, 102, 241, 0.03));
+            border-right: 1px solid rgba(6, 182, 212, 0.15);
+            box-shadow: inset -15px 0 35px rgba(6, 182, 212, 0.05);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 50px;
+            z-index: 5;
+            left: 0;
+            transform: translate3d(0, 0, 0);
+            transition: transform 0.7s cubic-bezier(0.25, 1, 0.3, 1.08);
+            will-change: transform;
+        }
 
-.container.active .left{
-    clip-path:polygon(20% 0,100% 0,100% 100%,0 100%);
-}
+        .container.active .left {
+            transform: translate3d(100%, 0, 0);
+            border-right: 1px solid transparent;
+            border-left: 1px solid rgba(6, 182, 212, 0.15);
+            box-shadow: inset 15px 0 35px rgba(6, 182, 212, 0.05);
+        }
 
-/* RIGHT */
-.right{
-    position:absolute;
-    right:0;
-    width:50%;
-    height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
+        /* Tech corner accents inside the sliding pane */
+        .left::before, .left::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: rgba(6, 182, 212, 0.4);
+            border-style: solid;
+            pointer-events: none;
+        }
+        .left::before { top: 20px; left: 20px; border-width: 1px 0 0 1px; }
+        .left::after { bottom: 20px; right: 20px; border-width: 0 1px 1px 0; }
 
-/* FORMS */
-.form-box{width:80%;}
+        .left h1 {
+            color: #22d3ee;
+            font-size: 2.1rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+            margin-bottom: 10px;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            will-change: opacity, transform;
+        }
 
-.signup{display:none;}
-.container.active .login{display:none;}
-.container.active .signup{display:block;}
+        .left p {
+            color: #64748b;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            will-change: opacity, transform;
+        }
 
-/* TEXT */
-h1{
-    color:#22d3ee;
-    text-shadow:0 0 10px #06b6d4;
-}
+        /* LAYOUT AND FIELDS */
+        .right {
+            position: absolute;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
 
-h2{
-    color:white;
-    margin-bottom:15px;
-}
+        .form-box {
+            position: absolute;
+            width: 50%;
+            padding: 0 50px;
+            transition: opacity 0.35s cubic-bezier(0.25, 1, 0.5, 1), transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+            will-change: opacity, transform;
+        }
 
-/* INPUT */
-.input-box{
-    position:relative;
-    margin:20px 0;
-}
+        .login { left: 50%; opacity: 1; pointer-events: all; transform: translate3d(0, 0, 0); }
+        .signup { left: 0; opacity: 0; pointer-events: none; transform: translate3d(-20px, 0, 0); }
 
-.input-box input{
-    width:100%;
-    padding:10px;
-    border:none;
-    border-bottom:2px solid #555;
-    background:transparent;
-    color:white;
-    outline:none;
-    transition:.3s;
-}
+        .container.active .login { opacity: 0; pointer-events: none; transform: translate3d(20px, 0, 0); }
+        .container.active .signup { opacity: 1; pointer-events: all; transform: translate3d(0, 0, 0); }
 
-.input-box input:focus{
-    border-bottom:2px solid #06b6d4;
-    box-shadow:0 5px 10px rgba(6,182,212,0.3);
-}
+        h2 {
+            color: white;
+            margin-bottom: 28px;
+            font-weight: 500;
+            font-size: 1.6rem;
+            letter-spacing: 0.5px;
+        }
 
-.input-box label{
-    position:absolute;
-    top:10px;
-    left:0;
-    color:#aaa;
-    transition:.3s;
-}
+        .input-box {
+            position: relative;
+            margin-bottom: 26px;
+        }
 
-.input-box input:focus + label,
-.input-box input:valid + label{
-    top:-10px;
-    font-size:11px;
-    color:#22d3ee;
-}
+        .input-box input {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid #1e293b;
+            background: transparent;
+            color: white;
+            outline: none;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
 
-/* BUTTON */
-button{
-    width:100%;
-    padding:12px;
-    border:none;
-    border-radius:20px;
-    background:linear-gradient(135deg,#06b6d4,#0ea5e9);
-    color:white;
-    cursor:pointer;
-    transition:.3s;
-}
+        .input-box input:focus {
+            border-bottom-color: #06b6d4;
+        }
 
-button:hover{
-    box-shadow:0 0 15px #06b6d4;
-}
+        .input-box label {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            color: #475569;
+            pointer-events: none;
+            transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), color 0.25s ease;
+            transform-origin: left top;
+            font-size: 0.95rem;
+        }
 
-/* SWITCH */
-.switch{
-    margin-top:10px;
-    color:#aaa;
-    font-size:13px;
-}
+        .input-box input:focus + label,
+        .input-box input:valid + label {
+            transform: translate3d(0, -22px, 0) scale(0.85);
+            color: #22d3ee;
+        }
 
-.switch span{
-    color:#22d3ee;
-    cursor:pointer;
-}
+        /* PREMIUM FINISH BUTTONS */
+        button {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid rgba(6, 182, 212, 0.4);
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(14, 165, 233, 0.05));
+            color: #e2e8f0;
+            font-weight: 500;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+            backdrop-filter: blur(5px);
+            will-change: transform, background, box-shadow;
+        }
 
-/* MESSAGES */
-.msg{
-    margin-bottom:10px;
-    font-size:13px;
-    color:#ff4d4d;
-}
+        button:hover {
+            transform: translate3d(0, -1px, 0);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.35), rgba(14, 165, 233, 0.1));
+            color: white;
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.3);
+            border-color: rgba(6, 182, 212, 0.7);
+        }
 
-.success{
-    color:#22c55e;
-}
-</style>
+        button:active { transform: translate3d(0, 1px, 0); }
+
+        .switch {
+            margin-top: 20px;
+            color: #64748b;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .switch span {
+            color: #22d3ee;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: color 0.2s ease, text-shadow 0.2s ease;
+        }
+
+        .switch span:hover {
+            color: #67e8f9;
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+
+        /* ALERTS */
+        .msg {
+            padding: 10px 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .msg.success {
+            background: rgba(34, 197, 94, 0.05);
+            border: 1px solid rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="bg"></div>
-<div class="scan" id="scan"></div>
+    <div class="bg"></div>
 
-<div class="container {% if request.POST.signup %}active{% endif %}" id="container">
-
-    <div class="left">
-        <h1>WELCOME BACK!</h1>
-        <p>Login to continue</p>
-    </div>
-
-    <div class="right">
-
-        <!-- LOGIN -->
-        <div class="form-box login">
-            <h2>Login</h2>
-
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="msg {% if message.tags == 'success' %}success{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <form method="POST">
-                {% csrf_token %}
-                <div class="input-box">
-                    <input type="text" name="name" required>
-                    <label>Username</label>
-                </div>
-
-                <div class="input-box">
-                    <input type="password" name="password" required>
-                    <label>Password</label>
-                </div>
-
-                <button type="submit" name="login">Login</button>
-
-                <div class="switch">
-                    Don't have account? <span onclick="toggle()">Sign Up</span>
-                </div>
-            </form>
+    <div class="container {% if request.POST.signup %}active{% endif %}" id="container">
+        
+        <div class="scan-wrapper" id="scanWrapper">
+            <div class="scan-grid"></div>
+            <div class="scan-target"></div>
+            <div class="scan-line"></div>
         </div>
 
-        <!-- SIGNUP -->
-        <div class="form-box signup">
-            <h2>Register</h2>
-
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="msg {% if message.tags == 'success' %}success{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <form method="POST">
-                {% csrf_token %}
-                <div class="input-box">
-                    <input type="text" name="name" required>
-                    <label>Username</label>
-                </div>
-
-                <div class="input-box">
-                    <input type="email" name="email" required>
-                    <label>Email</label>
-                </div>
-
-                <div class="input-box">
-                    <input type="password" name="password" required>
-                    <label>Password</label>
-                </div>
-
-                <div class="input-box">
-                    <input type="password" name="confirm" required>
-                    <label>Confirm Password</label>
-                </div>
-
-                <button type="submit" name="signup">Register</button>
-
-                <div class="switch">
-                    Already have account? <span onclick="toggle()">Login</span>
-                </div>
-            </form>
+        <div class="left" id="leftPanel">
+            <h1 id="panelTitle">WELCOME BACK!</h1>
+            <p id="panelDesc">Login to access your secure panel.</p>
         </div>
 
+        <div class="right">
+
+            <div class="form-box login">
+                <h2>Secure Login</h2>
+
+                {% for message in messages %}
+                {% if 'login' in message.tags %}
+                <div class="msg {% if 'success' in message.tags %}success{% endif %}">
+                    {{ message }}
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="input-box">
+                        <input type="text" name="name" required autocomplete="off">
+                        <label>Username</label>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="password" name="password" required>
+                        <label>Password</label>
+                    </div>
+
+                    <button type="submit" name="login">INITIALIZE SIGN-IN</button>
+
+                    <div class="switch">
+                        New terminal user? <span onclick="toggle(true)">Register Here</span>
+                    </div>
+                </form>
+            </div>
+
+            <div class="form-box signup">
+                <h2>Create Terminal Account</h2>
+
+                {% for message in messages %}
+                {% if 'login' in message.tags %}
+                <div class="msg {% if 'success' in message.tags %}success{% endif %}">
+                    {{ message }}
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="input-box">
+                        <input type="text" name="name" required autocomplete="off">
+                        <label>Username</label>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="email" name="email" required autocomplete="off">
+                        <label>Email Address</label>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="password" name="password" required>
+                        <label>Password</label>
+                    </div>
+
+                    <div class="input-box">
+                        <input type="password" name="confirm" required>
+                        <label>Confirm Password</label>
+                    </div>
+
+                    <button type="submit" name="signup">REGISTER ACCESS</button>
+
+                    <div class="switch">
+                        Existing credential? <span onclick="toggle(false)">Login Here</span>
+                    </div>
+                </form>
+            </div>
+
+        </div>
     </div>
-</div>
 
-<script>
-function toggle(){
-    const container = document.getElementById('container');
-    const scan = document.getElementById('scan');
+    <script>
+        const container = document.getElementById('container');
+        const scanWrapper = document.getElementById('scanWrapper');
+        const panelTitle = document.getElementById('panelTitle');
+        const panelDesc = document.getElementById('panelDesc');
 
-    container.classList.toggle('active');
+        function toggle(isSignup) {
+            // Apply Layout Shift
+            container.classList.toggle('active', isSignup);
 
-    scan.classList.add('active');
-    setTimeout(()=>scan.classList.remove('active'),1500);
-}
-</script>
+            // Restart Unified Futuristic Scan Sequence
+            scanWrapper.classList.remove('active');
+            void scanWrapper.offsetWidth; // DOM Reflow Trigger
+            scanWrapper.classList.add('active');
+
+            // Synchronized typography fade inside the sliding panel
+            panelTitle.style.opacity = '0';
+            panelTitle.style.transform = 'translate3d(0, -4px, 0)';
+            panelDesc.style.opacity = '0';
+            panelDesc.style.transform = 'translate3d(0, -4px, 0)';
+
+            setTimeout(() => {
+                if (isSignup) {
+                    panelTitle.textContent = "JOIN US!";
+                    panelDesc.textContent = "Create an account to start your journey.";
+                } else {
+                    panelTitle.textContent = "WELCOME BACK!";
+                    panelDesc.textContent = "Login to access your secure panel.";
+                }
+                panelTitle.style.opacity = '1';
+                panelTitle.style.transform = 'translate3d(0, 0, 0)';
+                panelDesc.style.opacity = '1';
+                panelDesc.style.transform = 'translate3d(0, 0, 0)';
+            }, 220);
+        }
+
+        // Adjust text fallback for native post initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            if(container.classList.contains('active')) {
+                panelTitle.textContent = "JOIN US!";
+                panelDesc.textContent = "Create an account to start your journey.";
+            }
+        });
+    </script>
 
 </body>
 </html>

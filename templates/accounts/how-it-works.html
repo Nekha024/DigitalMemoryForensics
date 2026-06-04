@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}How It Works{% endblock %}
+
+{% block content %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+<style>
+.hero-grid{
+    background-image:
+        linear-gradient(rgba(6,182,212,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6,182,212,.08) 1px, transparent 1px);
+    background-size:40px 40px;
+}
+.glow{
+    box-shadow:0 0 30px rgba(6,182,212,.25);
+}
+.node{
+    position:absolute;
+    width:18px;
+    height:18px;
+    border-radius:999px;
+    background:#06b6d4;
+    box-shadow:0 0 25px #06b6d4;
+}
+.pipeline-card:hover{
+    transform:translateY(-6px);
+}
+.timeline-line{
+    position:absolute;
+    left:16px;
+    top:0;
+    bottom:0;
+    width:2px;
+    background:linear-gradient(#06b6d4,transparent);
+}
+</style>
+
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden hero-grid">
+
+    <div class="absolute w-[700px] h-[700px] rounded-full bg-cyan-500/10 blur-[140px] -top-40 -left-20"></div>
+    <div class="absolute w-[700px] h-[700px] rounded-full bg-purple-500/10 blur-[140px] bottom-0 right-0"></div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-8 text-center">
+        <div class="glass inline-flex px-6 py-3 rounded-full mb-8">
+            AI-Powered Digital Memory Forensics
+        </div>
+
+        <h1 class="hero-title text-6xl md:text-8xl font-black leading-tight">
+            Transform Digital Evidence
+            <span class="block text-cyan-400">Into Actionable Intelligence</span>
+        </h1>
+
+        <p class="hero-sub text-slate-400 text-xl mt-8 max-w-4xl mx-auto">
+            Upload evidence, generate embeddings, perform semantic retrieval,
+            reconstruct timelines, detect anomalies, and generate investigation insights
+            using Retrieval-Augmented Generation (RAG).
+        </p>
+
+        <div class="mt-12 flex gap-4 justify-center">
+            <a href="{% url 'upload_evidence' %}" class="btn-primary">Start Investigation</a>
+            <a href="#pipeline" class="btn-outline">Explore Workflow</a>
+        </div>
+    </div>
+</section>
+
+<section id="pipeline" class="py-28 px-8">
+    <h2 class="text-center text-5xl font-bold mb-20">RAG Investigation Pipeline</h2>
+
+    <div class="grid xl:grid-cols-7 md:grid-cols-3 grid-cols-2 gap-6 max-w-7xl mx-auto">
+        <div class="pipeline-card glass rounded-3xl p-6 text-center">📄<h3 class="mt-3 font-bold">Evidence</h3></div>
+        <div class="pipeline-card glass rounded-3xl p-6 text-center">⚙️<h3 class="mt-3 font-bold">Extract</h3></div>
+        <div class="pipeline-card glass rounded-3xl p-6 text-center">✂️<h3 class="mt-3 font-bold">Chunk</h3></div>
+        <div class="pipeline-card glass rounded-3xl p-6 text-center">🧠<h3 class="mt-3 font-bold">Embeddings</h3></div>
+        <div class="pipeline-card glass rounded-3xl p-6 text-center">🗄️<h3 class="mt-3 font-bold">Vector DB</h3></div>
+        <div class="pipeline-card glass rounded-3xl p-6 text-center">🔍<h3 class="mt-3 font-bold">Retrieve</h3></div>
+        <div class="pipeline-card glass rounded-3xl p-6 text-center">🤖<h3 class="mt-3 font-bold">Generate</h3></div>
+    </div>
+</section>
+
+<section class="py-28 px-8">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+        <div>
+            <h2 class="text-5xl font-bold mb-8">Vector Database Intelligence</h2>
+            <p class="text-slate-400 text-lg leading-8">
+                The system converts emails, chats, PDFs, and documents into vector embeddings.
+                Similar evidence clusters together, enabling semantic search that understands context
+                rather than relying on keywords.
+            </p>
+        </div>
+
+        <div class="relative h-[420px] glass rounded-3xl">
+            <div class="node top-10 left-12"></div>
+            <div class="node top-32 left-40"></div>
+            <div class="node top-20 left-72"></div>
+            <div class="node top-56 left-24"></div>
+            <div class="node top-64 left-80"></div>
+            <div class="node top-40 left-[22rem]"></div>
+            <div class="node top-80 left-[18rem]"></div>
+            <div class="node top-[18rem] left-[8rem]"></div>
+        </div>
+    </div>
+</section>
+
+<section class="py-28 px-8">
+    <h2 class="text-center text-5xl font-bold mb-20">Timeline Reconstruction</h2>
+
+    <div class="max-w-4xl mx-auto relative">
+        <div class="timeline-line"></div>
+
+        <div class="timeline-item ml-12 glass rounded-3xl p-6 mb-8">
+            <strong>08:12 AM</strong> — Suspicious Email Received
+        </div>
+
+        <div class="timeline-item ml-12 glass rounded-3xl p-6 mb-8">
+            <strong>08:19 AM</strong> — Attachment Opened
+        </div>
+
+        <div class="timeline-item ml-12 glass rounded-3xl p-6 mb-8">
+            <strong>08:27 AM</strong> — Unauthorized Login
+        </div>
+
+        <div class="timeline-item ml-12 glass rounded-3xl p-6 mb-8">
+            <strong>08:35 AM</strong> — Sensitive File Access
+        </div>
+
+        <div class="timeline-item ml-12 glass rounded-3xl p-6">
+            <strong>08:42 AM</strong> — AI Alert Generated
+        </div>
+    </div>
+</section>
+
+<section class="py-28 px-8">
+    <div class="glass rounded-[40px] p-12 max-w-7xl mx-auto">
+        <h2 class="text-center text-5xl font-black mb-16">Investigation Results</h2>
+
+        <div class="grid md:grid-cols-4 gap-8 text-center">
+            <div>
+                <div class="text-5xl font-black text-cyan-400">1457</div>
+                <p>Embeddings</p>
+            </div>
+            <div>
+                <div class="text-5xl font-black text-cyan-400">23</div>
+                <p>Documents</p>
+            </div>
+            <div>
+                <div class="text-5xl font-black text-cyan-400">14</div>
+                <p>Events</p>
+            </div>
+            <div>
+                <div class="text-5xl font-black text-red-400">3</div>
+                <p>Threats</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+gsap.from(".hero-title",{y:100,opacity:0,duration:1.2});
+gsap.from(".hero-sub",{y:50,opacity:0,duration:1,delay:.3});
+
+gsap.utils.toArray(".pipeline-card").forEach((card,i)=>{
+  gsap.from(card,{
+    scrollTrigger:{trigger:card,start:"top 85%"},
+    opacity:0,y:60,duration:.8,delay:i*0.05
+  });
+});
+
+gsap.utils.toArray(".timeline-item").forEach(item=>{
+  gsap.from(item,{
+    scrollTrigger:{trigger:item,start:"top 85%"},
+    x:-100,opacity:0,duration:1
+  });
+});
+
+gsap.to(".node",{
+  y:20,
+  repeat:-1,
+  yoyo:true,
+  duration:2,
+  stagger:.15
+});
+</script>
+
+{% endblock %}

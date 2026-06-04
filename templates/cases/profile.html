@@ -3,182 +3,266 @@
 {% block title %}My Dashboard{% endblock %}
 
 {% block content %}
+<div class="max-w-7xl mx-auto px-2 py-4 antialiased">
 
-<div class="max-w-6xl mx-auto">
+    <!-- CONTAINER 1: MAIN DASHBOARD VIEW -->
+    <div id="dashboard-view" class="transition-all duration-300 space-y-8">
 
-    <!-- Header -->
-    <div class="glass rounded-xl p-6 mb-6">
-        <div class="flex flex-col md:flex-row items-center gap-6">
+        <!-- Top Header Card -->
+        <header class="glass relative overflow-hidden rounded-2xl p-6 md:p-8 shadow-xl">
+            <!-- Accent Glow Blur -->
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="w-24 h-24 rounded-full bg-cyan-500 flex items-center justify-center text-4xl font-bold text-black">
-                {{ user.username|first|upper }}
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                <!-- User Profile Identity -->
+                <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-3xl font-black text-white shadow-lg shadow-cyan-500/20 tracking-wider">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                            {{ user.username }}
+                        </h2>
+                        <p class="text-slate-400 font-medium text-sm md:text-base mt-0.5">
+                            {{ user.email }}
+                        </p>
+                        <p class="text-xs text-slate-400 font-medium mt-2 flex items-center gap-1.5 justify-center sm:justify-start">
+                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+                            Member since {{ user.date_joined|date:"d M Y" }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Profile Quick Actions -->
+                <div class="flex flex-wrap gap-3 w-full sm:w-auto justify-center">
+                    <button type="button" onclick="toggleViews()"
+                        class="btn-primary flex-1 sm:flex-none text-sm shadow-lg shadow-cyan-500/10 hover:shadow-cyan-400/20 text-center cursor-pointer">
+                        Edit Profile
+                    </button>
+                    <a href="{% url 'change_password' %}" class="btn-outline flex-1 sm:flex-none text-sm text-center font-semibold">
+                        Change Password
+                    </a>
+                </div>
             </div>
+        </header>
 
-            <div class="flex-1">
-                <h2 class="text-3xl font-bold text-cyan-400">
-                    {{ user.username }}
-                </h2>
-
-                <p class="text-gray-400">
-                    {{ user.email }}
+        <!-- Statistics Bento Grid -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <!-- Messages -->
+            {% for message in messages %}
+            <div class="col-span-2 lg:col-span-4">
+                {% if 'profile' in message.tags %}
+                <div class="bg-blue-500/10 border border-blue-500/30 text-cyan-400 p-4 rounded-xl text-sm font-medium">
+                    {{ message }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            
+            <!-- Metric: Total Cases -->
+            <div class="glass p-6 rounded-2xl shadow-xl group hover:border-cyan-500/30 transition duration-300">
+                <p class="text-xs md:text-sm font-semibold tracking-wider text-slate-400 uppercase mb-2">
+                    Total Cases
                 </p>
+                <h3 class="text-3xl md:text-4xl font-black tracking-tight group-hover:text-cyan-400 transition-colors">
+                    {{ total_cases }}
+                </h3>
+            </div>
 
-                <p class="text-sm text-gray-500 mt-2">
-                    Member since {{ user.date_joined|date:"d M Y" }}
+            <!-- Metric: Evidence Files -->
+            <div class="glass p-6 rounded-2xl shadow-xl group hover:border-cyan-500/30 transition duration-300">
+                <p class="text-xs md:text-sm font-semibold tracking-wider text-slate-400 uppercase mb-2">
+                    Evidence Files
                 </p>
+                <h3 class="text-3xl md:text-4xl font-black tracking-tight group-hover:text-cyan-400 transition-colors">
+                    {{ total_evidence }}
+                </h3>
             </div>
 
-            <div class="flex gap-3">
-                <a href=""
-                   class="px-4 py-2 bg-cyan-500 text-black rounded-lg font-semibold">
-                    Edit Profile
-                </a>
-
-                <a href=""
-                   class="px-4 py-2 border border-cyan-500 text-cyan-400 rounded-lg">
-                    Change Password
-                </a>
+            <!-- Metric: Searches -->
+            <div class="glass p-6 rounded-2xl shadow-xl group hover:border-cyan-500/30 transition duration-300">
+                <p class="text-xs md:text-sm font-semibold tracking-wider text-slate-400 uppercase mb-2">
+                    Searches
+                </p>
+                <h3 class="text-3xl md:text-4xl font-black tracking-tight group-hover:text-cyan-400 transition-colors">
+                    {{ total_searches }}
+                </h3>
             </div>
+
+            <!-- Metric: Storage Used -->
+            <div class="glass p-6 rounded-2xl shadow-xl group hover:border-cyan-500/30 transition duration-300">
+                <p class="text-xs md:text-sm font-semibold tracking-wider text-slate-400 uppercase mb-2">
+                    Storage Used
+                </p>
+                <h3 class="text-3xl md:text-4xl font-black tracking-tight group-hover:text-cyan-400 transition-colors">
+                    {{ storage_used }} <span class="text-lg font-medium text-slate-400">MB</span>
+                </h3>
+            </div>
+        </section>
+
+        <!-- Detailed Configuration Panels -->
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <!-- Panel: Subscription Ecosystem -->
+            <section class="glass rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-cyan-500/10 pb-4 mb-4">
+                        <h3 class="text-lg font-bold tracking-tight">
+                            Subscription Details
+                        </h3>
+                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full {% if plans.active %}bg-emerald-500/10 text-emerald-500 border border-emerald-500/20{% else %}bg-rose-500/10 text-rose-500 border border-rose-500/20{% endif %}">
+                            {{ plans.active|yesno:"Active,Inactive" }}
+                        </span>
+                    </div>
+
+                    <div class="space-y-3.5 text-sm">
+                        <div class="flex justify-between items-center py-0.5">
+                            <span class="text-slate-400 font-medium">Current Plan</span>
+                            <span class="font-semibold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded-lg text-xs tracking-wide uppercase">
+                                {{ plans.plan.name }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-0.5">
+                            <span class="text-slate-400 font-medium">Started On</span>
+                            <span class="font-semibold text-slate-400">
+                                {{ plans.created_at }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-0.5">
+                            <span class="text-slate-400 font-medium">Expires On</span>
+                            <span class="font-semibold text-slate-400">
+                                {{ plans.ended_at }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-0.5">
+                            <span class="text-slate-400 font-medium">Days Remaining</span>
+                            <span class="font-bold text-base text-cyan-400">
+                                {{ remaining_days }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-cyan-500/10">
+                    <a href="#" class="btn-outline w-full block text-center font-semibold text-sm">
+                        Upgrade Plan
+                    </a>
+                </div>
+            </section>
+
+            <!-- Panel: Access & Security Info -->
+            <section class="glass rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+                <div>
+                    <div class="border-b border-cyan-500/10 pb-4 mb-4">
+                        <h3 class="text-lg font-bold tracking-tight">
+                            Security Settings
+                        </h3>
+                    </div>
+
+                    <div class="space-y-5 text-sm">
+                        <div class="p-3.5 rounded-xl border border-cyan-500/5 bg-cyan-500/[0.02]">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                                Password Lifecycle
+                            </p>
+                            <p class="font-medium text-sm">
+                                Last changed: <span class="text-slate-400 font-normal">{{ password_changed_date }}</span>
+                            </p>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl border border-cyan-500/5 bg-cyan-500/[0.02]">
+                            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
+                                Last Login Session
+                            </p>
+                            <p class="text-slate-400 font-normal text-xs break-all leading-relaxed">
+                                {{ user.last_login }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-cyan-500/10">
+                    <a href="{% url 'change_password' %}" class="btn-outline w-full block text-cyan-400 text-center font-semibold text-sm">
+                        Manage Password Settings
+                    </a>
+                </div>
+            </section>
 
         </div>
     </div>
 
-    <!-- Statistics -->
-    <div class="grid md:grid-cols-4 gap-6 mb-6">
+    <!-- CONTAINER 2: EDIT PROFILE FORM VIEW (HIDDEN BY DEFAULT) -->
+    <div id="edit-profile-view" class="hidden transition-all duration-300 max-w-2xl mx-auto">
+        <div class="glass rounded-2xl p-6 md:p-8 shadow-xl relative">
 
-        <div class="glass p-5 rounded-xl text-center">
-            <h3 class="text-3xl text-cyan-400 font-bold">
-                {{ total_cases }}
-            </h3>
-            <p class="text-gray-400">
-                Total Cases
-            </p>
-        </div>
-
-        <div class="glass p-5 rounded-xl text-center">
-            <h3 class="text-3xl text-cyan-400 font-bold">
-                {{ total_evidence }}
-            </h3>
-            <p class="text-gray-400">
-                Evidence Files
-            </p>
-        </div>
-
-        <div class="glass p-5 rounded-xl text-center">
-            <h3 class="text-3xl text-cyan-400 font-bold">
-                {{ total_searches }}
-            </h3>
-            <p class="text-gray-400">
-                Searches
-            </p>
-        </div>
-
-        <div class="glass p-5 rounded-xl text-center">
-            <h3 class="text-3xl text-cyan-400 font-bold">
-                {{ storage_used }} MB
-            </h3>
-            <p class="text-gray-400">
-                Storage Used
-            </p>
-        </div>
-
-    </div>
-
-    <!-- Subscription + Security -->
-    <div class="grid md:grid-cols-2 gap-6">
-
-        <!-- Subscription -->
-        <div class="glass p-6 rounded-xl">
-
-            <h3 class="text-xl text-cyan-400 mb-4">
-                Subscription Details
-            </h3>
-
-            <div class="space-y-3">
-
-                <div class="flex justify-between">
-                    <span>Current Plan</span>
-                    <span class="font-semibold text-cyan-400">
-                        {{ plans.plan.name }}
-                    </span>
+            <!-- Header inside form panel -->
+            <div class="flex items-center justify-between border-b border-cyan-500/10 pb-4 mb-6">
+                <div>
+                    <h3 class="text-xl font-bold tracking-tight">Edit Profile Details</h3>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Update your account credentials and primary contact parameters.
+                    </p>
                 </div>
-
-                <div class="flex justify-between">
-                    <span>Status</span>
-                    <span class="font-semibold text-cyan-400">
-                        {{ plans.active|yesno:"Active,Inactive"}}
-                    </span>
-                </div>
-
-                <div class="flex justify-between">
-                    <span >Started On</span>
-                    <span class="font-semibold text-cyan-400">
-                        {{ plans.created_at }}
-                    </span>
-                </div>
-
-                <div class="flex justify-between">
-                    <span>Expires On</span>
-                    <span class="font-semibold text-cyan-400">
-                        {{ plans.ended_at }}
-                    </span>
-                </div>
-
-                <div class="flex justify-between">
-                    <span>Days Remaining</span>
-                    <span class="font-semibold text-cyan-400">
-                        {{ remaining_days }}
-                    </span>
-                </div>
-
+                <button type="button" onclick="toggleViews()" class="btn-outline text-xs font-semibold cursor-pointer py-1.5 px-3">
+                    Cancel
+                </button>
             </div>
 
-            <a href=""
-               class="inline-block mt-5 px-4 py-2 bg-cyan-500 text-black rounded-lg">
-                Upgrade Plan
-            </a>
+            <!-- Form Processing Action -->
+            <form method="POST" action="" class="space-y-5">
+                {% csrf_token %}
 
-        </div>
-
-        <!-- Security -->
-        <div class="glass p-6 rounded-xl">
-
-            <h3 class="text-xl text-cyan-400 mb-4">
-                Security Settings
-            </h3>
-
-            <div class="space-y-4">
-
+                <!-- Username Input Field -->
                 <div>
-                    <p class="text-gray-400">
-                        Password
-                    </p>
-                    <p>
-                        Last changed:
-                        {{ password_changed_date }}
-                    </p>
+                    <label for="username" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                        Username
+                    </label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}" required>
                 </div>
 
+                <!-- Email Input Field -->
                 <div>
-                    <p class="text-gray-400">
-                        Last Login
-                    </p>
-                    <p>
-                        {{ user.last_login }}
-                    </p>
+                    <label for="email" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                        Email Address
+                    </label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
                 </div>
 
-               <a href="{% url 'change_password' %}"
-               class="px-4 py-2 border border-cyan-500 text-cyan-400 rounded-lg hover:bg-cyan-500 hover:text-black transition">
-               Change Password
-               </a>
+                <!-- Optional Form Helper Message -->
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    To safeguard system authentication metrics, passwords must be altered via the dedicated security control system.
+                </p>
 
-            </div>
-
+                <!-- Action Button Cluster -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-cyan-500/10 mt-6">
+                    <button type="button" onclick="toggleViews()" class="btn-outline text-sm font-semibold cursor-pointer">
+                        Discard Changes
+                    </button>
+                    <button type="submit" class="btn-primary text-sm cursor-pointer">
+                        Save Identity Parameters
+                    </button>
+                </div>
+            </form>
         </div>
-
     </div>
 
 </div>
 
+<!-- Interactive View-State Control Script -->
+<script>
+    function toggleViews() {
+        const dashboard = document.getElementById('dashboard-view');
+        const editForm = document.getElementById('edit-profile-view');
+
+        if (dashboard.classList.contains('hidden')) {
+            dashboard.classList.remove('hidden');
+            editForm.classList.add('hidden');
+        } else {
+            dashboard.classList.add('hidden');
+            editForm.classList.remove('hidden');
+        }
+    }
+</script>
 {% endblock %}

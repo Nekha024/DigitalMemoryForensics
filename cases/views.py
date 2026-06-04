@@ -5,11 +5,37 @@ from .forms import CaseForm
 from subscription.decorators import subscription_required
 from subscription.models import UserSubscription
 from django.utils import timezone as tz
+from django.contrib import messages
 
 @login_required
 def profile(request):
-    total_cases = Case.objects.filter(created_by=request.user).count()
-    plans=UserSubscription.objects.filter(user=request.user,active=True).first()
+    user = request.user
+
+    # Handle Form Submission (POST)
+    if request.method == "POST":
+        username = request.POST.get("username", "").strip()
+        email = request.POST.get("email", "").strip()
+
+        # Basic server-side validation
+        if not username or not email:
+            messages.error(request, "Both username and email fields are required.")
+        else:
+            # Check for unique constraints if username/email changed
+            if username != user.username and user.__class__.objects.filter(username=username).exists():
+                messages.error(request, "This username is already taken.")
+            elif email != user.email and user.__class__.objects.filter(email=email).exists():
+                messages.error(request, "This email address is already in use.")
+            else:
+                # Update user data
+                user.username = username
+                user.email = email
+                user.save()
+                messages.success(request, "Your profile parameters have been updated successfully.", extra_tags='profile')
+                return redirect("profile")  
+
+    # Handle Page Load (GET)
+    total_cases = Case.objects.filter(created_by=user).count()
+    plans = UserSubscription.objects.filter(user=user, active=True).first()
     remaining_days = None
 
     if plans:
@@ -17,9 +43,15 @@ def profile(request):
             0,
             (plans.ended_at - tz.now()).days
         )
+
     return render(request, "cases/profile.html", {
-        "total_cases": total_cases,'plans':plans,'remaining_days':remaining_days
-        })
+        "total_cases": total_cases,
+        "plans": plans,
+        "remaining_days": remaining_days,
+        "total_evidence": 0,  # Map to actual query if available
+        "total_searches": 0,  # Map to actual query if available
+        "password_changed_date": "Not trackable directly via standard user model" 
+    })
 
 @login_required
 def dashboard(request):

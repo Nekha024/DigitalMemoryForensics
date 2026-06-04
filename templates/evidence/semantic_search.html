@@ -3,84 +3,91 @@
 {% block title %}Semantic Search{% endblock %}
 
 {% block content %}
-
 <div class="max-w-4xl mx-auto">
 
-    <div class="glass p-6 rounded-xl mb-8">
+    <div class="glass p-6 rounded-3xl mb-8">
 
-        <h2 class="text-2xl text-cyan-400 mb-6">Semantic Search</h2>
+        <h2 class="text-2xl text-cyan-400 font-bold tracking-wide mb-6">Semantic Search</h2>
 
-        <form method="get" class="grid md:grid-cols-2 gap-4">
+        <form method="get" class="grid md:grid-cols-2 gap-5">
 
-            <!-- CASE SELECT -->
-            <div>
-                <label class="text-sm text-gray-300">Case</label>
+            <div class="flex flex-col">
+                <label class="text-sm font-medium tracking-wide text-slate-400">Case Context</label>
                 <select name="case_id">
                     <option value="">All Cases</option>
                     {% for case in cases %}
-                        <option value="{{ case.id }}" 
-                        {% if selected_case_id == case.id %}selected{% endif %}>
+                        <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
                             {{ case.title }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
 
-            <!-- QUERY -->
-            <div>
-                <label class="text-sm text-gray-300">Search Query</label>
-                <input type="text" name="q" value="{{ query }}" placeholder="Enter keywords...">
+            <div class="flex flex-col">
+                <label class="text-sm font-medium tracking-wide text-slate-400">Search Query</label>
+                <input type="text" name="q" value="{{ query }}" placeholder="Enter keyword or concept descriptions...">
             </div>
 
-            <div class="md:col-span-2 text-right">
-                <button type="submit" class="btn">Search</button>
+            <div class="md:col-span-2 flex justify-end pt-2">
+                <button type="submit" class="btn-primary text-sm min-w-32">
+                    🔍 Execute Search
+                </button>
             </div>
 
         </form>
 
-    </div>-
+    </div>
 
-    <!-- RESULTS -->
     {% if query %}
-        <h3 class="text-xl text-cyan-400 mb-6">
-            Results for "{{ query }}"
-        </h3>
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-bold tracking-wide text-cyan-400">
+                Results for "{{ query }}"
+            </h3>
+            <span class="text-xs px-2.5 py-1 rounded-full glass text-slate-400 font-medium">
+                {{ results|length }} Matches Found
+            </span>
+        </div>
 
-        <div class="grid gap-6">
+        <div class="space-y-6">
 
             {% for result in results %}
-            <div class="glass card p-5 rounded-xl">
+            <div class="glass p-6 rounded-2xl border border-cyan-500/10 hover:border-cyan-500/30 transition duration-300">
 
-                <div class="flex justify-between text-sm text-gray-400 mb-2">
-                    <span>File: <span class="text-cyan-400">{{ result.title }}</span></span>
-                    <span>Score: {{ result.score }}</span>
+                <div class="flex flex-wrap justify-between items-center gap-2 text-xs text-slate-400 border-b border-cyan-500/5 pb-3 mb-4">
+                    <span class="font-medium">
+                        File Source: <span class="text-cyan-400 font-semibold">{{ result.title }}</span>
+                    </span>
+                    <span class="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 font-bold tracking-wider">
+                        Score: {{ result.score }}
+                    </span>
                 </div>
 
-                <p class="text-gray-300 text-sm mb-3">
+                <div class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
                     Chunk #{{ result.chunk_index }}
-                </p>
+                </div>
 
-                <p class="text-gray-200 mb-4">
+                <p class="leading-relaxed mb-4 text-sm font-medium">
                     {{ result.content }}
                 </p>
 
-                <a href="{% url 'evidence_detail' result.evidence_id %}" 
-                   class="text-cyan-400 hover:underline">
-                   View Evidence →
-                </a>
+                <div class="pt-2">
+                    <a href="{% url 'evidence_detail' result.evidence_id %}" class="text-cyan-400 font-semibold text-sm hover:underline inline-flex items-center gap-1">
+                        View Evidence Source →
+                    </a>
+                </div>
 
             </div>
             {% empty %}
-                <p class="text-gray-400">No results found.</p>
+            <div class="text-center py-12 glass rounded-2xl">
+                <p class="text-slate-400">No semantic matches located within the target parameters.</p>
+            </div>
             {% endfor %}
 
         </div>
     {% endif %}
 
-    <!-- BACK -->
-    <div class="mt-10">
-        <a href="{% url 'home' %}" 
-           class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
+    <div class="mt-10 pt-4 border-t border-cyan-500/5">
+        <a href="{% url 'home' %}" class="btn-outline inline-flex items-center justify-center text-sm font-semibold">
             ← Back to Dashboard
         </a>
     </div>

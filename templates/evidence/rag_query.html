@@ -6,26 +6,23 @@
 {% block content %}
 
 <style>
-/* ── Typography ─────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-/* ── Layout ─────────────────────────────────────────── */
+/* ── Layout & Core Containers ──────────────────────── */
 .rag-wrap { max-width: 860px; margin: 0 auto; }
 
-/* ── Form card ───────────────────────────────────────── */
 .rag-form-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
+    background: var(--glass-bg);
+    border: 1px solid var(--border);
     border-radius: 20px;
     padding: 28px 30px 24px;
     margin-bottom: 24px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(18px);
+    transition: background 0.3s ease, border 0.3s ease;
 }
 
 .rag-label {
     font-size: 11px;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-muted);
     letter-spacing: .8px;
     text-transform: uppercase;
     display: block;
@@ -35,19 +32,21 @@
 #rag-question-input {
     width: 100%;
     font-size: 16px;
-    font-family: 'Inter', sans-serif;
-    background: rgba(0,0,0,0.25);
-    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    color: #e2e8f0;
+    color: var(--text-main);
     padding: 13px 16px;
     transition: border-color .2s, box-shadow .2s;
     box-sizing: border-box;
     outline: none;
 }
+body.light-theme #rag-question-input {
+    background: rgba(0, 0, 0, 0.02);
+}
 #rag-question-input:focus {
-    border-color: rgba(103,232,249,0.5);
-    box-shadow: 0 0 0 3px rgba(103,232,249,0.08);
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 4px rgba(6,182,212,.12);
 }
 
 .form-row {
@@ -59,22 +58,23 @@
 }
 .form-row > .fr-cell { flex: 1; min-width: 140px; }
 
-select {
-    width: 100%;
-    font-size: 14px;
-    font-family: 'Inter', sans-serif;
-    background: rgba(0,0,0,0.25);
-    border: 1.5px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    color: #e2e8f0;
+/* Overwrite base configuration elements cleanly */
+.fr-cell select {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border);
+    color: var(--text-main);
     padding: 11px 14px;
-    outline: none;
-    cursor: pointer;
+    border-radius: 12px;
 }
-select:focus { border-color: rgba(103,232,249,0.4); }
-select option { background: #0f172a; }
+body.light-theme .fr-cell select {
+    background: rgba(0, 0, 0, 0.02);
+}
+.fr-cell select option {
+    background: var(--navbar-bg);
+    color: var(--text-main);
+}
 
-/* ── Ask Button ──────────────────────────────────────── */
+/* ── Interactive Trigger Elements ──────────────────── */
 #ask-btn {
     display: flex;
     align-items: center;
@@ -84,47 +84,34 @@ select option { background: #0f172a; }
     padding: 12px 28px;
     font-size: 15px;
     font-weight: 700;
-    font-family: 'Inter', sans-serif;
     background: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
     border: none;
     border-radius: 12px;
-    color: #fff;
+    color: #fff !important;
     cursor: pointer;
     transition: transform .15s, box-shadow .15s, opacity .15s;
-    box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.25);
     position: relative;
     overflow: hidden;
 }
-#ask-btn::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
-    opacity: 0;
-    transition: opacity .2s;
-}
-#ask-btn:hover:not(:disabled)::after { opacity: 1; }
 #ask-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(99,102,241,0.5);
+    box-shadow: 0 8px 28px rgba(99,102,241,0.4);
 }
-#ask-btn:active:not(:disabled) { transform: translateY(0); }
 #ask-btn:disabled { opacity: .65; cursor: not-allowed; }
 
-/* ── LOADING OVERLAY ─────────────────────────────────── */
+/* ── Loading Module ────────────────────────────────── */
 #loading-screen {
     display: none;
     position: relative;
     margin-bottom: 28px;
     padding: 56px 28px;
-    background: rgba(6,182,212,0.04);
-    border: 1px solid rgba(6,182,212,0.15);
+    background: rgba(6, 182, 212, 0.05);
+    border: 1px solid var(--border);
     border-radius: 20px;
     text-align: center;
     overflow: hidden;
 }
-
-/* animated gradient sweep */
 #loading-screen::before {
     content: '';
     position: absolute;
@@ -137,7 +124,6 @@ select option { background: #0f172a; }
     100% { transform: translateX(200%); }
 }
 
-/* Neural Pulse Orb */
 .neural-orb {
     width: 80px;
     height: 80px;
@@ -159,12 +145,9 @@ select option { background: #0f172a; }
     border: 2px solid rgba(103,232,249,0.4);
     animation: ring-expand 1.8s ease-out infinite;
 }
-.neural-orb .ring2 {
-    animation-delay: .6s;
-}
-.neural-orb .ring3 {
-    animation-delay: 1.2s;
-}
+.neural-orb .ring2 { animation-delay: .6s; }
+.neural-orb .ring3 { animation-delay: 1.2s; }
+
 @keyframes pulse-core {
     0%, 100% { transform: scale(1);   box-shadow: 0 0 20px rgba(103,232,249,0.6); }
     50%       { transform: scale(1.15); box-shadow: 0 0 36px rgba(103,232,249,0.9); }
@@ -177,20 +160,17 @@ select option { background: #0f172a; }
 .loading-title {
     font-size: 18px;
     font-weight: 700;
-    color: #67e8f9;
+    color: var(--text-cyan);
     margin-bottom: 8px;
     position: relative;
 }
 .loading-sub {
     font-size: 13px;
-    color: #475569;
+    color: var(--text-muted);
     position: relative;
 }
 
-/* Typing dots */
-.dots span {
-    animation: blink .9s infinite;
-}
+.dots span { animation: blink .9s infinite; }
 .dots span:nth-child(2) { animation-delay: .3s; }
 .dots span:nth-child(3) { animation-delay: .6s; }
 @keyframes blink {
@@ -198,12 +178,11 @@ select option { background: #0f172a; }
     40%           { opacity: 1; }
 }
 
-/* Progress bar */
 .progress-bar-wrap {
     margin: 22px auto 0;
     max-width: 340px;
     height: 4px;
-    background: rgba(255,255,255,0.06);
+    background: rgba(6, 182, 212, 0.1);
     border-radius: 99px;
     overflow: hidden;
     position: relative;
@@ -220,7 +199,6 @@ select option { background: #0f172a; }
     100% { transform: translateX(350%); }
 }
 
-/* Provider badge inside loading */
 .provider-tag {
     display: inline-block;
     margin-top: 14px;
@@ -234,29 +212,27 @@ select option { background: #0f172a; }
 }
 .provider-tag.ollama {
     background: rgba(34,197,94,0.12);
-    color: #4ade80;
+    color: #22c55e;
     border: 1px solid rgba(34,197,94,0.2);
 }
 .provider-tag.glm {
     background: rgba(99,102,241,0.12);
-    color: #a5b4fc;
+    color: #6366f1;
     border: 1px solid rgba(99,102,241,0.2);
 }
 
-/* ── ERROR BOX ───────────────────────────────────────── */
+/* ── Errors & Dynamic Outputs ──────────────────────── */
 #error-box {
     display: none;
     background: rgba(239,68,68,0.08);
     border: 1px solid rgba(239,68,68,0.25);
     border-radius: 14px;
     padding: 16px 20px;
-    color: #fca5a5;
+    color: #ef4444;
     margin-bottom: 22px;
     font-size: 14px;
 }
-#error-box strong { color: #f87171; }
 
-/* ── RESULT AREA ─────────────────────────────────────── */
 #result-area { display: none; animation: fadeSlideUp .5s ease; }
 @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -265,7 +241,7 @@ select option { background: #0f172a; }
 
 .answer-box {
     background: rgba(6,182,212,0.05);
-    border: 1px solid rgba(6,182,212,0.2);
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 26px 30px;
     margin-bottom: 24px;
@@ -279,14 +255,14 @@ select option { background: #0f172a; }
 .answer-label {
     font-size: 12px;
     font-weight: 800;
-    color: #67e8f9;
+    color: var(--text-cyan);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 .via-badge {
     font-size: 11px;
-    color: #475569;
-    background: rgba(255,255,255,0.05);
+    color: var(--text-muted);
+    background: rgba(6,182,212,0.1);
     padding: 3px 10px;
     border-radius: 99px;
     margin-left: auto;
@@ -296,11 +272,10 @@ select option { background: #0f172a; }
     white-space: pre-wrap;
     line-height: 1.9;
     font-size: 15px;
-    color: #e2e8f0;
-    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
 }
 
-/* ── SOURCE CARDS ────────────────────────────────────── */
+/* ── Source Verification Components ────────────────── */
 .sources-heading {
     display: flex;
     align-items: center;
@@ -308,37 +283,36 @@ select option { background: #0f172a; }
     margin-bottom: 14px;
     font-size: 12px;
     font-weight: 800;
-    color: #64748b;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 .source-card {
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid var(--border);
     border-radius: 14px;
-    background: rgba(255,255,255,0.02);
+    background: var(--glass-bg);
     overflow: hidden;
     margin-bottom: 10px;
     transition: border-color .2s;
 }
-.source-card:hover { border-color: rgba(103,232,249,0.2); }
+.source-card:hover { border-color: rgba(103,232,249,0.4); }
 .source-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 13px 18px;
     cursor: pointer;
-    background: rgba(255,255,255,0.03);
+    background: rgba(6,182,212,0.03);
     user-select: none;
     flex-wrap: wrap;
     gap: 8px;
 }
-.source-header:hover { background: rgba(255,255,255,0.055); }
 .source-body {
     padding: 16px 18px;
     font-size: 14px;
-    color: #cbd5e1;
+    color: var(--text-main);
     line-height: 1.75;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid var(--border);
 }
 .relevance-label {
     font-size: 11px;
@@ -347,30 +321,29 @@ select option { background: #0f172a; }
     border-radius: 99px;
     letter-spacing: .5px;
 }
-.rel-high   { background: rgba(34,197,94,.15);   color: #4ade80; }
-.rel-medium { background: rgba(234,179,8,.15);   color: #facc15; }
-.rel-low    { background: rgba(148,163,184,.12); color: #94a3b8; }
+.rel-high   { background: rgba(34,197,94,.15);   color: #22c55e; }
+.rel-medium { background: rgba(234,179,8,.15);   color: #eab308; }
+.rel-low    { background: rgba(148,163,184,.12); color: var(--text-muted); }
 
-/* ── EMPTY STATE ─────────────────────────────────────── */
 #empty-state {
     display: none;
     text-align: center;
     padding: 48px 20px;
-    color: #475569;
+    color: var(--text-muted);
 }
 </style>
 
 <div class="rag-wrap">
 
     <!-- HEADER -->
-    <div style="margin-bottom:24px;">
-        <h2 style="font-size:24px;font-weight:800;color:#67e8f9;margin-bottom:6px;">🔍 Evidence Q&amp;A</h2>
-        <p style="color:#475569;font-size:14px;">Ask a question — the AI answers <em>only</em> from your uploaded evidence files.</p>
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold tracking-wide text-cyan-400 mb-1">🔍 Evidence Q&amp;A</h2>
+        <p class="text-slate-400 text-sm">Ask a question — the AI answers <em>only</em> from your uploaded evidence files.</p>
     </div>
 
     <!-- FORM -->
     <div class="rag-form-card">
-        <div style="margin-bottom:12px;">
+        <div class="mb-4">
             <label class="rag-label" for="rag-question-input">Your Question</label>
             <input type="text"
                    id="rag-question-input"
@@ -381,7 +354,7 @@ select option { background: #0f172a; }
 
         <div class="form-row">
             <div class="fr-cell">
-                <label class="rag-label" for="rag-case-select">Case</label>
+                <label class="rag-label" for="rag-case-select">Case Context</label>
                 <select id="rag-case-select">
                     <option value="">All Cases</option>
                     {% for case in cases %}
@@ -393,24 +366,24 @@ select option { background: #0f172a; }
             </div>
 
             <div class="fr-cell">
-                <label class="rag-label" for="rag-provider-select">AI Provider</label>
+                <label class="rag-label" for="rag-provider-select">AI Provider Engine</label>
                 <select id="rag-provider-select">
                     <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>🖥️ Ollama (Local)</option>
                     <option value="glm"    {% if provider == 'glm'    %}selected{% endif %}>☁️ GLM (Cloud)</option>
                 </select>
             </div>
 
-            <div class="fr-cell" style="min-width:120px;max-width:180px;">
+            <div class="fr-cell style-cell" style="min-width:120px; max-width:180px;">
                 <label class="rag-label">&nbsp;</label>
                 <button type="button" id="ask-btn">
                     <span id="btn-icon">🔎</span>
-                    <span id="btn-text">Ask</span>
+                    <span id="btn-text">Ask Engine</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- ── LOADING SCREEN ── -->
+    <!-- LOADING SCREEN -->
     <div id="loading-screen">
         <div class="neural-orb">
             <div class="core"></div>
@@ -428,19 +401,19 @@ select option { background: #0f172a; }
         <div id="loading-provider-tag" class="provider-tag ollama">via Ollama</div>
     </div>
 
-    <!-- ── ERROR BOX ── -->
+    <!-- ERROR BOX -->
     <div id="error-box">
-        <strong>⚠️ Error:</strong> <span id="error-text"></span>
+        <span id="error-text"></span>
     </div>
 
-    <!-- ── RESULT AREA ── -->
+    <!-- RESULT AREA -->
     <div id="result-area">
 
         <!-- ANSWER -->
         <div class="answer-box">
             <div class="answer-header">
                 <span style="font-size:20px;">🤖</span>
-                <span class="answer-label">AI Answer</span>
+                <span class="answer-label">AI Analysis Response</span>
                 <span class="via-badge" id="via-badge">via GLM</span>
             </div>
             <div class="rag-answer" id="answer-text"></div>
@@ -449,8 +422,8 @@ select option { background: #0f172a; }
         <!-- SOURCES -->
         <div id="sources-wrap" style="display:none;">
             <div class="sources-heading">
-                📎 Evidence Sources Used
-                <span style="font-weight:500;color:#334155;" id="source-count"></span>
+                📎 Grounded Evidence Sources Used
+                <span class="ml-1 font-semibold text-cyan-400" id="source-count"></span>
             </div>
             <div id="sources-list"></div>
         </div>
@@ -459,14 +432,16 @@ select option { background: #0f172a; }
 
     <!-- EMPTY STATE -->
     <div id="empty-state">
-        <div style="font-size:48px;margin-bottom:14px;">🔍</div>
-        <p style="font-size:16px;font-weight:600;color:#64748b;">No relevant evidence found</p>
-        <p style="font-size:13px;margin-top:6px;color:#334155;">Make sure you've indexed your evidence files first.</p>
+        <div class="text-4xl mb-3">🔍</div>
+        <p class="text-base font-bold text-slate-400">No relevant evidence matches located</p>
+        <p class="text-xs mt-1 text-slate-400">Make sure you have indexed your file vectors for this case first.</p>
     </div>
 
     <!-- BACK -->
-    <div style="margin-top:32px;">
-        <a href="{% url 'home' %}" style="color:#334155;font-size:13px;text-decoration:none;">← Back to Dashboard</a>
+    <div class="mt-8 pt-4 border-t border-cyan-500/5">
+        <a href="{% url 'home' %}" class="btn-outline inline-flex items-center text-sm font-semibold">
+            ← Back to Dashboard
+        </a>
     </div>
 
 </div>
@@ -505,11 +480,9 @@ select option { background: #0f172a; }
 
     function showLoading(provider) {
         hideAll();
-        // set provider tag style
         loadingProvTag.className = 'provider-tag ' + provider;
         loadingProvTag.textContent = provider === 'ollama' ? '🖥️ via Ollama (Local LLM)' : '☁️ via GLM Cloud';
 
-        // dynamic sub text
         if (provider === 'ollama') {
             loadingSubTxt.textContent = 'Running local model — this may take 30–90 seconds…';
         } else {
@@ -517,7 +490,6 @@ select option { background: #0f172a; }
         }
 
         loadingScreen.style.display = 'block';
-        // animate btn
         btnIcon.textContent = '⏳';
         btnText.textContent = 'Thinking…';
         askBtn.disabled = true;
@@ -525,7 +497,7 @@ select option { background: #0f172a; }
 
     function showError(msg) {
         hideAll();
-        errorText.textContent = msg;
+        errorText.innerHTML = `<strong>⚠️ Error:</strong> ${msg}`;
         errorBox.style.display = 'block';
     }
 
@@ -550,17 +522,17 @@ select option { background: #0f172a; }
         <div class="source-card">
             <div class="source-header">
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-                    <span style="font-size:13px;font-weight:700;color:#e2e8f0;">Source ${src.source_no}</span>
-                    <span style="font-size:12px;color:#67e8f9;">📄 ${esc(src.title || 'Unknown')}</span>
+                    <span style="font-size:13px;font-weight:700;">Source ${src.source_no}</span>
+                    <span style="font-size:12px;color:var(--text-cyan); font-weight:600;">📄 ${esc(src.title || 'Unknown')}</span>
                     <span class="relevance-label ${rc}">${rl}</span>
                 </div>
-                <span style="font-size:12px;color:#475569;">Score: ${scoreFixed}</span>
+                <span style="font-size:12px;color:var(--text-muted);">Score: ${scoreFixed}</span>
             </div>
             <div class="source-body">
                 <p style="margin-bottom:12px;">${esc(src.content || '')}</p>
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
-                    <span style="font-size:11px;color:#475569;">Chunk #${src.chunk_index}</span>
-                    <a href="${evidUrl}" style="font-size:12px;color:#67e8f9;text-decoration:none;font-weight:600;">
+                    <span style="font-size:11px;color:var(--text-muted);">Chunk #${src.chunk_index}</span>
+                    <a href="${evidUrl}" style="font-size:12px;color:var(--text-cyan);text-decoration:none;font-weight:600;">
                         View Full Evidence →
                     </a>
                 </div>
@@ -579,7 +551,6 @@ select option { background: #0f172a; }
     function showResult(data, provider) {
         hideAll();
 
-        // No answer / no chunks
         if (!data || !data.answer) {
             emptyState.style.display = 'block';
             return;
@@ -588,7 +559,6 @@ select option { background: #0f172a; }
         answerTxt.textContent = data.answer;
         viaBadge.textContent  = 'via ' + provider.toUpperCase();
 
-        // Sources
         const sources = data.sources || [];
         if (sources.length > 0) {
             srcCount.textContent = `(${sources.length} found)`;
@@ -608,7 +578,7 @@ select option { background: #0f172a; }
 
         if (!q) {
             input.focus();
-            input.style.borderColor = 'rgba(239,68,68,0.6)';
+            input.style.borderColor = '#ef4444';
             setTimeout(() => input.style.borderColor = '', 1500);
             return;
         }
@@ -620,22 +590,18 @@ select option { background: #0f172a; }
 
         try {
             const res = await fetch(url, { credentials: 'same-origin' });
-
-            // Safety: if server returned HTML (e.g. login page), tell user clearly
             const ct = res.headers.get('content-type') || '';
             if (!ct.includes('application/json')) {
                 btnIcon.textContent = '🔎';
-                btnText.textContent = 'Ask';
+                btnText.textContent = 'Ask Engine';
                 askBtn.disabled = false;
                 showError(`Unexpected response from server (status ${res.status}). Try refreshing the page.`);
                 return;
             }
 
             const json = await res.json();
-
-            // restore button
             btnIcon.textContent = '🔎';
-            btnText.textContent = 'Ask';
+            btnText.textContent = 'Ask Engine';
             askBtn.disabled = false;
 
             if (!res.ok || !json.ok) {
@@ -646,7 +612,7 @@ select option { background: #0f172a; }
 
         } catch (err) {
             btnIcon.textContent = '🔎';
-            btnText.textContent = 'Ask';
+            btnText.textContent = 'Ask Engine';
             askBtn.disabled = false;
             showError('Network error: ' + err.message);
         }
@@ -657,13 +623,10 @@ select option { background: #0f172a; }
         if (e.key === 'Enter') doAsk();
     });
 
-    // Auto-focus
     input.focus();
 
-    // ── If Django server-side already has an answer (e.g. direct URL with params), show it ──
     {% if answer_data %}
     (function(){
-        // server_data injected safely via json_script tag below
         const el = document.getElementById('server-answer-data');
         if (!el) return;
         try {

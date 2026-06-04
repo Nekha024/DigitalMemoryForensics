@@ -29,7 +29,7 @@ def auth_page(request):
                 login(request, user)
                 return redirect("profile")
             else:
-                messages.error(request, "Please verify your email using OTP before login.")
+                messages.error(request, "Please verify your email using OTP before login.",extra_tags='login')
         else:
             messages.error(request, "Invalid username or password")
 
@@ -96,3 +96,5 @@ def verify_otp(request, user_id):
 
 
 
+def how_it_works(request):
+    return render(request,"accounts/how-it-works.html")
