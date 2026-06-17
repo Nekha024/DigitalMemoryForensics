@@ -365,11 +365,42 @@ body.light-theme .fr-cell select {
                 </select>
             </div>
 
-            <div class="fr-cell">
+            {% comment %} <div class="fr-cell">
                 <label class="rag-label" for="rag-provider-select">AI Provider Engine</label>
                 <select id="rag-provider-select">
                     <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>🖥️ Ollama (Local)</option>
                     <option value="glm"    {% if provider == 'glm'    %}selected{% endif %}>☁️ GLM (Cloud)</option>
+                </select>
+            </div> {% endcomment %}
+             
+            <div class="fr-cell">
+                <label class="rag-label" for="rag-provider-select">AI Provider Engine</label>
+                <select id="rag-provider-select">
+
+        {% if user_subscription.plan.name == 'SILVER' %}
+
+            <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>
+                🖥️ Ollama (Local)
+            </option>
+
+        {% elif user_subscription.plan.name == 'GOLD' %}
+
+            <option value="glm" {% if provider == 'glm' %}selected{% endif %}>
+                ☁️ GLM (Cloud)
+            </option>
+
+        {% else %}
+
+            <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>
+                🖥️ Ollama (Local)
+            </option>
+
+            <option value="glm" {% if provider == 'glm' %}selected{% endif %}>
+                ☁️ GLM (Cloud)
+            </option>
+
+        {% endif %}
+
                 </select>
             </div>
 

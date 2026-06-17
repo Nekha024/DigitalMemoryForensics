@@ -9,6 +9,8 @@ from .vector_utils import index_evidence_file, search_similar_chunks
 from .llm_utils import generate_rag_answer, DEFAULT_LLM_PROVIDER
 from cases.models import Case
 from subscription.decorators import subscription_required
+from subscription.models import UserSubscription
+
 
 
 @subscription_required
@@ -88,13 +90,16 @@ def rag_query(request):
     question = request.GET.get('q', '')
     case_id = request.GET.get('case_id')
     provider = request.GET.get('provider', DEFAULT_LLM_PROVIDER)
-
     cases = Case.objects.filter(created_by=request.user)
+    
     selected_case_id = None
     retrieved_chunks = []
     answer_data = None
     error_message = None
-
+    user_subscription=UserSubscription.objects.filter(
+        user=request.user,
+        active=True
+        ).first()
     if case_id and case_id.isdigit():
         selected_case_id = int(case_id)
 
@@ -106,6 +111,7 @@ def rag_query(request):
         'retrieved_chunks': retrieved_chunks,
         'answer_data': answer_data,
         'error_message': error_message,
+        'user_subscription':user_subscription
     })
 
 
