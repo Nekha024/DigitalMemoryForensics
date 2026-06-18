@@ -158,6 +158,7 @@ def generate_with_glm(prompt, model=None):
 
     max_retries = 3
     for attempt in range(max_retries):
+        print('sample')
         response = requests.post(url, headers=headers, json=payload, timeout=300)
 
         if response.status_code == 429:
