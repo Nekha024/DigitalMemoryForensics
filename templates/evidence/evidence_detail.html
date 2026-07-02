@@ -21,11 +21,15 @@
             <p><strong>Uploaded:</strong> {{ evidence.uploaded_at }}</p>
 
             <p>
-                <strong>File:</strong> 
-                <a href="{{ evidence.file.url }}" 
-                   class="text-cyan-400 hover:underline">
-                   Download
-                </a>
+                <strong>File:</strong>
+                {% if evidence.file %}
+                    <a href="{{ evidence.file.url }}"
+                       class="text-cyan-400 hover:underline">
+                        Download
+                    </a>
+                {% else %}
+                    <span class="text-gray-500 italic">No file attached</span>
+                {% endif %}
             </p>
 
         </div>

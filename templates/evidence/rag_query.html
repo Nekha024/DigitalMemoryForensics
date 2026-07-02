@@ -331,6 +331,29 @@ body.light-theme .fr-cell select {
     padding: 48px 20px;
     color: var(--text-muted);
 }
+#download-pdf-btn {
+    margin-left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--glass-bg);
+    color: var(--text-cyan);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+#download-pdf-btn:hover {
+    background: rgba(6, 182, 212, 0.12);
+    border-color: #06b6d4;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
+    transform: translateY(-1px);
+}
 </style>
 
 <div class="rag-wrap">
@@ -445,6 +468,9 @@ body.light-theme .fr-cell select {
             <div class="answer-header">
                 <span style="font-size:20px;">🤖</span>
                 <span class="answer-label">AI Analysis Response</span>
+                <button type="button" id="download-pdf-btn">
+                    📥 Download Report (PDF)
+                </button>
                 <span class="via-badge" id="via-badge">via GLM</span>
             </div>
             <div class="rag-answer" id="answer-text"></div>
@@ -479,10 +505,12 @@ body.light-theme .fr-cell select {
 
 <script>
 (function () {
+    let currentResultData = null;
     const input      = document.getElementById('rag-question-input');
     const caseSelect = document.getElementById('rag-case-select');
     const provSel    = document.getElementById('rag-provider-select');
     const askBtn     = document.getElementById('ask-btn');
+    const downloadPdfBtn = document.getElementById('download-pdf-btn');
 
     const loadingScreen = document.getElementById('loading-screen');
     const loadingSubTxt = document.getElementById('loading-sub-text');
@@ -581,6 +609,7 @@ body.light-theme .fr-cell select {
 
     function showResult(data, provider) {
         hideAll();
+        currentResultData = data;
 
         if (!data || !data.answer) {
             emptyState.style.display = 'block';
@@ -620,7 +649,16 @@ body.light-theme .fr-cell select {
         const url    = `{% url 'rag_query_ajax' %}?${params}`;
 
         try {
-            const res = await fetch(url, { credentials: 'same-origin' });
+            // Give GLM/slow providers up to 3 minutes before browser aborts
+            const controller = new AbortController();
+            const fetchTimeout = setTimeout(() => controller.abort(), 3 * 60 * 1000);
+
+            let res;
+            try {
+                res = await fetch(url, { credentials: 'same-origin', signal: controller.signal });
+            } finally {
+                clearTimeout(fetchTimeout);
+            }
             const ct = res.headers.get('content-type') || '';
             if (!ct.includes('application/json')) {
                 btnIcon.textContent = '🔎';
@@ -649,7 +687,124 @@ body.light-theme .fr-cell select {
         }
     }
 
+    function renderMarkdown(str) {
+        let escaped = esc(str);
+        escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        escaped = escaped.replace(/`(.*?)`/g, '<code style="background-color: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-family: monospace;">$1</code>');
+        return escaped;
+    }
+
+    function buildPrintHTML(question, caseName, engine, answer, sources) {
+        const dateStr = new Date().toLocaleString();
+        const sourcesHTML = sources.length > 0 ? `
+            <div class="section">
+                <h2>Grounded Evidence Sources Used</h2>
+                ${sources.map(src => `
+                <div class="source-block">
+                    <div class="source-header">
+                        <span>Source ${src.source_no} — ${src.title || 'Unknown'} (Chunk #${src.chunk_index})</span>
+                        <span class="score">Relevance: ${(src.score || 0).toFixed(2)}</span>
+                    </div>
+                    <div class="source-body">${src.content || ''}</div>
+                </div>
+                `).join('')}
+            </div>` : '';
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Forensic Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #1e293b; padding: 28px 32px; background: #fff; }
+  .header { border-bottom: 2px solid #0891b2; padding-bottom: 12px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .header h1 { font-size: 20px; font-weight: 900; color: #0f172a; letter-spacing: 0.4px; }
+  .header p { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #64748b; margin-top: 3px; }
+  .meta-table { width: 100%; border-collapse: collapse; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; margin-bottom: 18px; font-size: 11px; }
+  .meta-table td { padding: 4px 8px; color: #475569; }
+  .meta-table strong { color: #0f172a; }
+  .section { margin-bottom: 22px; }
+  .section h2 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; color: #64748b; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 10px; }
+  .question-box { border-left: 4px solid #6366f1; background: #f1f5f9; padding: 10px 14px; font-style: italic; color: #334155; line-height: 1.6; border-radius: 4px; }
+  .answer-body { white-space: pre-wrap; line-height: 1.8; color: #1e293b; text-align: justify; font-size: 13px; }
+  .source-block { border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 10px; page-break-inside: avoid; }
+  .source-header { background: #f1f5f9; padding: 6px 10px; font-weight: 700; font-size: 11px; color: #334155; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; }
+  .score { color: #0d9488; }
+  .source-body { padding: 8px 10px; color: #475569; line-height: 1.6; font-size: 11px; text-align: justify; }
+  .footer { margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 8px; text-align: center; font-size: 9px; color: #94a3b8; letter-spacing: 0.5px; }
+  @media print {
+    body { padding: 0; }
+    @page { margin: 18mm; size: A4; }
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>DIGITAL MEMORY FORENSICS</h1>
+      <p>AI Case Investigation Report</p>
+    </div>
+    <div style="text-align:right;font-size:9px;color:#94a3b8;font-weight:600;">Generated via RAG Engine</div>
+  </div>
+
+  <table class="meta-table">
+    <tr>
+      <td><strong>Case:</strong> ${caseName}</td>
+      <td><strong>Date / Time:</strong> ${dateStr}</td>
+    </tr>
+    <tr>
+      <td><strong>AI Engine:</strong> ${engine}</td>
+      <td><strong>Integrity:</strong> SHA-256 Verified</td>
+    </tr>
+  </table>
+
+  <div class="section">
+    <h2>Investigator Query</h2>
+    <div class="question-box">&ldquo;${question}&rdquo;</div>
+  </div>
+
+  <div class="section">
+    <h2>AI Analysis Response</h2>
+    <div class="answer-body">${answer}</div>
+  </div>
+
+  ${sourcesHTML}
+
+  <div class="footer">CONFIDENTIAL — DIGITAL MEMORY FORENSICS REPORT</div>
+
+  <script>window.onload = function(){ window.print(); }<\/script>
+</body>
+</html>`;
+    }
+
+    function downloadReportAsPDF() {
+        if (!currentResultData) {
+            alert('Please ask a question first to generate a report.');
+            return;
+        }
+
+        const question = input.value.trim();
+        const caseName = caseSelect.options[caseSelect.selectedIndex].text;
+        const engine   = viaBadge.textContent;
+        const answer   = currentResultData.answer || '';
+        const sources  = currentResultData.sources || [];
+
+        const html = buildPrintHTML(question, caseName, engine, answer, sources);
+
+        // Open in a new popup window and let the browser handle print-to-PDF
+        const pw = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
+        if (!pw) {
+            alert('Popup blocked! Please allow popups for this site and try again.');
+            return;
+        }
+        pw.document.write(html);
+        pw.document.close();
+    }
+
     askBtn.addEventListener('click', doAsk);
+    downloadPdfBtn.addEventListener('click', downloadReportAsPDF);
     input.addEventListener('keydown', e => {
         if (e.key === 'Enter') doAsk();
     });

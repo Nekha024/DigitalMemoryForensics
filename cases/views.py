@@ -62,12 +62,12 @@ def dashboard(request):
 
     open_cases = Case.objects.filter(
         created_by=request.user,
-        status='Open'
+        status='open'
     ).count()
 
     closed_cases = Case.objects.filter(
         created_by=request.user,
-        status='Closed'
+        status='closed'
     ).count()
 
     recent_cases = Case.objects.filter(

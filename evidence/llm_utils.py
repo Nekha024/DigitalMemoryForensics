@@ -10,7 +10,11 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
 GLM_BASE_URL = os.getenv("GLM_BASE_URL", "").rstrip("/")
 GLM_API_KEY = os.getenv("GLM_API_KEY", "")
 GLM_API_KEY_FALLBACK = os.getenv("GLM_API_KEY_FALLBACK", "")
+GLM_API_KEY_FALLBACK_2 = os.getenv("GLM_API_KEY_FALLBACK_2", "")
 GLM_MODEL = os.getenv("GLM_MODEL", "glm-5.1")
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "glm").lower()
 
@@ -139,8 +143,10 @@ def generate_with_ollama(prompt, model=None):
 def generate_with_glm(prompt, model=None):
     has_primary = GLM_API_KEY and GLM_API_KEY.strip() != "" and "your_glm" not in GLM_API_KEY
     has_fallback = GLM_API_KEY_FALLBACK and GLM_API_KEY_FALLBACK.strip() != "" and "your_glm" not in GLM_API_KEY_FALLBACK
+    has_fallback_2 = GLM_API_KEY_FALLBACK_2 and GLM_API_KEY_FALLBACK_2.strip() != "" and "your_glm" not in GLM_API_KEY_FALLBACK_2
+    has_groq = GROQ_API_KEY and GROQ_API_KEY.strip() != "" and "your_groq" not in GROQ_API_KEY
 
-    if not (has_primary or has_fallback):
+    if not (has_primary or has_fallback or has_fallback_2 or has_groq):
         import re
         
         question_match = re.search(r"User Question:\s*(.*)", prompt)
@@ -178,23 +184,42 @@ def generate_with_glm(prompt, model=None):
         answer += "\n\n*(Note: To use live cloud intelligence, configure your `GLM_API_KEY` inside the `.env` file.)*"
         return answer
 
+    if has_groq:
+        try:
+            return generate_with_groq(prompt)
+        except Exception as e:
+            print(f"Groq failed: {e}. Falling back to GLM keys...")
+
     model = model or GLM_MODEL
     url = f"{GLM_BASE_URL.rstrip('/')}/chat/completions"
 
+    # Build ordered list of API keys to attempt
     keys_to_try = []
     if has_primary:
-        keys_to_try.append(GLM_API_KEY)
+        keys_to_try.append(("primary", GLM_API_KEY))
     if has_fallback:
-        keys_to_try.append(GLM_API_KEY_FALLBACK)
+        keys_to_try.append(("fallback_1", GLM_API_KEY_FALLBACK))
+    if has_fallback_2:
+        keys_to_try.append(("fallback_2", GLM_API_KEY_FALLBACK_2))
 
-    last_exception = None
-    for api_key in keys_to_try:
+    GLM_TIMEOUT = int(os.getenv("GLM_TIMEOUT", "120"))
+
+    def _try_single_key(key_label, api_key):
+        if key_label == "groq":
+            target_url = "https://api.groq.com/openai/v1/chat/completions"
+            target_model = GROQ_MODEL or "llama-3.3-70b-versatile"
+            timeout = 30
+        else:
+            target_url = url
+            target_model = model
+            timeout = GLM_TIMEOUT
+
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
         payload = {
-            "model": model,
+            "model": target_model,
             "messages": [
                 {"role": "system", "content": "You are a digital forensics assistant. Answer only from the provided evidence context."},
                 {"role": "user", "content": prompt}
@@ -203,29 +228,73 @@ def generate_with_glm(prompt, model=None):
             "max_tokens": 800,
         }
 
-        max_retries = 2
-        for attempt in range(max_retries):
-            try:
-                response = requests.post(url, headers=headers, json=payload, timeout=45)
-                
-                if response.status_code == 429:
-                    wait = 5 * (attempt + 1)
-                    import time
-                    time.sleep(wait)
-                    continue
-                
-                response.raise_for_status()
-                data = response.json()
-                choices = data.get("choices", [])
-                if choices:
-                    return choices[0].get("message", {}).get("content", "").strip()
-            except Exception as e:
-                last_exception = e
-                break
+        # Make request
+        response = requests.post(target_url, headers=headers, json=payload, timeout=timeout)
+        
+        if response.status_code == 429:
+            raise Exception("Rate-limited (429)")
+            
+        response.raise_for_status()
+        data = response.json()
+        choices = data.get("choices", [])
+        if choices:
+            return choices[0].get("message", {}).get("content", "").strip()
+        raise Exception("Returned an empty response")
 
-    if last_exception:
-        raise last_exception
-    raise Exception("GLM API request failed. Please check your API keys or connection.")
+    import concurrent.futures
+    exceptions = []
+    success_result = None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(keys_to_try)) as executor:
+        future_to_label = {
+            executor.submit(_try_single_key, label, key): label
+            for label, key in keys_to_try
+        }
+
+        for future in concurrent.futures.as_completed(future_to_label):
+            label = future_to_label[future]
+            try:
+                res = future.result()
+                if res:
+                    success_result = res
+                    break
+            except Exception as e:
+                exceptions.append(f"{label}: {e}")
+
+    if success_result is not None:
+        return success_result
+
+    raise Exception(f"All GLM / Groq keys failed. Details:\n" + "\n".join(exceptions))
+
+
+def generate_with_groq(prompt, model=None):
+    if not GROQ_API_KEY:
+        raise ValueError("GROQ_API_KEY is not set in the environment.")
+    
+    model = model or GROQ_MODEL
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    
+    headers = {
+        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": "You are a digital forensics assistant. Answer only from the provided evidence context."},
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.2,
+        "max_tokens": 800,
+    }
+    
+    response = requests.post(url, headers=headers, json=payload, timeout=30)
+    response.raise_for_status()
+    data = response.json()
+    choices = data.get("choices", [])
+    if choices:
+        return choices[0].get("message", {}).get("content", "").strip()
+    raise Exception("Groq returned an empty response")
 
 
 def generate_rag_answer(question, retrieved_chunks, provider=None):
@@ -243,6 +312,8 @@ def generate_rag_answer(question, retrieved_chunks, provider=None):
         answer = generate_with_ollama(prompt)
     elif provider == "glm":
         answer = generate_with_glm(prompt)
+    elif provider == "groq":
+        answer = generate_with_groq(prompt)
     else:
         raise ValueError(f"Unsupported provider: {provider}")
 
