@@ -143,7 +143,9 @@ body {
 }
 
 /* Inputs */
-input, textarea, select {
+input,
+textarea,
+select {
     width: 100%;
     background: rgba(255,255,255,.03);
     border: 1px solid var(--border);
@@ -151,6 +153,15 @@ input, textarea, select {
     padding: 12px;
     color: var(--text-main);
     margin-top: 6px;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+select option {
+    background: #0f172a;
+    color: #ffffff;
 }
 
 body.light-theme input, body.light-theme textarea, body.light-theme select {

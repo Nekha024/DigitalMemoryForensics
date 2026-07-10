@@ -85,6 +85,7 @@ def auth_page(request):
         )
 
         send_otp_email(email, otp)
+        print(otp)
         messages.success(request, "OTP sent to your email. Check terminal output.")
         return redirect("verify_otp", user_id=user.id)
 
