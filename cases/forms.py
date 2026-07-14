@@ -5,7 +5,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 class CaseForm(forms.ModelForm):
     class Meta:
         model = Case
-        fields = ['title', 'description', 'status']
+        fields = ['title', 'description', 'status','case_type']
 
 class CustomPasswordChangeForm(PasswordChangeForm):
 

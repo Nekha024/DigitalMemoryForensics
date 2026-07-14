@@ -7,7 +7,11 @@
 
 <style>
 /* ── Layout & Core Containers ──────────────────────── */
-.rag-wrap { max-width: 860px; margin: 0 auto; }
+.rag-wrap { 
+    max-width: 860px; 
+    margin: 0 auto; 
+    font-family: 'Inter', sans-serif;
+}
 
 .rag-form-card {
     background: var(--glass-bg);
@@ -17,26 +21,29 @@
     margin-bottom: 24px;
     backdrop-filter: blur(18px);
     transition: background 0.3s ease, border 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .rag-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: var(--text-muted);
     letter-spacing: .8px;
     text-transform: uppercase;
     display: block;
     margin-bottom: 7px;
+    padding-left: 2px;
 }
 
 #rag-question-input {
     width: 100%;
-    font-size: 16px;
+    font-size: 15px;
     background: rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border);
     border-radius: 12px;
     color: var(--text-main);
-    padding: 13px 16px;
+    padding: 14px 18px;
     transition: border-color .2s, box-shadow .2s;
     box-sizing: border-box;
     outline: none;
@@ -46,32 +53,36 @@ body.light-theme #rag-question-input {
 }
 #rag-question-input:focus {
     border-color: #06b6d4;
-    box-shadow: 0 0 0 4px rgba(6,182,212,.12);
+    box-shadow: 0 0 15px rgba(6,182,212,.12);
 }
 
 .form-row {
     display: flex;
-    gap: 12px;
-    margin-top: 14px;
+    gap: 16px;
+    margin-top: 18px;
     flex-wrap: wrap;
     align-items: flex-end;
 }
-.form-row > .fr-cell { flex: 1; min-width: 140px; }
+.form-row > .fr-cell { flex: 1; min-width: 150px; }
 
 /* Overwrite base configuration elements cleanly */
 .fr-cell select {
     background: rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border);
     color: var(--text-main);
-    padding: 11px 14px;
+    padding: 12px 14px;
     border-radius: 12px;
+    outline: none;
+    font-size: 13px;
+    width: 100%;
+    margin-top: 2px;
 }
 body.light-theme .fr-cell select {
     background: rgba(0, 0, 0, 0.02);
 }
 .fr-cell select option {
-    background: var(--navbar-bg);
-    color: var(--text-main);
+    background: #0f172a;
+    color: #ffffff;
 }
 
 /* ── Interactive Trigger Elements ──────────────────── */
@@ -81,22 +92,22 @@ body.light-theme .fr-cell select {
     justify-content: center;
     gap: 8px;
     width: 100%;
-    padding: 12px 28px;
-    font-size: 15px;
+    padding: 13px 28px;
+    font-size: 13px;
     font-weight: 700;
-    background: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
     border: none;
     border-radius: 12px;
     color: #fff !important;
     cursor: pointer;
     transition: transform .15s, box-shadow .15s, opacity .15s;
-    box-shadow: 0 4px 20px rgba(99,102,241,0.25);
+    box-shadow: 0 4px 20px rgba(6,182,212,0.15);
     position: relative;
     overflow: hidden;
 }
 #ask-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(99,102,241,0.4);
+    box-shadow: 0 8px 24px rgba(6,182,212,0.3);
 }
 #ask-btn:disabled { opacity: .65; cursor: not-allowed; }
 
@@ -106,7 +117,7 @@ body.light-theme .fr-cell select {
     position: relative;
     margin-bottom: 28px;
     padding: 56px 28px;
-    background: rgba(6, 182, 212, 0.05);
+    background: rgba(6, 182, 212, 0.03);
     border: 1px solid var(--border);
     border-radius: 20px;
     text-align: center;
@@ -116,7 +127,7 @@ body.light-theme .fr-cell select {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.06) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(6,182,212,0.04) 50%, transparent 100%);
     animation: sweep 2.2s ease-in-out infinite;
 }
 @keyframes sweep {
@@ -134,23 +145,23 @@ body.light-theme .fr-cell select {
     position: absolute;
     inset: 18px;
     border-radius: 50%;
-    background: radial-gradient(circle, #67e8f9, #6366f1);
+    background: radial-gradient(circle, #67e8f9, #0891b2);
     animation: pulse-core 1.8s ease-in-out infinite;
-    box-shadow: 0 0 24px rgba(103,232,249,0.6);
+    box-shadow: 0 0 24px rgba(6,182,212,0.6);
 }
 .neural-orb .ring {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    border: 2px solid rgba(103,232,249,0.4);
+    border: 2px solid rgba(6,182,212,0.3);
     animation: ring-expand 1.8s ease-out infinite;
 }
 .neural-orb .ring2 { animation-delay: .6s; }
 .neural-orb .ring3 { animation-delay: 1.2s; }
 
 @keyframes pulse-core {
-    0%, 100% { transform: scale(1);   box-shadow: 0 0 20px rgba(103,232,249,0.6); }
-    50%       { transform: scale(1.15); box-shadow: 0 0 36px rgba(103,232,249,0.9); }
+    0%, 100% { transform: scale(1);   box-shadow: 0 0 20px rgba(6,182,212,0.5); }
+    50%       { transform: scale(1.15); box-shadow: 0 0 36px rgba(6,182,212,0.8); }
 }
 @keyframes ring-expand {
     0%   { transform: scale(.9); opacity: .8; }
@@ -190,7 +201,7 @@ body.light-theme .fr-cell select {
 .progress-bar-fill {
     height: 100%;
     border-radius: 99px;
-    background: linear-gradient(90deg, #06b6d4, #6366f1);
+    background: linear-gradient(90deg, #06b6d4, #0891b2);
     animation: progress-indeterminate 2s ease-in-out infinite;
     width: 40%;
 }
@@ -202,7 +213,7 @@ body.light-theme .fr-cell select {
 .provider-tag {
     display: inline-block;
     margin-top: 14px;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: .7px;
     text-transform: uppercase;
@@ -211,14 +222,14 @@ body.light-theme .fr-cell select {
     position: relative;
 }
 .provider-tag.ollama {
-    background: rgba(34,197,94,0.12);
-    color: #22c55e;
-    border: 1px solid rgba(34,197,94,0.2);
+    background: rgba(16,185,129,0.12);
+    color: #10b981;
+    border: 1px solid rgba(16,185,129,0.2);
 }
 .provider-tag.glm {
-    background: rgba(99,102,241,0.12);
-    color: #6366f1;
-    border: 1px solid rgba(99,102,241,0.2);
+    background: rgba(6,182,212,0.12);
+    color: #06b6d4;
+    border: 1px solid rgba(6,182,212,0.2);
 }
 
 /* ── Errors & Dynamic Outputs ──────────────────────── */
@@ -230,49 +241,55 @@ body.light-theme .fr-cell select {
     padding: 16px 20px;
     color: #ef4444;
     margin-bottom: 22px;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 500;
 }
 
-#result-area { display: none; animation: fadeSlideUp .5s ease; }
+#result-area { display: none; animation: fadeSlideUp .5s cubic-bezier(0.4, 0, 0.2, 1); }
 @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(15px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 .answer-box {
-    background: rgba(6,182,212,0.05);
+    background: rgba(6,182,212,0.03);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 26px 30px;
     margin-bottom: 24px;
+    position: relative;
 }
 .answer-header {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
 }
 .answer-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     color: var(--text-cyan);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 .via-badge {
-    font-size: 11px;
-    color: var(--text-muted);
+    font-size: 10px;
+    color: var(--text-cyan);
     background: rgba(6,182,212,0.1);
     padding: 3px 10px;
     border-radius: 99px;
-    margin-left: auto;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
 }
 .rag-answer {
     white-space: pre-wrap;
-    line-height: 1.9;
-    font-size: 15px;
+    line-height: 1.85;
+    font-size: 14.5px;
     color: var(--text-main);
+    text-align: justify;
 }
 
 /* ── Source Verification Components ────────────────── */
@@ -281,7 +298,7 @@ body.light-theme .fr-cell select {
     align-items: center;
     gap: 8px;
     margin-bottom: 14px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 800;
     color: var(--text-muted);
     text-transform: uppercase;
@@ -292,38 +309,47 @@ body.light-theme .fr-cell select {
     border-radius: 14px;
     background: var(--glass-bg);
     overflow: hidden;
-    margin-bottom: 10px;
-    transition: border-color .2s;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
 }
-.source-card:hover { border-color: rgba(103,232,249,0.4); }
+.source-card:hover { 
+    border-color: rgba(6,182,212,0.3); 
+    box-shadow: 0 0 15px rgba(6,182,212,0.04);
+}
 .source-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 13px 18px;
     cursor: pointer;
-    background: rgba(6,182,212,0.03);
+    background: rgba(6,182,212,0.02);
     user-select: none;
     flex-wrap: wrap;
     gap: 8px;
 }
 .source-body {
     padding: 16px 18px;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-main);
     line-height: 1.75;
     border-top: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.05);
+    font-family: monospace;
+    text-align: justify;
+}
+body.light-theme .source-body {
+    background: rgba(0, 0, 0, 0.01);
 }
 .relevance-label {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     padding: 3px 10px;
     border-radius: 99px;
     letter-spacing: .5px;
 }
-.rel-high   { background: rgba(34,197,94,.15);   color: #22c55e; }
-.rel-medium { background: rgba(234,179,8,.15);   color: #eab308; }
-.rel-low    { background: rgba(148,163,184,.12); color: var(--text-muted); }
+.rel-high   { background: rgba(16,185,129,.12);   color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.rel-medium { background: rgba(245,158,11,.12);   color: #f59e0b; border: 1px solid rgba(245,158,11,0.2); }
+.rel-low    { background: rgba(148,163,184,.12); color: var(--text-muted); border: 1px solid rgba(148,163,184,0.2); }
 
 #empty-state {
     display: none;
@@ -332,12 +358,12 @@ body.light-theme .fr-cell select {
     color: var(--text-muted);
 }
 #download-pdf-btn {
-    margin-left: 14px;
+    margin-left: auto;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 6px 14px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     border-radius: 8px;
     border: 1px solid var(--border);
@@ -349,28 +375,46 @@ body.light-theme .fr-cell select {
     white-space: nowrap;
 }
 #download-pdf-btn:hover {
-    background: rgba(6, 182, 212, 0.12);
+    background: rgba(6, 182, 212, 0.1);
     border-color: #06b6d4;
-    box-shadow: 0 0 12px rgba(6, 182, 212, 0.25);
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.2);
     transform: translateY(-1px);
+}
+
+/* Theme adaptation helpers */
+.rag-wrap .text-white {
+    color: var(--text-main) !important;
+}
+.rag-wrap .text-slate-400 {
+    color: var(--text-muted) !important;
+}
+.rag-wrap .border-cyan-500\/5 {
+    border-color: var(--border) !important;
 }
 </style>
 
-<div class="rag-wrap">
+<div class="rag-wrap py-2">
 
     <!-- HEADER -->
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold tracking-wide text-cyan-400 mb-1">🔍 Evidence Q&amp;A</h2>
-        <p class="text-slate-400 text-sm">Ask a question — the AI answers <em>only</em> from your uploaded evidence files.</p>
+    <div class="flex items-center gap-4 mb-8">
+        <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+            <i class="fa-solid fa-brain-circuit text-lg text-cyan-400"></i>
+        </div>
+        <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">AI Evidence Q&amp;A (RAG)</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Query the repository. The engine cross-references and generates reports using verified evidence chunks.</p>
+        </div>
     </div>
 
     <!-- FORM -->
     <div class="rag-form-card">
-        <div class="mb-4">
-            <label class="rag-label" for="rag-question-input">Your Question</label>
+        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div>
+            <label class="rag-label" for="rag-question-input">Your Investigation Query</label>
             <input type="text"
                    id="rag-question-input"
-                   placeholder="e.g. What programming languages does this person know?"
+                   placeholder="e.g. What passwords or credentials can be found in the system log files?"
                    autocomplete="off"
                    value="{{ question }}">
         </div>
@@ -387,51 +431,33 @@ body.light-theme .fr-cell select {
                     {% endfor %}
                 </select>
             </div>
-
-            {% comment %} <div class="fr-cell">
-                <label class="rag-label" for="rag-provider-select">AI Provider Engine</label>
-                <select id="rag-provider-select">
-                    <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>🖥️ Ollama (Local)</option>
-                    <option value="glm"    {% if provider == 'glm'    %}selected{% endif %}>☁️ GLM (Cloud)</option>
-                </select>
-            </div> {% endcomment %}
              
             <div class="fr-cell">
-                <label class="rag-label" for="rag-provider-select">AI Provider Engine</label>
+                <label class="rag-label" for="rag-provider-select">AI Inference Engine</label>
                 <select id="rag-provider-select">
-
-        {% if user_subscription.plan.name == 'SILVER' %}
-
-            <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>
-                🖥️ Ollama (Local)
-            </option>
-
-        {% elif user_subscription.plan.name == 'GOLD' %}
-
-            <option value="glm" {% if provider == 'glm' %}selected{% endif %}>
-                ☁️ GLM (Cloud)
-            </option>
-
-        {% else %}
-
-            <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>
-                🖥️ Ollama (Local)
-            </option>
-
-            <option value="glm" {% if provider == 'glm' %}selected{% endif %}>
-                ☁️ GLM (Cloud)
-            </option>
-
-        {% endif %}
-
+                    {% if user_subscription.plan.tier == 'SILVER' %}
+                        <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>
+                            🖥️ Ollama (Local)
+                        </option>
+                    {% elif user_subscription.plan.tier == 'GOLD' %}
+                        <option value="glm" {% if provider == 'glm' %}selected{% endif %}>
+                            ☁️ GLM (Cloud)
+                        </option>
+                    {% else %}
+                        <option value="ollama" {% if provider == 'ollama' %}selected{% endif %}>
+                            🖥️ Ollama (Local)
+                        </option>
+                        <option value="glm" {% if provider == 'glm' %}selected{% endif %}>
+                            ☁️ GLM (Cloud)
+                        </option>
+                    {% endif %}
                 </select>
             </div>
 
-            <div class="fr-cell style-cell" style="min-width:120px; max-width:180px;">
-                <label class="rag-label">&nbsp;</label>
+            <div class="fr-cell style-cell" style="min-width:140px; max-width:180px; flex: 0.5;">
                 <button type="button" id="ask-btn">
-                    <span id="btn-icon">🔎</span>
-                    <span id="btn-text">Ask Engine</span>
+                    <span id="btn-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span id="btn-text">Analyze</span>
                 </button>
             </div>
         </div>
@@ -466,12 +492,12 @@ body.light-theme .fr-cell select {
         <!-- ANSWER -->
         <div class="answer-box">
             <div class="answer-header">
-                <span style="font-size:20px;">🤖</span>
+                <span class="text-cyan-400 text-lg mr-1"><i class="fa-solid fa-microchip"></i></span>
                 <span class="answer-label">AI Analysis Response</span>
                 <button type="button" id="download-pdf-btn">
-                    📥 Download Report (PDF)
+                    <i class="fa-solid fa-file-pdf mr-1.5"></i> Download Report
                 </button>
-                <span class="via-badge" id="via-badge">via GLM</span>
+                <span class="via-badge ml-2" id="via-badge">via GLM</span>
             </div>
             <div class="rag-answer" id="answer-text"></div>
         </div>
@@ -479,7 +505,7 @@ body.light-theme .fr-cell select {
         <!-- SOURCES -->
         <div id="sources-wrap" style="display:none;">
             <div class="sources-heading">
-                📎 Grounded Evidence Sources Used
+                <i class="fa-solid fa-link text-cyan-400 mr-1.5"></i> Grounded Evidence Sources Used
                 <span class="ml-1 font-semibold text-cyan-400" id="source-count"></span>
             </div>
             <div id="sources-list"></div>
@@ -489,19 +515,20 @@ body.light-theme .fr-cell select {
 
     <!-- EMPTY STATE -->
     <div id="empty-state">
-        <div class="text-4xl mb-3">🔍</div>
-        <p class="text-base font-bold text-slate-400">No relevant evidence matches located</p>
-        <p class="text-xs mt-1 text-slate-400">Make sure you have indexed your file vectors for this case first.</p>
+        <div class="text-3xl mb-3">🔍</div>
+        <p class="text-slate-400 font-bold text-sm">No relevant evidence matches located</p>
+        <p class="text-xs mt-1 text-slate-500">Make sure you have indexed your file vectors for this case first.</p>
     </div>
 
     <!-- BACK -->
-    <div class="mt-8 pt-4 border-t border-cyan-500/5">
-        <a href="{% url 'home' %}" class="btn-outline inline-flex items-center text-sm font-semibold">
-            ← Back to Dashboard
+    <div class="mt-8 pt-4 border-t border-white/5">
+        <a href="{% url 'dashboard' %}" class="btn-outline inline-flex items-center text-xs py-2 px-4 rounded-lg font-semibold transition">
+            <i class="fa-solid fa-house mr-1.5"></i> Back to Dashboard
         </a>
     </div>
 
 </div>
+
 
 <script>
 (function () {
