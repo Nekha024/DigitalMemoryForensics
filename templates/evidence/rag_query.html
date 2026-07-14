@@ -643,7 +643,7 @@ body.light-theme .source-body {
             return;
         }
 
-        answerTxt.textContent = data.answer;
+        answerTxt.innerHTML = renderMarkdown(data.answer);
         viaBadge.textContent  = 'via ' + provider.toUpperCase();
 
         const sources = data.sources || [];
@@ -715,10 +715,21 @@ body.light-theme .source-body {
     }
 
     function renderMarkdown(str) {
+        if (!str) return "";
         let escaped = esc(str);
+        
+        // 1. Process bold text (**bold**)
         escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        escaped = escaped.replace(/`(.*?)`/g, '<code style="background-color: #f1f5f9; padding: 2px 4px; border-radius: 4px; font-family: monospace;">$1</code>');
+        
+        // 2. Process italic text (*italic*) - restricted to single line, single asterisks
+        escaped = escaped.replace(/(?<!\*)\*(?!\*)([^\n*]+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+        
+        // 3. Process code blocks (`code`)
+        escaped = escaped.replace(/`(.*?)`/g, '<code style="background-color: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.15); padding: 2px 5px; border-radius: 6px; font-family: monospace; font-size: 0.9em; color: var(--text-cyan);">$1</code>');
+        
+        // 4. Process bullet list items starting with '* ' or '- '
+        escaped = escaped.replace(/^(\s*)[\*\-]\s+(.*?)$/gm, '$1<li style="margin-left: 20px; margin-bottom: 8px; list-style-type: disc;">$2</li>');
+        
         return escaped;
     }
 
@@ -794,7 +805,7 @@ body.light-theme .source-body {
 
   <div class="section">
     <h2>AI Analysis Response</h2>
-    <div class="answer-body">${answer}</div>
+    <div class="answer-body">${renderMarkdown(answer)}</div>
   </div>
 
   ${sourcesHTML}

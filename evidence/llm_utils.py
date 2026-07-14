@@ -16,6 +16,10 @@ GLM_MODEL = os.getenv("GLM_MODEL", "glm-5.1")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+GMIN = os.getenv("GMIN", "false").lower() == "true"
+
 DEFAULT_LLM_PROVIDER = os.getenv("DEFAULT_LLM_PROVIDER", "glm").lower()
 
 
@@ -297,6 +301,46 @@ def generate_with_groq(prompt, model=None):
     raise Exception("Groq returned an empty response")
 
 
+def generate_with_gemini(prompt, model=None):
+    if (not GEMINI_API_KEY or 
+        GEMINI_API_KEY.strip() == "" or 
+        "your_gemini" in GEMINI_API_KEY or 
+        "placeholder" in GEMINI_API_KEY or 
+        "replace-me" in GEMINI_API_KEY):
+        raise ValueError("GEMINI_API_KEY is not configured. Please open your .env file and replace the placeholder value with your actual, live Gemini API Key.")
+    
+    model = model or GEMINI_MODEL
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={GEMINI_API_KEY}"
+    
+    headers = {
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }],
+        "generationConfig": {
+            "temperature": 0.2,
+            "maxOutputTokens": 800,
+        }
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        data = response.json()
+        
+        candidates = data.get("candidates", [])
+        if candidates:
+            parts = candidates[0].get("content", {}).get("parts", [])
+            if parts:
+                return parts[0].get("text", "").strip()
+        
+        raise Exception("Gemini returned an empty response")
+    except Exception as e:
+        raise Exception(f"Gemini API request failed: {e}")
+
+
 def generate_rag_answer(question, retrieved_chunks, provider=None):
     provider = (provider or DEFAULT_LLM_PROVIDER).lower()
 
@@ -309,10 +353,17 @@ def generate_rag_answer(question, retrieved_chunks, provider=None):
     prompt = build_rag_prompt(question, retrieved_chunks)
 
     if provider == "ollama":
+        print(f"\n[INFO] Using LLM Provider: Ollama | Model: {OLLAMA_MODEL}\n")
         answer = generate_with_ollama(prompt)
     elif provider == "glm":
-        answer = generate_with_glm(prompt)
+        if GMIN:
+            print(f"\n[INFO] Using LLM Provider: Gemini | Model: {GEMINI_MODEL}\n")
+            answer = generate_with_gemini(prompt)
+        else:
+            print(f"\n[INFO] Using LLM Provider: GLM | Model: {GLM_MODEL}\n")
+            answer = generate_with_glm(prompt)
     elif provider == "groq":
+        print(f"\n[INFO] Using LLM Provider: Groq | Model: {GROQ_MODEL}\n")
         answer = generate_with_groq(prompt)
     else:
         raise ValueError(f"Unsupported provider: {provider}")

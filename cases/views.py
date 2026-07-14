@@ -54,8 +54,7 @@ def profile(request):
         "plans": plans,
         "remaining_days": remaining_days,
         "password_changed_date": "Not trackable directly via standard user model",
-
-
+        "total_cases": Case.objects.filter(created_by=user).count(),
     })
 @subscription_required
 @login_required

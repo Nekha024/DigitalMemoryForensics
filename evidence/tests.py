@@ -51,6 +51,10 @@ class EvidenceVectorTests(TestCase):
         self.mock_chroma_client = self.chroma_patcher.start()
         self.ephemeral_client = chromadb.EphemeralClient()
         self.mock_chroma_client.return_value = self.ephemeral_client
+        try:
+            self.ephemeral_client.delete_collection("evidence_chunks")
+        except Exception:
+            pass
 
         # Patch SentenceTransformer to avoid loading 120MB model from network
         self.model_patcher = patch('evidence.vector_utils.get_embedding_model')
@@ -120,14 +124,23 @@ class EvidenceViewsTests(TestCase):
         self.mock_chroma_client = self.chroma_patcher.start()
         self.ephemeral_client = chromadb.EphemeralClient()
         self.mock_chroma_client.return_value = self.ephemeral_client
+        try:
+            self.ephemeral_client.delete_collection("evidence_chunks")
+        except Exception:
+            pass
 
         self.model_patcher = patch('evidence.vector_utils.get_embedding_model')
         self.mock_get_model = self.model_patcher.start()
         self.mock_get_model.return_value = MockSentenceTransformer()
 
+        # Patch GMIN to False by default so local .env settings don't break standard tests
+        self.gmin_patcher = patch('evidence.llm_utils.GMIN', False)
+        self.gmin_patcher.start()
+
     def tearDown(self):
         self.chroma_patcher.stop()
         self.model_patcher.stop()
+        self.gmin_patcher.stop()
         get_chroma_client.cache_clear()
         get_embedding_model.cache_clear()
 
@@ -204,4 +217,29 @@ class EvidenceViewsTests(TestCase):
             self.assertTrue(data['ok'])
             self.assertEqual(data['provider'], 'glm')
             self.assertIn("John Doe", data['data']['answer'])
+            self.assertEqual(len(data['data']['sources']), 1)
+
+    def test_rag_query_ajax_gemini_success(self):
+        # Create chunk so it's not empty
+        evidence = EvidenceFile.objects.create(
+            case=self.case,
+            title="Details",
+            file=SimpleUploadedFile("details.txt", b"The suspect is John Doe."),
+            file_type="txt",
+            extracted_text="The suspect is John Doe."
+        )
+        from evidence.vector_utils import index_evidence_file
+        index_evidence_file(evidence)
+
+        # Mock the Gemini API response
+        with patch('evidence.llm_utils.generate_with_gemini') as mock_gemini, \
+             patch('evidence.llm_utils.GMIN', True):
+            mock_gemini.return_value = "Based on Gemini, the suspect is John Doe."
+            
+            response = self.client.get(reverse('rag_query_ajax') + f"?q=suspect&case_id={self.case.id}&provider=glm")
+            self.assertEqual(response.status_code, 200)
+            data = response.json()
+            self.assertTrue(data['ok'])
+            self.assertEqual(data['provider'], 'glm')
+            self.assertIn("Gemini, the suspect is John Doe", data['data']['answer'])
             self.assertEqual(len(data['data']['sources']), 1)

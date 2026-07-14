@@ -78,7 +78,8 @@ class CasesViewTests(TestCase):
         response = self.client.post(reverse('create_case'), {
             'title': 'New Forensic Case',
             'description': 'Description of forensic case',
-            'status': 'open'
+            'status': 'open',
+            'case_type': 'memory'
         })
         self.assertRedirects(response, reverse('home'))
         self.assertTrue(Case.objects.filter(title='New Forensic Case', created_by=self.user).exists())
