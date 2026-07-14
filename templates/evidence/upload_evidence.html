@@ -1,50 +1,313 @@
 {% extends "base.html" %}
 
-{% block title %}Upload Evidence{% endblock %}
+{% block title %}Upload Evidence File{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
+<!-- Custom Font & Styles -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <div class="glass p-8 rounded-3xl">
+<style>
+    .ingest-container {
+        font-family: 'Inter', sans-serif;
+    }
 
-        <h2 class="text-2xl text-cyan-400 font-bold tracking-wide mb-6">
-            Upload Evidence
-        </h2>
+    /* Form control custom theme overrides inside container */
+    .ingest-form select,
+    .ingest-form input[type="text"] {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-main);
+        outline: none;
+        transition: all 0.3s ease;
+        margin-top: 6px;
+        font-size: 0.9rem;
+    }
+    .ingest-form select:focus,
+    .ingest-form input[type="text"]:focus {
+        border-color: #06b6d4;
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+    }
+    body.light-theme .ingest-form select,
+    body.light-theme .ingest-form input[type="text"] {
+        background: rgba(0, 0, 0, 0.02);
+        border-color: var(--border);
+    }
 
-        <form method="post" enctype="multipart/form-data" class="space-y-4">
-            {% csrf_token %}
+    /* Scoped theme overrides for layout elements */
+    .ingest-container .text-white {
+        color: var(--text-main) !important;
+    }
+    .ingest-container .text-slate-400 {
+        color: var(--text-muted) !important;
+    }
+    .ingest-container .text-slate-300 {
+        color: var(--text-muted) !important;
+    }
+    .ingest-container .border-slate-800 {
+        border-color: var(--border) !important;
+    }
 
-            {% for field in form %}
-                <div class="flex flex-col">
-                    <label class="text-slate-400 text-sm font-medium tracking-wide">
-                        {{ field.label }}
-                    </label>
+    /* Drag and Drop Zone styling */
+    .drag-zone {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body.light-theme .drag-zone {
+        background: rgba(0, 0, 0, 0.01);
+    }
+</style>
 
-                    {{ field }}
-
-                    {% if field.errors %}
-                        <p class="text-red-400 text-xs mt-1 font-medium">
-                            {{ field.errors|striptags }}
-                        </p>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <div class="flex justify-between items-center pt-4 mt-6">
-
-                <a href="{% url 'home' %}" class="btn-outline flex items-center justify-center text-sm font-semibold">
-                    ← Cancel
-                </a>
-
-                <button type="submit" class="btn-primary">
-                    Upload
-                </button>
-
-            </div>
-
-        </form>
-
+<div class="ingest-container max-w-xl mx-auto py-2">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 px-1">
+        <a href="{% url 'home' %}" class="hover:text-cyan-400 transition">Case Repositories</a>
+        <span class="text-slate-600">/</span>
+        <span class="text-white">Ingest Evidence</span>
     </div>
 
+    <div class="glass p-5 rounded-2xl border border-slate-800 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+
+        <!-- FORM CONTROLS PANEL -->
+        <div id="formBox" class="relative z-10">
+            <div class="flex items-center gap-3 mb-3.5">
+                <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-sm">
+                    <i class="fa-solid fa-file-shield animate-pulse"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-extrabold text-white tracking-tight">Ingest Forensic File</h2>
+                    <p class="text-[10px] text-slate-400">Add a file to the Vector Database for semantic queries.</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="ingest-form space-y-3.5" id="ingestForm">
+                {% csrf_token %}
+
+                {% for field in form %}
+                    {% if field.name == 'file' %}
+                        <!-- Hidden Raw File Field -->
+                        <div style="display: none;">
+                            {{ field }}
+                        </div>
+                    {% else %}
+                        <!-- Case Selector & Title Inputs -->
+                        <div class="flex flex-col">
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <p class="text-red-400 text-xs mt-1.5 font-medium px-1">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> {{ field.errors|striptags }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Custom Drag and Drop Area -->
+                <div class="flex flex-col">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-1">
+                        Evidence Document File
+                    </label>
+                    
+                    <div class="drag-zone border-2 border-dashed border-slate-800 rounded-2xl py-4 px-6 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/40 transition-all duration-300 relative overflow-hidden" id="dropzone">
+                        <div class="icon-container w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-base mb-1.5 shadow-md">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs font-bold text-white mb-0.5">Drag and drop file here</p>
+                            <p class="text-[10px] text-slate-400">or <span class="text-cyan-400 hover:underline">browse files</span></p>
+                        </div>
+                        <p class="text-[9px] text-slate-500 mt-2 uppercase tracking-wider font-semibold">Supports PDF, TXT, DOCX (Max 50MB)</p>
+                    </div>
+
+                    <!-- Selected File Preview Card -->
+                    <div class="file-preview-card hidden p-3 rounded-xl border border-slate-800 bg-slate-950/40 flex items-center justify-between" id="filePreview">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-base">
+                                <i class="fa-solid fa-file-invoice"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-white block truncate max-w-xs" id="fileName">evidence_report.txt</span>
+                                <span class="text-[9px] text-slate-400 block" id="fileSize">142 KB</span>
+                            </div>
+                        </div>
+                        <button type="button" class="text-slate-500 hover:text-red-400 transition p-1.5" id="removeFileBtn">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Form Controls Footer -->
+                <div class="flex justify-between items-center pt-3 border-t border-slate-800">
+                    <a href="{% url 'home' %}" class="btn-outline text-[10px] py-2 px-3.5 font-bold uppercase tracking-wider">
+                        ← Cancel
+                    </a>
+
+                    <button type="submit" class="btn-primary text-[10px] py-2 px-4 font-bold uppercase tracking-wider">
+                        Ingest File
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- SUBMIT FORENSIC SCANNER LOADING SCREEN -->
+        <div id="loadingScreen" class="hidden text-center py-5 relative z-10">
+            <div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                <!-- Circular spinner animation border -->
+                <div class="absolute inset-0 rounded-full border-4 border-cyan-500/10 border-t-cyan-400 animate-spin"></div>
+                <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-base shadow-md">
+                    <i class="fa-solid fa-fingerprint animate-pulse text-lg"></i>
+                </div>
+            </div>
+            
+            <h3 class="text-lg font-extrabold text-white tracking-tight mb-1">Ingesting Evidence Repository</h3>
+            <p class="text-[10px] text-slate-400 mb-4 max-w-sm mx-auto">Please wait while the system secure logs are processed and extracted into the database.</p>
+            
+            <!-- Progress Bar -->
+            <div class="w-full max-w-md mx-auto bg-slate-900 rounded-full h-1 overflow-hidden border border-slate-800 mb-4">
+                <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full" style="width: 0%;" id="progressBar"></div>
+            </div>
+            
+            <!-- Status Checklist Simulation -->
+            <div class="max-w-xs mx-auto text-left text-[10px] font-mono space-y-2 text-slate-400">
+                <div class="flex items-center gap-2" id="step1">
+                    <i class="fa-solid fa-circle-notch animate-spin text-cyan-400" id="step1-icon"></i>
+                    <span id="step1-text">Hashing evidence files...</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-slate-600" id="step2">
+                    <i class="fa-solid fa-circle text-[6px]" id="step2-icon"></i>
+                    <span id="step2-text">Running file binary block index...</span>
+                </div>
+                <div class="flex items-center gap-2.5 text-slate-600" id="step3">
+                    <i class="fa-solid fa-circle text-[6px]" id="step3-icon"></i>
+                    <span id="step3-text">Extracting plaintext strings...</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.querySelector('input[type="file"]');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFileBtn = document.getElementById('removeFileBtn');
+    
+    const form = document.getElementById('ingestForm');
+    const formBox = document.getElementById('formBox');
+    const loadingScreen = document.getElementById('loadingScreen');
+    const progressBar = document.getElementById('progressBar');
+
+    // Click dropzone to trigger input file select
+    dropzone.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+        handleFileSelect(fileInput.files[0]);
+    });
+
+    // Drag-and-drop event management
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-slate-800');
+        dropzone.classList.add('border-cyan-500', 'bg-cyan-500/5');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-cyan-500', 'bg-cyan-500/5');
+        dropzone.classList.add('border-slate-800');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-cyan-500', 'bg-cyan-500/5');
+        dropzone.classList.add('border-slate-800');
+        if (e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            handleFileSelect(e.dataTransfer.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        if (!file) return;
+        
+        fileName.textContent = file.name;
+        
+        let sizeText = '';
+        if (file.size > 1024 * 1024) {
+            sizeText = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        } else {
+            sizeText = (file.size / 1024).toFixed(2) + ' KB';
+        }
+        fileSize.textContent = sizeText;
+        
+        filePreview.classList.remove('hidden');
+        dropzone.classList.add('hidden');
+    }
+
+    removeFileBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        filePreview.classList.add('hidden');
+        dropzone.classList.remove('hidden');
+    });
+
+    // Form submission processing loader
+    form.addEventListener('submit', (e) => {
+        if (!fileInput.files || fileInput.files.length === 0) {
+            e.preventDefault();
+            alert('Please select an evidence document file first.');
+            return;
+        }
+
+        formBox.classList.add('hidden');
+        loadingScreen.classList.remove('hidden');
+        simulateIngestScan();
+    });
+
+    function simulateIngestScan() {
+        let width = 0;
+        const interval = setInterval(() => {
+            if (width >= 99) {
+                clearInterval(interval);
+            } else {
+                width += 1;
+                progressBar.style.width = width + '%';
+                
+                if (width === 25) {
+                    document.getElementById('step1-icon').className = 'fa-solid fa-circle-check text-emerald-400';
+                    document.getElementById('step1').classList.remove('text-slate-400');
+                    document.getElementById('step1').classList.add('text-emerald-400');
+                    
+                    document.getElementById('step2-icon').className = 'fa-solid fa-circle-notch animate-spin text-cyan-400';
+                    document.getElementById('step2').classList.remove('text-slate-600');
+                    document.getElementById('step2').classList.add('text-slate-400');
+                }
+                
+                if (width === 65) {
+                    document.getElementById('step2-icon').className = 'fa-solid fa-circle-check text-emerald-400';
+                    document.getElementById('step2').classList.remove('text-slate-400');
+                    document.getElementById('step2').classList.add('text-emerald-400');
+                    
+                    document.getElementById('step3-icon').className = 'fa-solid fa-circle-notch animate-spin text-cyan-400';
+                    document.getElementById('step3').classList.remove('text-slate-600');
+                    document.getElementById('step3').classList.add('text-slate-400');
+                    document.getElementById('step3-text').textContent = 'Extracting plaintext strings...';
+                }
+                
+                if (width === 88) {
+                    document.getElementById('step3-text').textContent = 'Indexing segments in vector database...';
+                }
+            }
+        }, 70);
+    }
+</script>
 {% endblock %}

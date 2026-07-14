@@ -29,4 +29,7 @@ urlpatterns = [
         ),
         name='password_changed'
     ),
+
+    path('cases/<int:case_id>/delete/', views.delete_case, name='delete_case'),
+    path('cases/<int:case_id>/toggle-status/', views.toggle_case_status, name='toggle_case_status'),
 ]

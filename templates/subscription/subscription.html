@@ -1,668 +1,286 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Subscription Plans</title>
-
+<!-- Custom Font & Scoped Styles -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Plus Jakarta Sans',sans-serif;
-}
-/* BACKGROUND */
-
-body::before{
-    content:'';
-    position:fixed;
-    inset:0;
-
-    background:
-    radial-gradient(circle at 20% 30%, rgba(0,255,255,.12), transparent 35%),
-    radial-gradient(circle at 80% 70%, rgba(0,180,255,.10), transparent 35%),
-    radial-gradient(circle at 50% 50%, rgba(0,120,255,.08), transparent 45%);
-
-    z-index:-2;
-
-    animation:bgMove 10s ease-in-out infinite alternate;
-}
-
-body::after{
-    content:'';
-    position:fixed;
-    inset:0;
-
-    background-image:
-    linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
-
-    background-size:40px 40px;
-
-    z-index:-1;
-}
-
-@keyframes bgMove{
-    from{
-        transform:scale(1);
+    .sub-wrapper {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
     }
-    to{
-        transform:scale(1.05);
+    
+    .sub-title {
+        text-align: center;
+        margin-bottom: 30px;
     }
-}
-
-.wrapper{
-    width:100%;
-    scale: 0.95;
-    margin-top: -100px;
-    max-width:1300px;
-}
-
-/* TITLE */
-
-.title{
-    text-align:center;
-    margin-bottom:40px;
-
-    animation:fadeDown 1s ease;
-}
-
-.title h1{
-    font-size:56px;
-    font-weight:800;
-    margin-bottom:15px;
-
-    background:linear-gradient(to right,#00d9ff,#00aaff,#66ffff);
-
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-
-    text-shadow:0 0 20px rgba(0,217,255,.35);
-}
-
-.title p{
-    color:#9cc7d8;
-    font-size:17px;
-}
-
-/* TOGGLE */
-
-.toggle-wrapper{
-
-    width:max-content;
-
-    margin:auto;
-    margin-bottom:60px;
-
-    padding:8px;
-
-    border-radius:18px;
-
-    background:rgba(0,20,40,.55);
-
-    border:1px solid rgba(0,217,255,.15);
-
-    backdrop-filter:blur(18px);
-
-    display:flex;
-    gap:10px;
-
-    box-shadow:
-    0 0 20px rgba(0,217,255,.08);
-
-    animation:fadeUp 1s ease;
-}
-
-.toggle-btn{
-
-    padding:12px 24px;
-
-    border:none;
-    border-radius:12px;
-
-    background:transparent;
-
-    color:#b7d5e0;
-
-    font-size:14px;
-    font-weight:700;
-
-    cursor:pointer;
-
-    transition:.35s;
-}
-
-.toggle-btn:hover{
-    transform:translateY(-2px);
-    color:white;
-}
-
-.toggle-btn.active{
-
-    background:linear-gradient(135deg,#00bfff,#00d9ff);
-
-    color:#001018;
-
-    box-shadow:
-    0 0 15px rgba(0,217,255,.45);
-}
-
-/* CARDS */
-
-.container{
-    display:flex;
-    justify-content:center;
-    align-items:stretch;
-    gap:35px;
-    flex-wrap:wrap;
-
-    padding:25px 10px;
-}
-
-.card{
-    width:320px;
-    padding:35px 30px;
-    border-radius:24px;
-
-    background:rgba(0,10,25,.75);
-
-    border:1px solid rgba(78, 78, 76, 0.744);
-
-    backdrop-filter:blur(18px);
-
-    position:relative;
-    overflow:hidden;
-
-    transition:
-    transform .45s ease,
-    box-shadow .45s ease,
-    border .45s ease;
-
-    box-shadow:
-    0 0 20px rgba(0,217,255,.10),
-    inset 0 0 20px rgba(255,255,255,.02);
-
-    opacity:0;
-
-    animation:cardFade .8s ease forwards;
-}
-
-
-.card:nth-child(1){
-    animation-delay:.2s;
-}
-
-.card:nth-child(2){
-    animation-delay:.4s;
-}
-
-.card:nth-child(3){
-    animation-delay:.6s;
-}
-
-.card::before{
-    content:'';
-    position:absolute;
-    top:-120%;
-    left:-40%;
-    width:80%;
-    height:300%;
-
-    background:linear-gradient(
-        120deg,
-        transparent,
-        rgba(255,255,255,.10),
-        transparent
-    );
-
-    transform:rotate(20deg);
-
-    transition:.8s;
-}
-
-.card:hover::before{
-    left:120%;
-}
-
-.card::after{
-    content:'';
-    position:absolute;
-    inset:0;
-
-    background:
-    linear-gradient(
-        120deg,
-        rgba(0,217,255,.10),
-        transparent 40%
-    );
-
-    pointer-events:none;
-}
-
-.card:hover{
-    transform:translateY(-12px) scale(1.03);
-
-    border:1px solid rgba(0,217,255,.45);
-
-    box-shadow:
-    0 0 30px rgba(0,217,255,.28),
-    0 0 60px rgba(0,140,255,.12);
-}
-
-@keyframes cardFade{
-    from{
-        opacity:0;
-        transform:translateY(50px);
+    
+    .sub-title h1 {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(to right, #00d9ff, #00aaff, #66ffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0,217,255,.2);
     }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
+    
+    .sub-title p {
+        color: var(--text-muted);
+        font-size: 14px;
     }
-}
-
-.card h2{
-    font-size:30px;
-    margin-bottom:20px;
-    text-align:center;
-    font-weight:700;
-
-    color:#e6fbff;
-}
-
-.price{
-    font-size:52px;
-    font-weight:800;
-    text-align:center;
-    margin-bottom:25px;
-
-    background:linear-gradient(to right,#00d9ff,#66ffff);
-
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-
-    text-shadow:0 0 15px rgba(0,217,255,.25);
-
-    transition:.4s;
-}
-
-.card:hover .price{
-    transform:scale(1.05);
-}
-
-.description{
-    color:#c2dce7;
-    text-align:center;
-    line-height:1.7;
-    margin-bottom:20px;
-}
-
-.duration{
-    text-align:center;
-    margin-bottom:30px;
-    color:#7fb7c9;
-
-    transition:.3s;
-}
-
-.card:hover .duration{
-    color:#d7f8ff;
-}
-
-/* BUTTON */
-
-.subscribe-btn{
-    width:100%;
-    padding:14px;
-
-    border:none;
-    border-radius:14px;
-
-    background:linear-gradient(135deg,#00bfff,#00d9ff);
-
-    color:#001018;
-
-    font-size:15px;
-    font-weight:800;
-
-    cursor:pointer;
-
-    transition:.35s;
-
-    position:relative;
-    overflow:hidden;
-}
-
-.subscribe-btn::before{
-    content:'';
-    position:absolute;
-    top:0;
-    left:-100%;
-    width:100%;
-    height:100%;
-
-    background:linear-gradient(
-        120deg,
-        transparent,
-        rgba(255,255,255,.5),
-        transparent
-    );
-
-    transition:.6s;
-}
-
-.subscribe-btn:hover::before{
-    left:100%;
-}
-
-.subscribe-btn:hover{
-
-    transform:scale(1.03);
-
-    box-shadow:
-    0 0 20px rgba(0,217,255,.55),
-    0 0 40px rgba(0,180,255,.25);
-}
-
-/* POPULAR CARD */
-
-.popular{
-    border:1px solid rgba(0,217,255,.45);
-
-    box-shadow:
-    0 0 25px rgba(0,217,255,.22);
-    background:25px rgba(0,217,255,.22);
-    z-index:2;
-    animation:
-    cardFade .8s ease forwards,
-    pulse 3s infinite;
-}
-
-
-@keyframes pulse{
-    0%{
-        box-shadow:
-        0 0 20px rgba(0,217,255,.15);
+    
+    /* Toggle */
+    .sub-toggle-wrapper {
+        width: max-content;
+        margin: 0 auto 35px auto;
+        padding: 5px;
+        border-radius: 14px;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid var(--border);
+        display: flex;
+        gap: 8px;
     }
-
-    50%{
-        box-shadow:
-        0 0 35px rgba(0,217,255,.35);
+    
+    .sub-toggle-btn {
+        padding: 8px 18px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .25s;
     }
-
-    100%{
-        box-shadow:
-        0 0 20px rgba(0,217,255,.15);
+    .sub-toggle-btn:hover {
+        color: var(--text-main);
     }
-}
-
-/* BADGE */
-
-.badge{
-    position:absolute;
-    top:18px;
-    right:18px;
-
-    background:#00d9ff;
-    color:#001018;
-
-    padding:6px 12px;
-    border-radius:30px;
-
-    font-size:12px;
-    font-weight:800;
-
-    box-shadow:
-    0 0 12px rgba(0,217,255,.45);
-
-    animation:floatBadge 2s ease-in-out infinite;
-}
-
-@keyframes floatBadge{
-    0%{
-        transform:translateY(0);
+    .sub-toggle-btn.active {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
     }
-
-    50%{
-        transform:translateY(-4px);
+    
+    /* Cards Grid */
+    .sub-grid {
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        gap: 25px;
+        flex-wrap: wrap;
+        padding: 10px 0;
     }
-
-    100%{
-        transform:translateY(0);
+    
+    .sub-card {
+        width: 290px;
+        padding: 30px 25px;
+        border-radius: 20px;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
-}
-
-/* ENTRY ANIMATIONS */
-
-@keyframes fadeDown{
-    from{
-        opacity:0;
-        transform:translateY(-40px);
+    body.light-theme .sub-card {
+        background: rgba(0, 0, 0, 0.02);
     }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
+    
+    .sub-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(6, 182, 212, 0.45);
+        box-shadow: 0 8px 30px rgba(6, 182, 212, 0.15);
     }
-}
-
-@keyframes fadeUp{
-    from{
-        opacity:0;
-        transform:translateY(40px);
+    
+    .sub-card h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: 700;
+        color: var(--text-main);
     }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
+    
+    /* Price */
+    .sub-price {
+        font-size: 40px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 20px;
+        background: linear-gradient(to right, #06b6d4, #00d9ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
     }
-}
-
-@keyframes cardEntry{
-    from{
-        opacity:0;
-        transform:translateY(60px);
+    body.light-theme .sub-price {
+        background: linear-gradient(to right, #0891b2, #06b6d4);
+        -webkit-background-clip: text;
     }
-
-    to{
-        opacity:1;
-        transform:translateY(0);
+    
+    .sub-desc {
+        color: var(--text-muted);
+        text-align: center;
+        line-height: 1.6;
+        font-size: 13px;
+        margin-bottom: 20px;
+        flex-grow: 1;
     }
-}
-
-@media(max-width:1000px){
-
-    .container{
-        flex-direction:column;
-        align-items:center;
+    
+    .sub-duration {
+        text-align: center;
+        margin-bottom: 25px;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
     }
-
-    .popular{
-        transform:none;
+    
+    /* Subscribe Button */
+    .sub-subscribe-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .3s;
     }
-
-    .title h1{
-        font-size:42px;
+    .sub-subscribe-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
     }
-}
-
+    
+    /* Popular Badge */
+    .sub-card.popular {
+        border-color: rgba(6, 182, 212, 0.45);
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+    }
+    .sub-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #06b6d4;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
 </style>
 
-</head>
-
-<body>
-
-<div class="wrapper">
-
-    <div class="title">
-
+<div class="sub-wrapper">
+    <div class="sub-title">
         <h1>Subscription Plans</h1>
-
-        <p>
-            Choose the perfect package
-        </p>
-
+        <p>Choose the perfect forensic ingestion package</p>
     </div>
 
-    <!-- TOGGLE -->
-
-    <div class="toggle-wrapper">
-
-        <button class="toggle-btn active" data-type="month">
+    <!-- Toggle -->
+    <div class="sub-toggle-wrapper">
+        <button class="sub-toggle-btn active" data-type="month">
             1 Month
         </button>
-
-        <button class="toggle-btn" data-type="six">
+        <button class="sub-toggle-btn" data-type="six">
             6 Months
         </button>
-
-        <button class="toggle-btn" data-type="year">
+        <button class="sub-toggle-btn" data-type="year">
             1 Year
         </button>
-
     </div>
 
-    <!-- CARDS -->
-
-    <div class="container">
-
+    <!-- Cards Grid -->
+    <div class="sub-grid">
         {% for plan in plans %}
-
-        <div class="card {% if forloop.counter == 2 %}popular{% endif %}">
-
+        <div class="sub-card {% if forloop.counter == 2 %}popular{% endif %}">
             {% if forloop.counter == 2 %}
-            <div class="badge">
+            <div class="sub-badge">
                 POPULAR
             </div>
             {% endif %}
 
             <h2>{{ plan.name }}</h2>
 
-            <!-- PRICE -->
-
-            <div class="price"
+            <!-- Price -->
+            <div class="sub-price"
                  data-month="{{ plan.price }}"
                  data-six="{% if plan.name == 'SILVER' %}799{% elif plan.name == 'GOLD' %}1099{% else %}1599{% endif %}"
                  data-year="{% if plan.name == 'SILVER' %}1499{% elif plan.name == 'GOLD' %}1999{% else %}2999{% endif %}">
-
                 ₹{{ plan.price }}
-
             </div>
 
-            <p class="description">
+            <p class="sub-desc">
                 {{ plan.description }}
             </p>
 
-            <!-- DURATION -->
-
-            <p class="duration">
+            <!-- Duration -->
+            <p class="sub-duration">
                 1 Month Access
             </p>
 
-            <form method="POST">
-
+            <form method="POST" class="m-0">
                 {% csrf_token %}
-
                 <input type="hidden" name="plan_id" value="{{ plan.id }}">
                 <input type="hidden" name="billing_type" value="month" class="billing-input">
-                <button type="submit" class="subscribe-btn">
+                <button type="submit" class="sub-subscribe-btn">
                     Subscribe
                 </button>
-
             </form>
-
         </div>
-
         {% endfor %}
-
     </div>
-
 </div>
 
 <script>
+    const buttons = document.querySelectorAll(".sub-toggle-btn");
+    const prices = document.querySelectorAll(".sub-price");
+    const billingInputs = document.querySelectorAll(".billing-input");
+    const durations = document.querySelectorAll(".sub-duration");
 
-const buttons = document.querySelectorAll(".toggle-btn");
+    buttons.forEach(button => {
+        button.addEventListener("click", () => {
+            buttons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
 
-const prices = document.querySelectorAll(".price");
+            const type = button.getAttribute("data-type");
 
-const billingInputs = document.querySelectorAll(".billing-input");
+            prices.forEach(price => {
+                const value = price.getAttribute(`data-${type}`);
+                price.style.transform = "scale(1.1)";
+                price.style.opacity = "0.5";
 
-const durations = document.querySelectorAll(".duration");
+                setTimeout(() => {
+                    price.innerHTML = `₹${value}`;
+                    price.style.transform = "scale(1)";
+                    price.style.opacity = "1";
+                }, 180);
+            });
 
-buttons.forEach(button => {
+            billingInputs.forEach(input => {
+                input.value = type;
+            });
 
-    button.addEventListener("click", () => {
+            durations.forEach(duration => {
+                duration.style.opacity = "0";
 
-        buttons.forEach(btn => btn.classList.remove("active"));
-
-        button.classList.add("active");
-
-        const type = button.getAttribute("data-type");
-
-        prices.forEach(price => {
-
-            const value = price.getAttribute(`data-${type}`);
-
-            price.style.transform = "scale(1.15)";
-            price.style.opacity = "0.5";
-
-            setTimeout(() => {
-
-                price.innerHTML = `₹${value}`;
-
-                price.style.transform = "scale(1)";
-                price.style.opacity = "1";
-
-            }, 180);
-
+                setTimeout(() => {
+                    if (type === "month") {
+                        duration.innerHTML = "1 Month Access";
+                    } else if (type === "six") {
+                        duration.innerHTML = "6 Months Access";
+                    } else {
+                        duration.innerHTML = "1 Year Access";
+                    }
+                    duration.style.opacity = "1";
+                }, 180);
+            });
         });
-        billingInputs.forEach(input => {
-    input.value = type;
-});
-
-        durations.forEach(duration => {
-
-            duration.style.opacity = "0";
-
-            setTimeout(() => {
-
-                if(type === "month"){
-                    duration.innerHTML = "1 Month Access";
-                }
-
-                else if(type === "six"){
-                    duration.innerHTML = "6 Months Access";
-                }
-
-                else{
-                    duration.innerHTML = "1 Year Access";
-                }
-
-                duration.style.opacity = "1";
-
-            }, 180);
-
-        });
-
     });
-
-});
-
 </script>
-
-</body>
-</html>
-
 {% endblock %}

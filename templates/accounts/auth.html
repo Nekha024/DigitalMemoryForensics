@@ -439,13 +439,30 @@
                         <label>Email Address</label>
                     </div>
 
-                    <div class="input-box">
-                        <input type="password" name="password" required>
+                    <div class="input-box" style="margin-bottom: 12px;">
+                        <input type="password" name="password" id="reg-password" required>
                         <label>Password</label>
                     </div>
+                    
+                    <!-- Requirements Checklist -->
+                    <ul id="password-checks" style="list-style: none; padding: 0; margin: 0 0 18px 0; display: none; font-size: 0.72rem; color: #94a3b8; font-family: monospace;" class="space-y-1">
+                        <li id="rule-length" style="display: flex; align-items: center; gap: 6px; color: #475569;">
+                            <i class="fa-solid fa-circle" id="icon-length" style="font-size: 5px;"></i> At least 8 characters
+                        </li>
+                        <li id="rule-upper" style="display: flex; align-items: center; gap: 6px; color: #475569;">
+                            <i class="fa-solid fa-circle" id="icon-upper" style="font-size: 5px;"></i> One uppercase letter
+                        </li>
+                        <li id="rule-number" style="display: flex; align-items: center; gap: 6px; color: #475569;">
+                            <i class="fa-solid fa-circle" id="icon-number" style="font-size: 5px;"></i> One number digit
+                        </li>
+                        <li id="rule-special" style="display: flex; align-items: center; gap: 6px; color: #475569;">
+                            <i class="fa-solid fa-circle" id="icon-special" style="font-size: 5px;"></i> One special symbol
+                        </li>
+                    </ul>
 
                     <div class="input-box">
-                        <input type="password" name="confirm" required>
+                        <input type="password" name="confirm" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$" 
+                        title="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.">
                         <label>Confirm Password</label>
                     </div>
 
@@ -538,6 +555,44 @@
                 panelDesc.textContent = "Reset your password with a secure OTP.";
             }
         });
+
+        // Biometric Password Strength Validation
+        const regPasswordInput = document.getElementById('reg-password');
+        const passwordChecksList = document.getElementById('password-checks');
+        
+        const ruleLength = document.getElementById('rule-length');
+        const iconLength = document.getElementById('icon-length');
+        const ruleUpper = document.getElementById('rule-upper');
+        const iconUpper = document.getElementById('icon-upper');
+        const ruleNumber = document.getElementById('rule-number');
+        const iconNumber = document.getElementById('icon-number');
+        const ruleSpecial = document.getElementById('rule-special');
+        const iconSpecial = document.getElementById('icon-special');
+
+        regPasswordInput.addEventListener('focus', () => {
+            passwordChecksList.style.display = 'block';
+        });
+
+        regPasswordInput.addEventListener('input', () => {
+            const val = regPasswordInput.value;
+
+            validateRule(val.length >= 8, ruleLength, iconLength);
+            validateRule(/[A-Z]/.test(val), ruleUpper, iconUpper);
+            validateRule(/[0-9]/.test(val), ruleNumber, iconNumber);
+            validateRule(/[!@#$%^&*(),.?":{}|<>]/.test(val), ruleSpecial, iconSpecial);
+        });
+
+        function validateRule(isPassed, element, icon) {
+            if (isPassed) {
+                element.style.color = '#34d399'; // Emerald green
+                icon.className = 'fa-solid fa-circle-check';
+                icon.style.fontSize = '8px';
+            } else {
+                element.style.color = '#475569'; // Slate muted
+                icon.className = 'fa-solid fa-circle';
+                icon.style.fontSize = '5px';
+            }
+        }
     </script>
 
 </body>

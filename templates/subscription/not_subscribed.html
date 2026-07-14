@@ -1,47 +1,112 @@
 {% extends "base.html" %}
 
-{% block title %}Subscription Required{% endblock %}
+{% block title %}Subscription Required - Memoir Console{% endblock %}
 
 {% block content %}
+<!-- Custom Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-<div class="max-w-2xl mx-auto mt-20">
+<style>
+    .not-subscribed-container {
+        font-family: 'Outfit', sans-serif;
+    }
+    
+    .glow-ring {
+        box-shadow: 0 0 35px rgba(6, 182, 212, 0.2);
+        border-color: rgba(6, 182, 212, 0.3) !important;
+    }
+    
+    .glow-expired {
+        box-shadow: 0 0 35px rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+    
+    .grid-bg-lock {
+        background-image:
+            linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+</style>
+
+<div class="not-subscribed-container max-w-2xl mx-auto mt-12 px-4 py-8">
 
     {% if subscription_status == "none" %}
-    <div class="glass p-8 rounded-xl text-center">
+    <!-- Case: User has no active subscription -->
+    <div class="glass p-8 rounded-3xl border border-slate-800 text-center grid-bg-lock relative overflow-hidden glow-ring">
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <!-- Padlock Icon -->
+        <div class="w-20 h-20 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-3xl mx-auto mb-6 shadow-lg shadow-cyan-500/5 animate-pulse">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
 
-        <h2 class="text-2xl text-cyan-400 mb-6">Subscription Required</h2>
-
-        <p class="text-gray-300 mb-6">
-            You need to subscribe to access this feature.
+        <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest block mb-2">Access Denied</span>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-4">Subscription Required</h2>
+        
+        <p class="text-slate-400 text-sm leading-relaxed mb-8 max-w-md mx-auto">
+            You currently do not have an active subscription token. Choose a plan to initialize case files and begin digital forensics processing.
         </p>
 
-        <a href="{% url 'subscription_page' %}" class="btn">
-            View Subscription Plans
-        </a>
+        <!-- Feature List -->
+        <div class="border border-slate-800/80 bg-slate-950/40 rounded-2xl p-5 mb-8 text-left max-w-md mx-auto space-y-3">
+            <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Unlocked Case Tools:</h4>
+            <div class="flex items-center gap-2.5 text-xs text-slate-300">
+                <i class="fa-solid fa-circle-check text-cyan-400"></i>
+                <span>Ingest unlimited evidence files (PDF, DOCX, TXT, CSV)</span>
+            </div>
+            <div class="flex items-center gap-2.5 text-xs text-slate-300">
+                <i class="fa-solid fa-circle-check text-cyan-400"></i>
+                <span>Automated Dense Vector Embeddings indexing in Qdrant</span>
+            </div>
+            <div class="flex items-center gap-2.5 text-xs text-slate-300">
+                <i class="fa-solid fa-circle-check text-cyan-400"></i>
+                <span>Forensic Semantic Search & RAG AI Analysis reports</span>
+            </div>
+        </div>
 
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="{% url 'subscription_page' %}" class="btn-primary w-full sm:w-auto text-sm py-2.5 px-6">
+                <i class="fa-solid fa-credit-card mr-1.5"></i> View Subscription Plans
+            </a>
+            <a href="{% url 'profile' %}" class="btn-outline w-full sm:w-auto text-sm py-2.5 px-6 font-semibold">
+                Go to Profile
+            </a>
+        </div>
     </div>
     {% endif %}
 
-
     {% if subscription_status == "expired" %}
-    <!-- Subscription expired message -->
-    <div class="glass p-8 rounded-xl text-center mt-6">
+    <!-- Case: User's subscription has expired -->
+    <div class="glass p-8 rounded-3xl border border-slate-800 text-center grid-bg-lock relative overflow-hidden glow-expired">
+        <div class="absolute -top-24 -right-24 w-48 h-48 bg-rose-500/5 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <!-- Expired Icon -->
+        <div class="w-20 h-20 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-3xl mx-auto mb-6 shadow-lg shadow-rose-500/5">
+            <i class="fa-solid fa-hourglass-empty"></i>
+        </div>
 
-        <h2 class="text-2xl text-cyan-400 mb-6">
-            Subscription Expired
-        </h2>
-
-        <p class="text-gray-300 mb-6">
-            Your subscription has expired. Please renew to continue accessing all features.
+        <span class="text-xs font-bold text-rose-400 uppercase tracking-widest block mb-2">Token Expired</span>
+        <h2 class="text-2xl md:text-3xl font-extrabold text-white tracking-tight mb-4">Subscription Expired</h2>
+        
+        <p class="text-slate-400 text-sm leading-relaxed mb-8 max-w-md mx-auto">
+            Your Memoir investigation plan has run its course. To continue tracking data, running vector queries, and managing case logs, please renew your subscription.
         </p>
 
-        <a href="{% url 'subscription_page' %}" class="btn">
-            Renew Subscription
-        </a>
-
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="{% url 'subscription_page' %}" class="btn-primary w-full sm:w-auto text-sm py-2.5 px-6 bg-gradient-to-r from-rose-500 to-red-600 hover:shadow-rose-500/20">
+                <i class="fa-solid fa-rotate mr-1.5"></i> Renew Subscription
+            </a>
+            <a href="{% url 'profile' %}" class="btn-outline w-full sm:w-auto text-sm py-2.5 px-6 font-semibold">
+                Go to Profile
+            </a>
+        </div>
     </div>
     {% endif %}
 
 </div>
-
 {% endblock %}

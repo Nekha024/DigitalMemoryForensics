@@ -62,7 +62,7 @@ def index_evidence(request, evidence_id):
 
     return redirect('evidence_detail', evidence_id=evidence.id)
 
-
+@subscription_required
 @login_required
 def semantic_search(request):
     query = request.GET.get('q', '')
@@ -84,7 +84,7 @@ def semantic_search(request):
         'selected_case_id': selected_case_id,
     })
 
-
+@subscription_required
 @login_required
 def rag_query(request):
     question = request.GET.get('q', '')
@@ -154,3 +154,42 @@ def rag_query_ajax(request):
 
     except Exception as e:
         return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+
+
+
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from subscription.decorators import subscription_required
+from .models import EvidenceFile
+from .vector_utils import get_collection
+import os
+
+@login_required
+@subscription_required
+@require_POST
+def delete_evidence(request, evidence_id):
+    # Retrieve evidence and ensure access permission
+    evidence = get_object_or_404(EvidenceFile, id=evidence_id, case__created_by=request.user)
+    case_id = evidence.case.id
+    evidence_title = evidence.title
+
+    # 1. CLEAN CHROMADB VECTOR EMBEDDINGS
+    try:
+        collection = get_collection()
+        # Delete vectors where evidence_id matches
+        collection.delete(where={"evidence_id": int(evidence_id)})
+    except Exception:
+        pass
+
+    # 2. DELETE PHYSICAL FILE FROM DISK
+    if evidence.file and os.path.exists(evidence.file.path):
+        os.remove(evidence.file.path)
+
+    # 3. DELETE FROM DB
+    evidence.delete()
+
+    messages.success(request, f"Evidence '{evidence_title}' deleted successfully.")
+    return redirect('case_detail', case_id=case_id)
