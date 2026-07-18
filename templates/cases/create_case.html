@@ -49,8 +49,48 @@
     .case-container .text-slate-400 {
         color: var(--text-muted) !important;
     }
-    .case-container .border-white\/5 {
-        border-color: var(--border) !important;
+    
+    /* Dropdown Styling */
+    select {
+        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E") !important;
+        background-position: right 14px center !important;
+        background-repeat: no-repeat !important;
+        background-size: 20px !important;
+        padding-right: 40px !important;
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text-main) !important;
+        outline: none;
+    }
+    
+    select option {
+        background: #0f172a !important;
+        color: #ffffff !important;
+    }
+    
+    body.light-theme select {
+        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E") !important;
+        background-position: right 14px center !important;
+        background-repeat: no-repeat !important;
+        background-size: 20px !important;
+        background-color: #ffffff !important;
+        border-color: rgba(15, 23, 42, 0.12) !important;
+        color: #0f172a !important;
+    }
+    
+    body.light-theme select option {
+        background: #ffffff !important;
+        color: #0f172a !important;
+    }
+    
+    select:focus {
+        border-color: #06b6d4 !important;
+        box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.12) !important;
+    }
+    
+    body.light-theme select:focus {
+        border-color: #0891b2 !important;
+        box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.12) !important;
     }
 </style>
 
@@ -81,6 +121,7 @@
         <form method="post" class="space-y-6">
             {% csrf_token %}
 
+            <!-- Case Title -->
             <!-- Case Name & Type Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Case Title -->

@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auth Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
         * {
@@ -266,7 +267,7 @@
 
         .input-box input {
             width: 100%;
-            padding: 10px 0;
+            padding: 10px 30px 10px 0;
             border: none;
             border-bottom: 1px solid #1e293b;
             background: transparent;
@@ -294,6 +295,21 @@
         .input-box input:focus + label,
         .input-box input:valid + label {
             transform: translate3d(0, -22px, 0) scale(0.85);
+            color: #22d3ee;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 5px;
+            top: 12px;
+            color: #475569;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: color 0.2s, text-shadow 0.2s;
+            z-index: 10;
+        }
+
+        .toggle-password:hover {
             color: #22d3ee;
         }
 
@@ -403,6 +419,7 @@
                     <div class="input-box">
                         <input type="password" name="password" required>
                         <label>Password</label>
+                        <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePasswordVisibility(this)"></i>
                     </div>
 
                     <button type="submit" name="login">INITIALIZE SIGN-IN</button>
@@ -442,6 +459,7 @@
                     <div class="input-box" style="margin-bottom: 12px;">
                         <input type="password" name="password" id="reg-password" required>
                         <label>Password</label>
+                        <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePasswordVisibility(this)"></i>
                     </div>
                     
                     <!-- Requirements Checklist -->
@@ -464,6 +482,7 @@
                         <input type="password" name="confirm" required pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$" 
                         title="Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number.">
                         <label>Confirm Password</label>
+                        <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePasswordVisibility(this)"></i>
                     </div>
 
                     <button type="submit" name="signup">REGISTER ACCESS</button>
@@ -591,6 +610,22 @@
                 element.style.color = '#475569'; // Slate muted
                 icon.className = 'fa-solid fa-circle';
                 icon.style.fontSize = '5px';
+            }
+        }
+
+        function togglePasswordVisibility(icon) {
+            const inputBox = icon.closest('.input-box');
+            const input = inputBox.querySelector('input');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                icon.style.color = '#22d3ee';
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                icon.style.color = '#475569';
             }
         }
     </script>

@@ -13,6 +13,37 @@
         font-family: 'Inter', sans-serif;
     }
     
+    /* Header Icon Accent */
+    .search-header-icon {
+        background: rgba(6, 182, 212, 0.1);
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        color: #22d3ee;
+        transition: all 0.3s ease;
+    }
+    body.light-theme .search-header-icon {
+        background: rgba(8, 145, 178, 0.08);
+        border-color: rgba(8, 145, 178, 0.2);
+        color: #0891b2;
+    }
+    
+    /* Query Highlight Accent */
+    .query-highlight {
+        color: #22d3ee;
+    }
+    body.light-theme .query-highlight {
+        color: #0891b2;
+    }
+    
+    /* Document icon wrappers */
+    .doc-icon-wrapper {
+        background: rgba(6, 182, 212, 0.1);
+        color: #22d3ee;
+    }
+    body.light-theme .doc-icon-wrapper {
+        background: rgba(8, 145, 178, 0.08);
+        color: #0891b2;
+    }
+    
     /* Scoring Badges */
     .score-badge {
         font-size: 10px;
@@ -37,6 +68,23 @@
         color: var(--text-muted);
         border: 1px solid rgba(148, 163, 184, 0.2);
     }
+    
+    /* Light Theme Scoring Badges Overrides */
+    body.light-theme .score-high {
+        background: rgba(16, 185, 129, 0.08);
+        color: #047857;
+        border-color: rgba(16, 185, 129, 0.25);
+    }
+    body.light-theme .score-medium {
+        background: rgba(245, 158, 11, 0.08);
+        color: #b45309;
+        border-color: rgba(245, 158, 11, 0.25);
+    }
+    body.light-theme .score-low {
+        background: rgba(100, 116, 139, 0.08);
+        color: #475569;
+        border-color: rgba(100, 116, 139, 0.18);
+    }
 
     /* Result Card Hover Glows */
     .result-card {
@@ -47,11 +95,32 @@
         box-shadow: 0 0 20px rgba(6, 182, 212, 0.05);
         transform: translateY(-2px);
     }
+    body.light-theme .result-card:hover {
+        border-color: rgba(8, 145, 178, 0.4);
+        box-shadow: 0 10px 25px rgba(8, 145, 178, 0.08);
+        transform: translateY(-2px);
+    }
+
+    /* Code/Text Previews */
+    .content-preview {
+        color: #cbd5e1;
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    body.light-theme .content-preview {
+        color: #334155;
+        background: rgba(15, 23, 42, 0.02);
+        border-color: rgba(15, 23, 42, 0.06);
+    }
 
     /* Selection options color */
     select option {
         background: #0f172a;
         color: #ffffff;
+    }
+    body.light-theme select option {
+        background: #ffffff;
+        color: #0f172a;
     }
     
     /* General Theme Helpers */
@@ -69,8 +138,8 @@
 <div class="search-container max-w-4xl mx-auto py-2">
     <!-- Header -->
     <div class="flex items-center gap-4 mb-8">
-        <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-            <i class="fa-solid fa-brain text-lg text-cyan-400"></i>
+        <div class="search-header-icon w-12 h-12 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-brain text-lg"></i>
         </div>
         <div>
             <h2 class="text-xl font-bold text-white tracking-tight">Semantic Index Search</h2>
@@ -119,7 +188,7 @@
     {% if query %}
         <div class="flex items-center justify-between mb-6 px-1">
             <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
-                Matches for <span class="text-cyan-400">"{{ query }}"</span>
+                Matches for <span class="query-highlight">"{{ query }}"</span>
             </h3>
             <span class="text-xs px-2.5 py-1 rounded-full glass text-slate-400 font-medium">
                 {{ results|length }} fragments found
@@ -132,7 +201,7 @@
                 <!-- Metadata Header -->
                 <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/5 pb-4 mb-4">
                     <div class="flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-xs">
+                        <div class="doc-icon-wrapper w-7 h-7 rounded-lg flex items-center justify-center">
                             {% if result.file_type == 'pdf' %}
                                 <i class="fa-solid fa-file-pdf"></i>
                             {% elif result.file_type == 'docx' %}
@@ -160,7 +229,7 @@
                 </div>
 
                 <!-- Text Content Area -->
-                <p class="leading-relaxed text-sm font-medium text-slate-300 mb-4 bg-slate-950/20 border border-white/5 p-4 rounded-xl font-mono text-justify selection:bg-cyan-500/30">
+                <p class="content-preview leading-relaxed text-sm font-medium mb-4 p-4 rounded-xl font-mono text-justify selection:bg-cyan-500/30">
                     {{ result.content }}
                 </p>
 

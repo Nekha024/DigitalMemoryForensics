@@ -1,66 +1,114 @@
 {% extends "base.html" %}
 
-{% block title %}Semantic Search{% endblock %}
+{% block title %}Evidence Detail{% endblock %}
 
 {% block content %}
 
-<!-- MAIN -->
-<div class="max-w-4xl mx-auto">
+<!-- Custom Font & Styles -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    .detail-container {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .detail-card {
+        transition: background 0.3s ease, border 0.3s ease;
+    }
+    
+    .text-box {
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 20px;
+        font-family: monospace;
+        font-size: 13px;
+        line-height: 1.8;
+        color: #cbd5e1;
+        white-space: pre-wrap;
+        text-align: justify;
+    }
+    
+    body.light-theme .text-box {
+        background: rgba(15, 23, 42, 0.02);
+        border-color: rgba(15, 23, 42, 0.06);
+        color: #334155;
+    }
+    
+    /* General Theme Helpers */
+    .detail-container .text-white {
+        color: var(--text-main) !important;
+    }
+    .detail-container .text-slate-400 {
+        color: var(--text-muted) !important;
+    }
+    .detail-container .border-white\/5 {
+        border-color: var(--border) !important;
+    }
+</style>
+
+<div class="detail-container max-w-4xl mx-auto py-2">
 
     <!-- DETAILS CARD -->
-    <div class="glass card p-8 rounded-xl mb-8">
+    <div class="glass detail-card p-8 rounded-2xl mb-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-        <h2 class="text-2xl text-cyan-400 mb-4">
-            {{ evidence.title }}
-        </h2>
+        <div class="flex items-center gap-3.5 mb-6">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-400 text-lg">
+                <i class="fa-solid fa-file-signature"></i>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-white tracking-tight">
+                    {{ evidence.title }}
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">Forensic Metadata &amp; Raw Analysis Context</p>
+            </div>
+        </div>
 
-        <div class="grid md:grid-cols-2 gap-4 text-sm text-gray-300">
-
-            <p><strong>Case:</strong> {{ evidence.case.title }}</p>
-            <p><strong>Type:</strong> {{ evidence.file_type }}</p>
-            <p><strong>Uploaded:</strong> {{ evidence.uploaded_at }}</p>
-
+        <div class="grid md:grid-cols-2 gap-4 text-xs font-medium text-slate-400 border-t border-white/5 pt-6 mb-6">
+            <p><strong class="text-white mr-1">Case Context:</strong> {{ evidence.case.title }}</p>
+            <p><strong class="text-white mr-1">Format Type:</strong> {{ evidence.file_type|upper }}</p>
+            <p><strong class="text-white mr-1">Ingested On:</strong> {{ evidence.uploaded_at }}</p>
             <p>
-                <strong>File:</strong>
+                <strong class="text-white mr-1">File Source:</strong>
                 {% if evidence.file %}
                     <a href="{{ evidence.file.url }}"
-                       class="text-cyan-400 hover:underline">
-                        Download
+                       class="text-cyan-400 hover:underline inline-flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-download"></i> Download Original File
                     </a>
                 {% else %}
-                    <span class="text-gray-500 italic">No file attached</span>
+                    <span class="text-slate-500 italic">No file attached</span>
                 {% endif %}
             </p>
-
         </div>
 
         <!-- ACTIONS -->
-        <div class="mt-6 flex gap-4 flex-wrap">
-
-            <a href="{% url 'index_evidence' evidence.id %}" class="btn">
-                Index Evidence
+        <div class="flex gap-3 flex-wrap">
+            <a href="{% url 'index_evidence' evidence.id %}" class="btn-primary text-xs py-2 px-4 rounded-lg font-semibold transition inline-flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt"></i> Index Vector Chunks
             </a>
 
             <a href="{% url 'case_detail' evidence.case.id %}" 
-               class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
-                ← Back to Case
+               class="btn-outline text-xs py-2 px-4 rounded-lg font-semibold transition inline-flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i> Back to Case
             </a>
-
         </div>
-
     </div>
 
     <!-- EXTRACTED TEXT -->
-    <div class="glass p-6 rounded-xl">
-
-        <h3 class="text-xl text-cyan-400 mb-4">
-            Extracted Text
-        </h3>
+    <div class="glass p-6 rounded-2xl relative overflow-hidden">
+        <div class="flex items-center gap-2 mb-4">
+            <i class="fa-solid fa-quote-left text-cyan-400 text-sm"></i>
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+                Extracted Text Contents
+            </h3>
+        </div>
 
         <div class="text-box">
             {{ evidence.extracted_text|default:"No text extracted yet." }}
         </div>
-
     </div>
 
 </div>

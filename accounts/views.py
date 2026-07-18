@@ -27,7 +27,7 @@ def auth_page(request):
 
             if otp_obj and otp_obj.is_verified:
                 login(request, user)
-                return redirect("profile")
+                return redirect("dashboard")
             else:
                 messages.error(request, "Please verify your email using OTP before login.", extra_tags='login')
         else:

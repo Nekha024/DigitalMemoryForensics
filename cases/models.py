@@ -8,10 +8,24 @@ class Case(models.Model):
     ]
 
     TYPE_CHOICES = [
-        ('memory', 'Memory Forensics'),
-        ('disk', 'Disk Forensics'),
-        ('network', 'Network Analysis'),
-        ('mobile', 'Mobile Forensics'),
+    # General Criminal Cases
+    ('theft', 'Theft'),
+    ('assault', 'Assault'),
+    ('homicide', 'Homicide'),
+    ('fraud', 'Fraud'),
+    ('missing_person', 'Missing Person'),
+    ('traffic_accident', 'Traffic Accident'),
+
+    # Cyber & Digital Cases
+    ('phishing', 'Phishing Attack'),
+    ('online_fraud', 'Online Financial Fraud'),
+    ('identity_theft', 'Identity Theft'),
+    ('social_media', 'Social Media Crime'),
+    ('ransomware', 'Ransomware Attack'),
+    ('data_breach', 'Data Breach'),
+
+    # Other
+    ('other', 'Other'),
     ]
 
     title = models.CharField(max_length=255)
