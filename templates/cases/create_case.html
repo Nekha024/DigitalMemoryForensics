@@ -13,33 +13,77 @@
         font-family: 'Inter', sans-serif;
     }
     
-    .status-card-input:checked + .card-content {
+    /* Card input structures */
+    .status-card-box {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(15, 23, 42, 0.35);
+        transition: all 0.25s ease;
+    }
+    .status-card-box:hover {
+        background: rgba(15, 23, 42, 0.5);
+    }
+    
+    body.light-theme .status-card-box {
+        background: rgba(255, 255, 255, 0.8);
+        border-color: rgba(15, 23, 42, 0.08);
+    }
+    body.light-theme .status-card-box:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(15, 23, 42, 0.15);
+    }
+    
+    .status-card-input:checked + .status-card-box {
         border-color: rgba(6, 182, 212, 0.5) !important;
         background: rgba(6, 182, 212, 0.04) !important;
         box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
     }
-    
-    .status-card-input:checked + .card-content .inner-dot {
-        transform: scale(1);
-    }
-    
-    .status-card-input:checked + .card-content .status-dot-wrapper {
-        border-color: #06b6d4 !important;
-    }
-    
-    /* Theme support for checked card content */
-    body.light-theme .status-card-input:checked + .card-content {
+    body.light-theme .status-card-input:checked + .status-card-box {
         border-color: rgba(8, 145, 178, 0.5) !important;
         background: rgba(8, 145, 178, 0.04) !important;
         box-shadow: 0 0 15px rgba(8, 145, 178, 0.1);
     }
     
-    body.light-theme .status-card-input:checked + .card-content .status-dot-wrapper {
+    .status-card-input:checked + .status-card-box .inner-dot {
+        scale: 1 !important;
+        transform: scale(1) !important;
+        background-color: #06b6d4 !important;
+    }
+    body.light-theme .status-card-input:checked + .status-card-box .inner-dot {
+        scale: 1 !important;
+        transform: scale(1) !important;
+        background-color: #0891b2 !important;
+    }
+    
+    .status-card-input:checked + .status-card-box .status-dot-wrapper {
+        border-color: #06b6d4 !important;
+    }
+    body.light-theme .status-card-input:checked + .status-card-box .status-dot-wrapper {
         border-color: #0891b2 !important;
     }
     
-    body.light-theme .status-card-input:checked + .card-content .inner-dot {
-        background-color: #0891b2 !important;
+    /* Input and textareas styling */
+    input[type="text"], textarea {
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid var(--border) !important;
+        color: var(--text-main) !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+        outline: none !important;
+        margin-top: 6px;
+    }
+    body.light-theme input[type="text"], body.light-theme textarea {
+        background-color: #ffffff !important;
+        border-color: rgba(15, 23, 42, 0.12) !important;
+        color: #0f172a !important;
+    }
+    input[type="text"]:focus, textarea:focus {
+        border-color: #06b6d4 !important;
+        box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.12) !important;
+    }
+    body.light-theme input[type="text"]:focus, body.light-theme textarea:focus {
+        border-color: #0891b2 !important;
+        box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.12) !important;
     }
     
     /* Colors and details adapters */
@@ -94,7 +138,7 @@
     }
 </style>
 
-<div class="case-container max-w-xl mx-auto py-4">
+<div class="case-container max-w-5xl mx-auto py-4">
     <!-- Back Button / Top Bar -->
     <div class="flex items-center mb-6">
         <a href="{% url 'home' %}" class="text-xs font-semibold text-slate-400 hover:text-cyan-400 transition flex items-center gap-1">
@@ -102,137 +146,220 @@
         </a>
     </div>
 
-    <!-- Main Card -->
-    <div class="glass p-8 rounded-2xl relative overflow-hidden">
-        <!-- Accent Glow at top right -->
-        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Side: Form Container (7 Cols) -->
+        <div class="lg:col-span-7 glass p-8 rounded-2xl relative overflow-hidden">
+            <!-- Accent Glow at top right -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-        <!-- Header -->
-        <div class="flex items-center gap-4 mb-8">
-            <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
-                <i class="fa-solid fa-folder-plus text-lg text-cyan-400"></i>
+            <!-- Header -->
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
+                    <i class="fa-solid fa-folder-plus text-lg text-cyan-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-white tracking-tight">Create Investigation Case</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Initialize a new repository to analyze evidence files</p>
+                </div>
             </div>
-            <div>
-                <h2 class="text-xl font-bold text-white tracking-tight">Create Investigation Case</h2>
-                <p class="text-xs text-slate-400 mt-0.5">Initialize a new repository to analyze evidence files</p>
-            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+
+                <!-- Case Name & Type Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Case Title -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="id_title" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                            Case Title <span class="text-red-500/80">*</span>
+                        </label>
+                        <input type="text" name="title" id="id_title" required
+                               class="transition"
+                               placeholder="e.g., Operation Memory Leak"
+                               value="{{ form.title.value|default:'' }}">
+                        {% if form.title.errors %}
+                            <span class="text-xs text-red-400 mt-1 font-medium">
+                                <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.title.errors.0 }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Case Type -->
+                    <div class="flex flex-col gap-1.5">
+                        <label for="id_case_type" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                            Case Type
+                        </label>
+                        <select name="case_type" id="id_case_type" class="transition">
+                            {% for value, label in form.fields.case_type.choices %}
+                                <option value="{{ value }}" {% if form.case_type.value == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.case_type.errors %}
+                            <span class="text-xs text-red-400 mt-1 font-medium">
+                                <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.case_type.errors.0 }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="id_description" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        Case Description
+                    </label>
+                    <textarea name="description" id="id_description" rows="4"
+                              class="transition resize-none"
+                              placeholder="Provide context, target information, or investigation scope...">{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                        <span class="text-xs text-red-400 mt-1 font-medium">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.description.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Status Card Selection -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        Initial Status
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Active Status Card -->
+                        <label class="cursor-pointer">
+                            <input type="radio" name="status" value="open" class="status-card-input sr-only" {% if form.status.value == 'open' or not form.status.value %}checked{% endif %}>
+                            <div class="status-card-box rounded-xl p-4 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] animate-pulse"></span>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-semibold text-white">Active</span>
+                                        <span class="text-[10px] text-slate-500">Ready for evidence upload</span>
+                                    </div>
+                                </div>
+                                <div class="status-dot-wrapper w-4 h-4 rounded-full border border-white/20 flex items-center justify-center transition">
+                                    <div class="inner-dot w-2 h-2 rounded-full scale-0 transition"></div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <!-- Closed Status Card -->
+                        <label class="cursor-pointer">
+                            <input type="radio" name="status" value="closed" class="status-card-input sr-only" {% if form.status.value == 'closed' %}checked{% endif %}>
+                            <div class="status-card-box rounded-xl p-4 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-semibold text-white">Closed</span>
+                                        <span class="text-[10px] text-slate-500">Create as inactive case</span>
+                                    </div>
+                                </div>
+                                <div class="status-dot-wrapper w-4 h-4 rounded-full border border-white/20 flex items-center justify-center transition">
+                                    <div class="inner-dot w-2 h-2 rounded-full scale-0 transition"></div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                    {% if form.status.errors %}
+                        <span class="text-xs text-red-400 mt-1 font-medium">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.status.errors.0 }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/5">
+                    <a href="{% url 'home' %}" class="btn-outline text-xs py-2 px-4 rounded-lg font-semibold transition">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn-primary text-xs py-2 px-5 rounded-lg font-semibold flex items-center gap-2 transition">
+                        <i class="fa-solid fa-check"></i> Initialize Case
+                    </button>
+                </div>
+
+            </form>
         </div>
 
-        <form method="post" class="space-y-6">
-            {% csrf_token %}
-
-            <!-- Case Title -->
-            <!-- Case Name & Type Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Case Title -->
-                <div class="flex flex-col gap-1.5">
-                    <label for="id_title" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        Case Title <span class="text-red-500/80">*</span>
-                    </label>
-                    <input type="text" name="title" id="id_title" required
-                           class="transition"
-                           placeholder="e.g., Operation Memory Leak"
-                           value="{{ form.title.value|default:'' }}">
-                    {% if form.title.errors %}
-                        <span class="text-xs text-red-400 mt-1 font-medium">
-                            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.title.errors.0 }}
-                        </span>
-                    {% endif %}
+        <!-- Right Side: Tutorial Panel (5 Cols) -->
+        <div class="lg:col-span-5 glass p-6 rounded-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-white/5">
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-400 text-sm">
+                    <i class="fa-solid fa-circle-info"></i>
                 </div>
-
-                <!-- Case Type -->
-                <div class="flex flex-col gap-1.5">
-                    <label for="id_case_type" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        Case Type
-                    </label>
-                    <select name="case_type" id="id_case_type" class="transition">
-                        {% for value, label in form.fields.case_type.choices %}
-                            <option value="{{ value }}" {% if form.case_type.value == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% if form.case_type.errors %}
-                        <span class="text-xs text-red-400 mt-1 font-medium">
-                            <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.case_type.errors.0 }}
-                        </span>
-                    {% endif %}
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Quick Tutorial</h3>
+                    <p class="text-[10px] text-slate-500">How to establish your forensic repository</p>
                 </div>
             </div>
 
-            <!-- Description -->
-            <div class="flex flex-col gap-1.5">
-                <label for="id_description" class="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Case Description
-                </label>
-                <textarea name="description" id="id_description" rows="4"
-                          class="transition resize-none"
-                          placeholder="Provide context, target information, or investigation scope...">{{ form.description.value|default:'' }}</textarea>
-                {% if form.description.errors %}
-                    <span class="text-xs text-red-400 mt-1 font-medium">
-                        <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.description.errors.0 }}
-                    </span>
-                {% endif %}
-            </div>
-
-            <!-- Status Card Selection -->
-            <div class="flex flex-col gap-2">
-                <label class="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                    Initial Status
-                </label>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Active Status Card -->
-                    <label class="cursor-pointer">
-                        <input type="radio" name="status" value="open" class="status-card-input sr-only" {% if form.status.value == 'open' or not form.status.value %}checked{% endif %}>
-                        <div class="card-content border border-white/10 rounded-xl p-4 bg-slate-950/10 hover:bg-slate-950/20 transition-all duration-200 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] animate-pulse"></span>
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-semibold text-white">Active</span>
-                                    <span class="text-[10px] text-slate-500">Ready for evidence upload</span>
-                                </div>
-                            </div>
-                            <div class="status-dot-wrapper w-4 h-4 rounded-full border border-white/20 flex items-center justify-center transition">
-                                <div class="inner-dot w-2 h-2 rounded-full bg-cyan-400 scale-0 transition"></div>
-                            </div>
+            <!-- Stepper Steps -->
+            <div class="space-y-6">
+                <!-- Step 1 -->
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
+                            1
                         </div>
-                    </label>
-
-                    <!-- Closed Status Card -->
-                    <label class="cursor-pointer">
-                        <input type="radio" name="status" value="closed" class="status-card-input sr-only" {% if form.status.value == 'closed' %}checked{% endif %}>
-                        <div class="card-content border border-white/10 rounded-xl p-4 bg-slate-950/10 hover:bg-slate-950/20 transition-all duration-200 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-semibold text-white">Closed</span>
-                                    <span class="text-[10px] text-slate-500">Create as inactive case</span>
-                                </div>
-                            </div>
-                            <div class="status-dot-wrapper w-4 h-4 rounded-full border border-white/20 flex items-center justify-center transition">
-                                <div class="inner-dot w-2 h-2 rounded-full bg-cyan-400 scale-0 transition"></div>
-                            </div>
-                        </div>
-                    </label>
+                        <div class="w-0.5 h-12 bg-white/5 mt-2"></div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Case Identity</h4>
+                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                            Give your case a clear and descriptive name (e.g., <em>Operation Blue Horizon</em>). This identifier connects all subsequent evidence indexes.
+                        </p>
+                    </div>
                 </div>
-                {% if form.status.errors %}
-                    <span class="text-xs text-red-400 mt-1 font-medium">
-                        <i class="fa-solid fa-circle-exclamation mr-1"></i>{{ form.status.errors.0 }}
-                    </span>
-                {% endif %}
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center justify-end gap-3 pt-4 border-t border-white/5">
-                <a href="{% url 'home' %}" class="btn-outline text-xs py-2 px-4 rounded-lg font-semibold transition">
-                    Cancel
-                </a>
-                <button type="submit" class="btn-primary text-xs py-2 px-5 rounded-lg font-semibold flex items-center gap-2 transition">
-                    <i class="fa-solid fa-check"></i> Initialize Case
-                </button>
-            </div>
+                <!-- Step 2 -->
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
+                            2
+                        </div>
+                        <div class="w-0.5 h-12 bg-white/5 mt-2"></div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Target Scope Type</h4>
+                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                            Specify whether you are executing <strong>Memory</strong>, <strong>Disk</strong>, or <strong>Network</strong> forensics to optimize the indexing models and prompt contexts.
+                        </p>
+                    </div>
+                </div>
 
-        </form>
+                <!-- Step 3 -->
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
+                            3
+                        </div>
+                        <div class="w-0.5 h-12 bg-white/5 mt-2"></div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Initial Lifecycle</h4>
+                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                            Marking the case as <strong>Active</strong> opens it immediately for forensic ingestion. Mark as <strong>Closed</strong> to archive historical portfolios.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center">
+                        <div class="w-6 h-6 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
+                            4
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Ingest &amp; RAG Q&amp;A</h4>
+                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                            After initialization, navigate into the case detail to upload your raw evidence and index it in the ChromaDB vector database.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>

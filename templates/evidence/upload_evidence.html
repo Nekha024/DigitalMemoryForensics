@@ -98,7 +98,7 @@
     }
 </style>
 
-<div class="ingest-container max-w-xl mx-auto py-2">
+<div class="ingest-container max-w-5xl mx-auto py-2">
     <!-- Breadcrumb -->
     <div class="flex items-center gap-2 mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 px-1">
         <a href="{% url 'home' %}" class="hover:text-cyan-400 transition">Case Repositories</a>
@@ -106,127 +106,187 @@
         <span class="text-white">Ingest Evidence</span>
     </div>
 
-    <div class="glass p-5 rounded-2xl border border-slate-800 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left Side: Ingest Form Panel (7 Cols) -->
+        <div class="lg:col-span-7 glass p-5 rounded-2xl border border-slate-800 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
 
-        <!-- FORM CONTROLS PANEL -->
-        <div id="formBox" class="relative z-10">
-            <div class="flex items-center gap-3 mb-3.5">
-                <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-sm">
-                    <i class="fa-solid fa-file-shield animate-pulse"></i>
+            <!-- FORM CONTROLS PANEL -->
+            <div id="formBox" class="relative z-10">
+                <div class="flex items-center gap-3 mb-3.5">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-sm">
+                        <i class="fa-solid fa-file-shield animate-pulse"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-extrabold text-white tracking-tight">Ingest Forensic File</h2>
+                        <p class="text-[10px] text-slate-400">Add a file to the Vector Database for semantic queries.</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="text-lg font-extrabold text-white tracking-tight">Ingest Forensic File</h2>
-                    <p class="text-[10px] text-slate-400">Add a file to the Vector Database for semantic queries.</p>
-                </div>
-            </div>
 
-            <form method="post" enctype="multipart/form-data" class="ingest-form space-y-3.5" id="ingestForm">
-                {% csrf_token %}
+                <form method="post" enctype="multipart/form-data" class="ingest-form space-y-3.5" id="ingestForm">
+                    {% csrf_token %}
 
-                {% for field in form %}
-                    {% if field.name == 'file' %}
-                        <!-- Hidden Raw File Field -->
-                        <div style="display: none;">
-                            {{ field }}
-                        </div>
-                    {% else %}
-                        <!-- Case Selector & Title Inputs -->
-                        <div class="flex flex-col">
-                            <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
-                                {{ field.label }}
-                            </label>
-                            {{ field }}
-                            {% if field.errors %}
-                                <p class="text-red-400 text-xs mt-1.5 font-medium px-1">
-                                    <i class="fa-solid fa-triangle-exclamation"></i> {{ field.errors|striptags }}
-                                </p>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                {% endfor %}
+                    {% for field in form %}
+                        {% if field.name == 'file' %}
+                            <!-- Hidden Raw File Field -->
+                            <div style="display: none;">
+                                {{ field }}
+                            </div>
+                        {% else %}
+                            <!-- Case Selector & Title Inputs -->
+                            <div class="flex flex-col">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <p class="text-red-400 text-xs mt-1.5 font-medium px-1">
+                                        <i class="fa-solid fa-triangle-exclamation"></i> {{ field.errors|striptags }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
 
-                <!-- Custom Drag and Drop Area -->
-                <div class="flex flex-col">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-1">
-                        Evidence Document File
-                    </label>
-                    
-                    <div class="drag-zone border-2 border-dashed border-slate-800 rounded-2xl py-4 px-6 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/40 transition-all duration-300 relative overflow-hidden" id="dropzone">
-                        <div class="icon-container w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-base mb-1.5 shadow-md">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <!-- Custom Drag and Drop Area -->
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1 mb-1">
+                            Evidence Document File
+                        </label>
+                        
+                        <div class="drag-zone border-2 border-dashed border-slate-800 rounded-2xl py-4 px-6 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-500/40 transition-all duration-300 relative overflow-hidden" id="dropzone">
+                            <div class="icon-container w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-base mb-1.5 shadow-md">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-xs font-bold text-white mb-0.5">Drag and drop file here</p>
+                                <p class="text-[10px] text-slate-400">or <span class="text-cyan-400 hover:underline">browse files</span></p>
+                            </div>
+                            <p class="text-[9px] text-slate-500 mt-2 uppercase tracking-wider font-semibold">Supports PDF, TXT, DOCX (Max 50MB)</p>
                         </div>
-                        <div class="text-center">
-                            <p class="text-xs font-bold text-white mb-0.5">Drag and drop file here</p>
-                            <p class="text-[10px] text-slate-400">or <span class="text-cyan-400 hover:underline">browse files</span></p>
+
+                        <!-- Selected File Preview Card -->
+                        <div class="file-preview-card hidden p-3 rounded-xl border border-slate-800 bg-slate-950/40 flex items-center justify-between mt-1.5" id="filePreview">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-base">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-white block truncate max-w-xs" id="fileName">evidence_report.txt</span>
+                                    <span class="text-[9px] text-slate-400 block" id="fileSize">142 KB</span>
+                                </div>
+                            </div>
+                            <button type="button" class="text-slate-500 hover:text-red-400 transition p-1.5" id="removeFileBtn">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
                         </div>
-                        <p class="text-[9px] text-slate-500 mt-2 uppercase tracking-wider font-semibold">Supports PDF, TXT, DOCX (Max 50MB)</p>
                     </div>
 
-                    <!-- Selected File Preview Card -->
-                    <div class="file-preview-card hidden p-3 rounded-xl border border-slate-800 bg-slate-950/40 flex items-center justify-between" id="filePreview">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-base">
-                                <i class="fa-solid fa-file-invoice"></i>
-                            </div>
-                            <div>
-                                <span class="text-xs font-bold text-white block truncate max-w-xs" id="fileName">evidence_report.txt</span>
-                                <span class="text-[9px] text-slate-400 block" id="fileSize">142 KB</span>
-                            </div>
-                        </div>
-                        <button type="button" class="text-slate-500 hover:text-red-400 transition p-1.5" id="removeFileBtn">
-                            <i class="fa-solid fa-trash-can text-xs"></i>
+                    <!-- Form Controls Footer -->
+                    <div class="flex justify-between items-center pt-3 border-t border-slate-800">
+                        <a href="{% url 'home' %}" class="btn-outline text-[10px] py-2 px-3.5 font-bold uppercase tracking-wider">
+                            ← Cancel
+                        </a>
+
+                        <button type="submit" class="btn-primary text-[10px] py-2 px-4 font-bold uppercase tracking-wider">
+                            Ingest File
                         </button>
                     </div>
-                </div>
-
-                <!-- Form Controls Footer -->
-                <div class="flex justify-between items-center pt-3 border-t border-slate-800">
-                    <a href="{% url 'home' %}" class="btn-outline text-[10px] py-2 px-3.5 font-bold uppercase tracking-wider">
-                        ← Cancel
-                    </a>
-
-                    <button type="submit" class="btn-primary text-[10px] py-2 px-4 font-bold uppercase tracking-wider">
-                        Ingest File
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- SUBMIT FORENSIC SCANNER LOADING SCREEN -->
-        <div id="loadingScreen" class="hidden text-center py-5 relative z-10">
-            <div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <!-- Circular spinner animation border -->
-                <div class="absolute inset-0 rounded-full border-4 border-cyan-500/10 border-t-cyan-400 animate-spin"></div>
-                <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-base shadow-md">
-                    <i class="fa-solid fa-fingerprint animate-pulse text-lg"></i>
-                </div>
+                </form>
             </div>
-            
-            <h3 class="text-lg font-extrabold text-white tracking-tight mb-1">Ingesting Evidence Repository</h3>
-            <p class="text-[10px] text-slate-400 mb-4 max-w-sm mx-auto">Please wait while the system secure logs are processed and extracted into the database.</p>
-            
-            <!-- Progress Bar -->
-            <div class="w-full max-w-md mx-auto bg-slate-900 rounded-full h-1 overflow-hidden border border-slate-800 mb-4">
-                <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full" style="width: 0%;" id="progressBar"></div>
-            </div>
-            
-            <!-- Status Checklist Simulation -->
-            <div class="max-w-xs mx-auto text-left text-[10px] font-mono space-y-2 text-slate-400">
-                <div class="flex items-center gap-2" id="step1">
-                    <i class="fa-solid fa-circle-notch animate-spin text-cyan-400" id="step1-icon"></i>
-                    <span id="step1-text">Hashing evidence files...</span>
+
+            <!-- SUBMIT FORENSIC SCANNER LOADING SCREEN -->
+            <div id="loadingScreen" class="hidden text-center py-5 relative z-10">
+                <div class="relative w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+                    <!-- Circular spinner animation border -->
+                    <div class="absolute inset-0 rounded-full border-4 border-cyan-500/10 border-t-cyan-400 animate-spin"></div>
+                    <div class="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-base shadow-md">
+                        <i class="fa-solid fa-fingerprint animate-pulse text-lg"></i>
+                    </div>
                 </div>
-                <div class="flex items-center gap-2.5 text-slate-600" id="step2">
-                    <i class="fa-solid fa-circle text-[6px]" id="step2-icon"></i>
-                    <span id="step2-text">Running file binary block index...</span>
+                
+                <h3 class="text-lg font-extrabold text-white tracking-tight mb-1">Ingesting Evidence Repository</h3>
+                <p class="text-[10px] text-slate-400 mb-4 max-w-sm mx-auto">Please wait while the system secure logs are processed and extracted into the database.</p>
+                
+                <!-- Progress Bar -->
+                <div class="w-full max-w-md mx-auto bg-slate-900 rounded-full h-1 overflow-hidden border border-slate-800 mb-4">
+                    <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full" style="width: 0%;" id="progressBar"></div>
                 </div>
-                <div class="flex items-center gap-2.5 text-slate-600" id="step3">
-                    <i class="fa-solid fa-circle text-[6px]" id="step3-icon"></i>
-                    <span id="step3-text">Extracting plaintext strings...</span>
+                
+                <!-- Status Checklist Simulation -->
+                <div class="max-w-xs mx-auto text-left text-[10px] font-mono space-y-2 text-slate-400">
+                    <div class="flex items-center gap-2" id="step1">
+                        <i class="fa-solid fa-circle-notch animate-spin text-cyan-400" id="step1-icon"></i>
+                        <span id="step1-text">Hashing evidence files...</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 text-slate-600" id="step2">
+                        <i class="fa-solid fa-circle text-[6px]" id="step2-icon"></i>
+                        <span id="step2-text">Running file binary block index...</span>
+                    </div>
+                    <div class="flex items-center gap-2.5 text-slate-600" id="step3">
+                        <i class="fa-solid fa-circle text-[6px]" id="step3-icon"></i>
+                        <span id="step3-text">Extracting plaintext strings...</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Right Side: Ingestion Guidelines (5 Cols) -->
+        <div class="lg:col-span-5 glass p-6 rounded-2xl relative overflow-hidden border border-slate-800">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div class="flex items-center gap-2.5 mb-6 pb-3 border-b border-slate-800">
+                <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-400 text-sm">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">Ingestion Guidelines</h3>
+                    <p class="text-[10px] text-slate-500">Security protocols and evidence integrity</p>
+                </div>
+            </div>
+
+            <!-- Guidelines lists -->
+            <div class="space-y-5">
+                <div>
+                    <h4 class="text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-fingerprint"></i> Evidence Hash Verification
+                    </h4>
+                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                         The system automatically calculates a cryptographic signature for every uploaded file to maintain chain of custody and guarantee the evidence remains unaltered.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-shapes"></i> Semantic Indexing
+                    </h4>
+                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                        Uploaded logs and documents are structured into logical content contexts, mapping target relationships to enable precise meaning-based retrieval.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock"></i> Isolated Knowledge Store
+                    </h4>
+                    <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                        Your records are stored within a secure, user-restricted workspace. plain-text is kept private, keeping your case profiles safe and fully confidential.
+                    </p>
+                </div>
+
+                <div class="p-3 bg-slate-950/20 border border-slate-800/80 rounded-xl">
+                    <h4 class="text-[10px] font-bold text-white uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-circle-exclamation text-amber-500"></i> Ingestion Requirements
+                    </h4>
+                    <ul class="text-[10px] text-slate-400 list-disc pl-4 space-y-1">
+                        <li>Maximum accepted file size is 50MB.</li>
+                        <li>Ensure the files do not contain active password encryptions.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
