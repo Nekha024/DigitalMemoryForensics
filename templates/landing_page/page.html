@@ -1,186 +1,575 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DMF System</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MEMOIR — RAG Memory Forensics & Vector DB Investigation</title>
+<meta name="description" content="AI-powered digital memory forensics using RAG and vector databases to turn RAM dumps into court-admissible, queryable intelligence." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@tailwindcss/browser@4"></script><script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: 'hsl(222 47% 5%)',
+          fg: 'hsl(180 30% 95%)',
+          card: 'hsl(222 40% 8%)',
+          muted: { DEFAULT: 'hsl(222 30% 14%)', fg: 'hsl(215 20% 65%)' },
+          border: 'hsl(200 50% 18%)',
+          primary: { DEFAULT: 'hsl(188 95% 55%)', fg: 'hsl(222 47% 5%)', glow: 'hsl(188 100% 70%)' },
+          secondary: 'hsl(270 80% 60%)',
+          accent: 'hsl(320 90% 60%)',
+          destructive: 'hsl(0 84% 60%)',
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+          sans: ['Inter', 'system-ui', 'sans-serif'],
+          mono: ['"JetBrains Mono"', 'monospace'],
+        },
+        boxShadow: {
+          glow: '0 0 60px hsl(188 95% 55% / 0.4)',
+          elegant: '0 20px 60px -20px hsl(188 95% 30% / 0.5)',
+        },
+      },
+    },
+  };
+</script>
 <style>
-body {
-  background: radial-gradient(circle at 20% 20%, #0f172a, #020617);
-  color: white;
-}
-
-/* GLASS */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(14px);
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* NEON */
-.neon {
-  box-shadow: 0 0 12px #06b6d4, 0 0 25px rgba(6,182,212,0.5);
-}
-
-/* CARD ANIMATION */
-.card {
-  transition: all 0.3s ease;
-}
-.card:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 0 30px rgba(6,182,212,0.6);
-}
-
-/* FLOW LINE */
-.line {
-  height: 2px;
-  background: linear-gradient(to right, transparent, #06b6d4, transparent);
-  flex: 1;
-}
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background:
+      radial-gradient(ellipse at top, hsl(188 95% 55% / 0.25), transparent 60%),
+      radial-gradient(ellipse at bottom right, hsl(270 80% 60% / 0.2), transparent 50%),
+      hsl(222 47% 5%);
+    background-attachment: fixed;
+    color: hsl(180 30% 95%);
+  }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', system-ui, sans-serif; letter-spacing: -0.02em; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(188 100% 70%), hsl(270 90% 75%) 50%, hsl(320 90% 70%));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .glass {
+    background: linear-gradient(160deg, hsl(222 40% 10% / 0.8), hsl(222 40% 6% / 0.4));
+    backdrop-filter: blur(16px);
+    border: 1px solid hsl(200 50% 18%);
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(hsl(200 50% 18% / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(200 50% 18% / 0.4) 1px, transparent 1px);
+    background-size: 48px 48px;
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+  }
+  @keyframes float { 0%,100% { transform: translateY(0);} 50%{transform: translateY(-12px);} }
+  @keyframes pulse-glow { 0%,100%{opacity:.6;transform:scale(1);} 50%{opacity:1;transform:scale(1.05);} }
+  @keyframes scan { 0%{transform:translateY(-100%);} 100%{transform:translateY(2400%);} }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+  .animate-pulse-glow { animation: pulse-glow 4s ease-in-out infinite; }
+  .animate-scan { animation: scan 3s linear infinite; }
+  .glow-btn { box-shadow: 0 0 60px hsl(188 95% 55% / 0.4); }
+  .container-x { max-width: 1280px; margin-inline: auto; padding-inline: 1.5rem; }
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s ease, transform .8s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display:none; }
+  details[open] .chev { transform: rotate(45deg); }
 </style>
-
 </head>
+<body class="overflow-x-hidden">
 
-<body class="font-sans pt-24">
-
-<!-- NAVBAR -->
-<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-5 bg-black/30 backdrop-blur-md border-b border-white/10">
-  <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
-
-  <nav class="hidden md:flex space-x-8 text-gray-300">
-    <a href="#" class="hover:text-cyan-400">Features</a>
-    <a href="#" class="hover:text-cyan-400">Workflow</a>
-    <a href="#" class="hover:text-cyan-400">Demo</a>
-    <a href="#" class="hover:text-cyan-400">Pricing</a>
-    <a href="#" class="hover:text-cyan-400">Contact</a>
+<!-- NAV -->
+<header class="fixed top-0 inset-x-0 z-50 transparent py-3 transition-all duration-300">
+  <nav class="container-x flex items-center justify-between h-16">
+    <a href="#" class="flex items-center gap-2 font-mono font-bold text-2xl">
+      <div class="w-8 h-8 rounded-lg grid place-items-center" style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));">
+        <svg class="w-4 h-4 text-primary-fg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <span class="text-gradient">MEMOIR</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-lg text-muted-fg">
+      <a href="#features" class="hover:text-primary transition-colors">Features</a>
+      <a href="#pipeline" class="hover:text-primary transition-colors">Pipeline</a>
+      <a href="#usecases" class="hover:text-primary transition-colors">Use Cases</a>
+      <a href="#tech" class="hover:text-primary transition-colors">Tech</a>
+      <a href="#pricing" class="hover:text-primary transition-colors">Pricing</a>
+      <a href="#faq" class="hover:text-primary transition-colors">FAQ</a>
+    </div>
+    <a href="{% url 'auth' %}" class="text-sm font-mono px-4 py-2 rounded-md text-primary-fg hover:opacity-90" style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));">SECURE ACCESS</a>
   </nav>
-
-  <a href="{% url 'auth' %}">
-  <button class="glass neon px-5 py-2 rounded-lg hover:bg-cyan-500/20">
-    Get Started
-  </button></a>
 </header>
 
 <!-- HERO -->
-<section class="grid md:grid-cols-2 gap-12 px-10 py-20 items-center">
+<section class="relative pt-32 pb-24 min-h-screen flex items-center">
+  <div class="absolute inset-0 grid-bg opacity-50"></div>
+  <div class="absolute inset-0 bg-gradient-to-b from-transparent via-bg/60 to-bg"></div>
+  <div class="container-x relative z-10 grid lg:grid-cols-12 gap-12 items-center">
+    <div class="lg:col-span-7 space-y-8">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass font-mono text-xs uppercase tracking-widest text-primary">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-glow"></span>
+        v2.4 · RAG Forensic Engine
+      </div>
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95]">
+        Memory<br>
+        <span class="text-gradient">forensics</span><br>
+        at the speed<br>of thought.
+      </h1>
+      <p class="text-lg md:text-xl text-muted-fg max-w-xl">
+        MEMOIR fuses Retrieval-Augmented Generation with vector databases to turn raw RAM dumps into investigable, queryable, court-admissible intelligence.
+      </p>
+      <div class="flex flex-wrap gap-4">
+        <a href="{% url 'auth' %}" class="font-mono px-6 py-3 rounded-md text-primary-fg glow-btn hover:opacity-90 inline-flex items-center" style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));">Start Investigation →</a>
+        {% comment %} <a href="#" class="font-mono px-6 py-3 rounded-md border border-primary/40 hover:bg-primary/10">Read Whitepaper</a> {% endcomment %}
+      </div>
+    </div>
 
-  <!-- TEXT -->
-  <div>
-    <h2 class="text-5xl font-bold leading-tight mb-6">
-      DIGITAL MEMORY <br>
-      <span class="text-cyan-400">FORENSICS SYSTEM</span>
-    </h2>
-
-    <p class="text-gray-400 mb-8 max-w-md">
-      Transforming complex unstructured data into clear, actionable evidence
-      using advanced RAG & Vector Databases.
-    </p>
-
-    <button class="neon bg-cyan-500 px-6 py-3 rounded-lg hover:bg-cyan-600">
-      Watch Demo
-    </button>
+    <div class="lg:col-span-5 relative animate-float">
+      <div class="glass rounded-2xl p-6 font-mono text-sm space-y-3 relative overflow-hidden">
+        <div class="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-scan"></div>
+        <div class="flex items-center gap-2 text-muted-fg text-xs">
+          <span class="w-2.5 h-2.5 rounded-full bg-destructive"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-accent"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+          <span class="ml-2">Memoir.query</span>
+        </div>
+        <div><span class="text-secondary">$</span> find lateral movement traces in dump_07.raw</div>
+        <div class="text-muted-fg">→ embedding query · k=12 · cosine 0.87</div>
+        <div class="text-primary">✓ 4 suspicious processes retrieved</div>
+        <div class="text-muted-fg">→ rundll32.exe → svchost.exe (injected)</div>
+        <div class="text-muted-fg">→ SMB session · 10.0.4.21:445</div>
+        <div class="text-accent">⚡ Mimikatz signature in heap @0x7ff8...</div>
+        <div class="pt-2 border-t border-border">
+          <span class="text-secondary">›</span> Generating report... <span class="animate-pulse-glow">▊</span>
+        </div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <!-- AI GRAPH IMAGE -->
-  <div class="glass p-6 rounded-2xl neon">
-    <img 
-      src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=900&q=80"
-      class="rounded-xl"
-      alt="AI Network"
-    >
+<!-- STATS -->
+<section id="stats" class="container-x py-20 border-y border-border">
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+    <div><div class="text-4xl md:text-5xl font-bold text-gradient font-mono">120×</div><div class="mt-2 text-sm uppercase tracking-widest text-muted-fg">Faster triage</div></div>
+    <div><div class="text-4xl md:text-5xl font-bold text-gradient font-mono">768d</div><div class="mt-2 text-sm uppercase tracking-widest text-muted-fg">Embedding space</div></div>
+    <div><div class="text-4xl md:text-5xl font-bold text-gradient font-mono">99.4%</div><div class="mt-2 text-sm uppercase tracking-widest text-muted-fg">Recall @ k=10</div></div>
+    <div><div class="text-4xl md:text-5xl font-bold text-gradient font-mono">&lt;80ms</div><div class="mt-2 text-sm uppercase tracking-widest text-muted-fg">Query latency</div></div>
   </div>
-
 </section>
 
 <!-- FEATURES -->
-<section class="px-10 py-16">
-
-  <h3 class="text-3xl font-semibold text-center mb-12">
-    SYSTEM KEY FUNCTIONALITIES
-  </h3>
-
-  <div class="grid md:grid-cols-4 gap-8">
-
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/upload.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Data Ingestion</h4>
-      <p class="text-gray-400 text-sm">PDF, Email, Chat, Docs</p>
+<section id="features" class="container-x py-32 reveal">
+  <div class="max-w-2xl mb-16">
+    <p class="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Capabilities</p>
+    <h2 class="text-4xl md:text-6xl font-bold">Built for the modern <span class="text-gradient">incident responder</span>.</h2>
+  </div>
+  <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- repeated cards -->
+    <div class="glass rounded-2xl p-8 hover:-translate-y-1 transition-all duration-500 hover:border-primary/60">
+      <div class="w-12 h-12 rounded-xl grid place-items-center mb-6" style="background:linear-gradient(135deg,hsl(188 95% 55% / .2),hsl(270 80% 60% / .2));">🧠</div>
+      <h3 class="text-xl font-semibold mb-3">RAG-Powered Analysis</h3>
+      <p class="text-muted-fg leading-relaxed">Retrieval-Augmented Generation surfaces relevant artifacts from terabytes of memory dumps in milliseconds.</p>
     </div>
-
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/search.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Semantic Search</h4>
-      <p class="text-gray-400 text-sm">RAG-based Retrieval</p>
+    <div class="glass rounded-2xl p-8 hover:-translate-y-1 transition-all duration-500 hover:border-primary/60">
+      <div class="w-12 h-12 rounded-xl grid place-items-center mb-6" style="background:linear-gradient(135deg,hsl(188 95% 55% / .2),hsl(270 80% 60% / .2));">🗂️</div>
+      <h3 class="text-xl font-semibold mb-3">Vector Database Indexing</h3>
+      <p class="text-muted-fg leading-relaxed">Semantic embeddings of process trees, registry hives, and network artifacts for similarity search.</p>
     </div>
-
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/database.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Vector Storage</h4>
-      <p class="text-gray-400 text-sm">Embeddings + DB</p>
+    <div class="glass rounded-2xl p-8 hover:-translate-y-1 transition-all duration-500 hover:border-primary/60">
+      <div class="w-12 h-12 rounded-xl grid place-items-center mb-6" style="background:linear-gradient(135deg,hsl(188 95% 55% / .2),hsl(270 80% 60% / .2));">🔍</div>
+      <h3 class="text-xl font-semibold mb-3">Natural Language Queries</h3>
+      <p class="text-muted-fg leading-relaxed">Ask in plain English. Get forensic answers grounded in actual memory evidence with source citations.</p>
     </div>
-
-    <div class="glass card p-6 rounded-xl text-center">
-      <img src="https://img.icons8.com/fluency/48/combo-chart.png" class="mx-auto mb-3"/>
-      <h4 class="text-cyan-400">Timeline</h4>
-      <p class="text-gray-400 text-sm">Anomaly Detection</p>
+    <div class="glass rounded-2xl p-8 hover:-translate-y-1 transition-all duration-500 hover:border-primary/60">
+      <div class="w-12 h-12 rounded-xl grid place-items-center mb-6" style="background:linear-gradient(135deg,hsl(188 95% 55% / .2),hsl(270 80% 60% / .2));">🛡️</div>
+      <h3 class="text-xl font-semibold mb-3">Chain-of-Custody Integrity</h3>
+      <p class="text-muted-fg leading-relaxed">Cryptographically signed retrievals ensure court-admissible evidence trails at every step.</p>
     </div>
-
+    <div class="glass rounded-2xl p-8 hover:-translate-y-1 transition-all duration-500 hover:border-primary/60">
+      <div class="w-12 h-12 rounded-xl grid place-items-center mb-6" style="background:linear-gradient(135deg,hsl(188 95% 55% / .2),hsl(270 80% 60% / .2));">⚡</div>
+      <h3 class="text-xl font-semibold mb-3">Real-Time Triage</h3>
+      <p class="text-muted-fg leading-relaxed">Identify malicious patterns, hidden processes, and IOCs faster than traditional Volatility workflows.</p>
+    </div>
+    <div class="glass rounded-2xl p-8 hover:-translate-y-1 transition-all duration-500 hover:border-primary/60">
+      <div class="w-12 h-12 rounded-xl grid place-items-center mb-6" style="background:linear-gradient(135deg,hsl(188 95% 55% / .2),hsl(270 80% 60% / .2));">🕸️</div>
+      <h3 class="text-xl font-semibold mb-3">Cross-Case Correlation</h3>
+      <p class="text-muted-fg leading-relaxed">Link artifacts across investigations through shared embedding spaces and clustering.</p>
+    </div>
   </div>
 </section>
 
-<!-- WORKFLOW -->
-<section class="px-10 py-16 text-center">
+<!-- PIPELINE -->
+<section id="pipeline" class="container-x py-32 reveal">
+  <div class="max-w-2xl mb-16">
+    <p class="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Pipeline</p>
+    <h2 class="text-4xl md:text-6xl font-bold">From volatile bytes to <span class="text-gradient">verifiable insight</span>.</h2>
+  </div>
+  <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="glass rounded-2xl p-6 hover:border-primary/60 transition-all">
+      <div class="font-mono text-xs text-primary mb-4">01</div>
+      <div class="text-3xl mb-3">💾</div>
+      <h3 class="text-xl font-semibold mb-2">Acquire</h3>
+      <p class="text-sm text-muted-fg">Capture volatile memory via LiME, WinPMEM, or AVML.</p>
+    </div>
+    <div class="glass rounded-2xl p-6 hover:border-primary/60 transition-all">
+      <div class="font-mono text-xs text-primary mb-4">02</div>
+      <div class="text-3xl mb-3">📑</div>
+      <h3 class="text-xl font-semibold mb-2">Extract</h3>
+      <p class="text-sm text-muted-fg">Volatility plugins parse processes, sockets, DLLs, hooks.</p>
+    </div>
+    <div class="glass rounded-2xl p-6 hover:border-primary/60 transition-all">
+      <div class="font-mono text-xs text-primary mb-4">03</div>
+      <div class="text-3xl mb-3">🧬</div>
+      <h3 class="text-xl font-semibold mb-2">Embed</h3>
+      <p class="text-sm text-muted-fg">Artifacts vectorized and indexed in Pinecone / Chroma / FAISS.</p>
+    </div>
+    <div class="glass rounded-2xl p-6 hover:border-primary/60 transition-all">
+      <div class="font-mono text-xs text-primary mb-4">04</div>
+      <div class="text-3xl mb-3">🤖</div>
+      <h3 class="text-xl font-semibold mb-2">Retrieve & Generate</h3>
+      <p class="text-sm text-muted-fg">LLM grounded on retrieved context produces investigator-ready reports.</p>
+    </div>
+  </div>
+</section>
 
-  <h3 class="text-3xl font-semibold mb-12">
-    THE RAG WORKFLOW FOR FORENSICS
-  </h3>
+<!-- USE CASES -->
+<section id="usecases" class="container-x py-32 reveal">
+  <div class="max-w-2xl mb-16">
+    <p class="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Use Cases</p>
+    <h2 class="text-4xl md:text-6xl font-bold">Wherever evidence <span class="text-gradient">lives in RAM</span>.</h2>
+  </div>
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="glass rounded-2xl p-8">
+      <h3 class="text-2xl font-semibold mb-3">🔓 Ransomware Reconstruction</h3>
+      <p class="text-muted-fg">Recover encryption keys, C2 channels, and lateral pivots from infected hosts before disk artifacts vanish.</p>
+    </div>
+    <div class="glass rounded-2xl p-8">
+      <h3 class="text-2xl font-semibold mb-3">🕵️ Insider Threat Investigation</h3>
+      <p class="text-muted-fg">Reveal anti-forensic tooling, shredded buffers, and credential theft hiding in volatile memory.</p>
+    </div>
+    <div class="glass rounded-2xl p-8">
+      <h3 class="text-2xl font-semibold mb-3">⚖️ Law Enforcement & e-Discovery</h3>
+      <p class="text-muted-fg">Court-admissible extraction with hash-verified retrieval logs and natural-language case briefs.</p>
+    </div>
+    <div class="glass rounded-2xl p-8">
+      <h3 class="text-2xl font-semibold mb-3">🦠 APT & Malware Research</h3>
+      <p class="text-muted-fg">Cluster unknown samples against an embedding library of known TTPs and YARA-matched fragments.</p>
+    </div>
+  </div>
+</section>
 
-  <div class="flex items-center justify-center flex-wrap gap-4">
+<!-- TECH STACK -->
+<section id="tech" class="container-x py-32 reveal">
+  <div class="grid lg:grid-cols-2 gap-16 items-start">
+    <div>
+      <p class="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Architecture</p>
+      <h2 class="text-4xl md:text-5xl font-bold mb-6">A purpose-built <span class="text-gradient">forensic AI stack</span>.</h2>
+      <p class="text-muted-fg text-lg mb-8">Composable, on-prem-friendly, and tuned for evidentiary rigor. Bring your own LLM, your own vector store, your own SOPs.</p>
+      <ul class="space-y-3 font-mono text-sm">
+        <li class="flex gap-3"><span class="text-primary">▸</span> Volatility 3 + Rekall plugin bridge</li>
+        <li class="flex gap-3"><span class="text-primary">▸</span> Sentence-Transformers / BGE / OpenAI embeddings</li>
+        <li class="flex gap-3"><span class="text-primary">▸</span> Pinecone · Chroma · Weaviate · FAISS · Qdrant</li>
+        <li class="flex gap-3"><span class="text-primary">▸</span> LangChain / LlamaIndex retrieval orchestration</li>
+        <li class="flex gap-3"><span class="text-primary">▸</span> Ed25519-signed evidence ledger</li>
+        <li class="flex gap-3"><span class="text-primary">▸</span> Air-gapped deployment via Docker / K8s</li>
+      </ul>
+    </div>
+    <div class="glass rounded-2xl p-8 font-mono text-xs leading-relaxed overflow-hidden relative">
+      <div class="text-muted-fg mb-4"># Memoir_query.py</div>
+<pre class="text-fg whitespace-pre-wrap">
+<span class="text-secondary">from</span> Memoir <span class="text-secondary">import</span> ForensicRAG
 
-    <div class="glass px-5 py-3 rounded-lg">📄 Ingestion</div>
-    <div class="line"></div>
+rag = ForensicRAG(
+    dump=<span class="text-accent">"evidence/dump_07.raw"</span>,
+    embedder=<span class="text-accent">"bge-large-en"</span>,
+    store=<span class="text-accent">"qdrant://localhost:6333"</span>,
+    llm=<span class="text-accent">"gpt-4o"</span>,
+)
 
-    <div class="glass px-5 py-3 rounded-lg">🧠 Embeddings</div>
-    <div class="line"></div>
+result = rag.ask(
+    <span class="text-accent">"Who exfiltrated PII between"</span>
+    <span class="text-accent">" 02:14 and 02:38 UTC?"</span>
+)
 
-    <div class="glass px-5 py-3 rounded-lg">🗄 Vector DB</div>
-    <div class="line"></div>
+<span class="text-primary">print</span>(result.answer)
+<span class="text-primary">print</span>(result.citations)  <span class="text-muted-fg"># [PID 4128, conn 10.0.4.21:443, ...]</span>
+</pre>
+    </div>
+  </div>
+</section>
 
-    <div class="glass px-5 py-3 rounded-lg">🤖 RAG + LLM</div>
-    <div class="line"></div>
+<!-- TESTIMONIALS -->
+<section class="container-x py-32 reveal">
+  <div class="max-w-2xl mb-16">
+    <p class="font-mono text-xs uppercase tracking-widest text-primary mb-4">// Trusted by</p>
+    <h2 class="text-4xl md:text-6xl font-bold">Field-tested by <span class="text-gradient">DFIR teams</span>.</h2>
+  </div>
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="glass rounded-2xl p-8">
+      <p class="text-muted-fg mb-6">"Cut our triage time from 14 hours to under 20 minutes. The citations alone made it bulletproof in court."</p>
+      <div class="font-mono text-sm"><div class="text-primary">— Lt. R. Okafor</div><div class="text-muted-fg">Federal Cyber Unit</div></div>
+    </div>
+    <div class="glass rounded-2xl p-8">
+      <p class="text-muted-fg mb-6">"Memoir's vector search found a malware family across 3 unrelated incidents. We never would've connected them."</p>
+      <div class="font-mono text-sm"><div class="text-primary">— A. Nakamura</div><div class="text-muted-fg">SOC Lead, Fortune 100</div></div>
+    </div>
+    <div class="glass rounded-2xl p-8">
+      <p class="text-muted-fg mb-6">"The RAG approach is what Volatility should have evolved into a decade ago. Game-changing for our consultancy."</p>
+      <div class="font-mono text-sm"><div class="text-primary">— M. Bertelli</div><div class="text-muted-fg">DFIR Consultant</div></div>
+    </div>
+  </div>
+</section>
 
-    <div class="glass px-5 py-3 rounded-lg">📊 Insights</div>
+<!-- PRICING -->
+<section id="pricing" class="container-x py-32 reveal">
+  <div class="max-w-2xl mb-16">
+    <p class="font-mono text-xs uppercase tracking-widest text-primary mb-4">
+      // Pricing
+    </p>
 
+    <h2 class="text-4xl md:text-6xl font-bold">
+      Scale with your <span class="text-gradient">caseload</span>.
+    </h2>
   </div>
 
-  <!-- EXTRA IMAGE -->
-  <div class="mt-12 flex justify-center">
-    <img 
-      src="https://images.unsplash.com/photo-1667372335962-5fd503a38a7f?auto=format&fit=crop&w=900&q=80"
-      class="rounded-xl w-[600px] opacity-80"
+  <div class="grid md:grid-cols-3 gap-6">
+
+    {% for plan in plans %}
+
+    <div class="glass rounded-2xl p-8
+      {% if forloop.counter == 2 %}
+        relative
+      {% endif %}
+    "
+
+    {% if forloop.counter == 2 %}
+      style="border-color:hsl(188 95% 55% / .6);
+      box-shadow:0 0 60px hsl(188 95% 55% / 0.25);"
+    {% endif %}
     >
-  </div>
 
+      {% if forloop.counter == 2 %}
+      <div
+        class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-mono text-primary-fg"
+        style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));">
+        MOST POPULAR
+      </div>
+      {% endif %}
+
+      <h3 class="text-2xl font-semibold mb-2">
+        {{ plan.name }}
+      </h3>
+
+      <div class="text-4xl font-bold font-mono mb-1">
+        ₹{{ plan.price }}
+
+        <span class="text-base text-muted-fg">
+          / {{ plan.duration }} Day{{ plan.duration|pluralize }}
+        </span>
+      </div>
+
+      <p class="text-sm text-muted-fg mb-6">
+        {{ plan.description }}
+      </p>
+
+      <form method="POST" action="{% url 'auth' %}">
+        {% csrf_token %}
+
+        <input type="hidden" name="plan_id" value="{{ plan.id }}">
+
+        <button
+          type="submit"
+          class="w-full text-center font-mono py-3 rounded-md
+          {% if forloop.counter == 2 %}
+            text-primary-fg
+          {% else %}
+            border border-primary/40 hover:bg-primary/10
+          {% endif %}
+          "
+
+          {% if forloop.counter == 2 %}
+          style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));"
+          {% endif %}
+        >
+          {% if forloop.counter == 2 %}
+            Start trial
+          {% else %}
+            Get started
+          {% endif %}
+        </button>
+      </form>
+
+    </div>
+
+    {% endfor %}
+
+  </div>
+</section>
+<!-- FAQ -->
+<section id="faq" class="container-x py-32 reveal">
+  <div class="max-w-2xl mb-16">
+    <p class="font-mono text-xs uppercase tracking-widest text-primary mb-4">// FAQ</p>
+    <h2 class="text-4xl md:text-6xl font-bold">Questions, <span class="text-gradient">answered</span>.</h2>
+  </div>
+  <div class="space-y-3 max-w-3xl">
+    <details class="glass rounded-xl p-6 group">
+      <summary class="flex justify-between items-center font-semibold">Is Memoir court-admissible? <span class="chev text-primary text-2xl transition-transform">+</span></summary>
+      <p class="mt-4 text-muted-fg">Yes. Every retrieval is hash-verified and Ed25519-signed. We follow NIST 800-86 and ISO 27037 guidelines, and outputs include a full audit trail.</p>
+    </details>
+    <details class="glass rounded-xl p-6 group">
+      <summary class="flex justify-between items-center font-semibold">Can I run it offline / air-gapped? <span class="chev text-primary text-2xl transition-transform">+</span></summary>
+      <p class="mt-4 text-muted-fg">Absolutely. The Agency tier ships with local LLMs (Llama 3, Mistral) and on-prem vector stores (Qdrant/Chroma). No external calls required.</p>
+    </details>
+    <details class="glass rounded-xl p-6 group">
+      <summary class="flex justify-between items-center font-semibold">Which memory acquisition tools are supported? <span class="chev text-primary text-2xl transition-transform">+</span></summary>
+      <p class="mt-4 text-muted-fg">LiME, WinPMEM, AVML, DumpIt, Magnet RAM Capture, and any tool producing raw or LiME format. We auto-detect profiles via Volatility 3.</p>
+    </details>
+    <details class="glass rounded-xl p-6 group">
+      <summary class="flex justify-between items-center font-semibold">Does the LLM hallucinate forensic findings? <span class="chev text-primary text-2xl transition-transform">+</span></summary>
+      <p class="mt-4 text-muted-fg">Memoir is grounded — every claim is constrained to retrieved context with offset/PID citations. Findings without citations are flagged and discarded.</p>
+    </details>
+    <details class="glass rounded-xl p-6 group">
+      <summary class="flex justify-between items-center font-semibold">How is data privacy handled? <span class="chev text-primary text-2xl transition-transform">+</span></summary>
+      <p class="mt-4 text-muted-fg">Evidence never leaves your environment in on-prem mode. SaaS tier is SOC2 Type II, encrypted at rest (AES-256) and in transit (TLS 1.3).</p>
+    </details>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta" class="container-x py-32">
+  <div class="glass rounded-3xl p-12 md:p-20 text-center relative overflow-hidden">
+    <div class="absolute inset-0 grid-bg opacity-30"></div>
+    <div class="relative z-10 max-w-3xl mx-auto space-y-8">
+      <h2 class="text-4xl md:text-6xl font-bold">Investigate every byte. <span class="text-gradient">Miss nothing.</span></h2>
+      <p class="text-lg text-muted-fg">Join law enforcement, SOC teams, and DFIR consultancies using Memoir to close cases faster.</p>
+      <form class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+        <input type="email" required placeholder="agent@yourdomain.gov" class="flex-1 bg-muted border border-border rounded-md px-4 py-3 font-mono text-sm focus:outline-none focus:border-primary"/>
+        <button type="submit" class="font-mono px-6 py-3 rounded-md text-primary-fg glow-btn hover:opacity-90" style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));">Request Demo →</button>
+      </form>
+    </div>
+  </div>
 </section>
 
 <!-- FOOTER -->
-<footer class="text-center py-8 text-gray-500">
-  © 2026 DMF System
+<footer class="border-t border-border mt-12">
+  <div class="container-x py-20">
+    <div class="grid md:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
+      <div class="lg:col-span-2 space-y-4">
+        <a href="#" class="flex items-center gap-2 font-mono font-bold text-lg">
+          <div class="w-8 h-8 rounded-lg grid place-items-center" style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));">
+            <svg class="w-4 h-4 text-primary-fg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <span class="text-gradient">Memoir</span>
+        </a>
+        <p class="text-sm text-muted-fg max-w-xs">RAG-powered digital memory forensics for the next generation of investigators.</p>
+        <div class="flex gap-3 pt-2">
+          <a href="#" aria-label="GitHub" class="w-9 h-9 rounded-md glass grid place-items-center hover:border-primary/60">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12a11.5 11.5 0 0 0 7.9 11c.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.4-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.7.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6a11.5 11.5 0 0 0 7.9-11C23.5 5.7 18.3.5 12 .5z"/></svg>
+          </a>
+          <a href="#" aria-label="X" class="w-9 h-9 rounded-md glass grid place-items-center hover:border-primary/60">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2H21l-6.52 7.45L22 22h-6.953l-4.72-6.18L4.8 22H2.04l6.97-7.96L2 2h7.083l4.27 5.65L18.244 2zm-2.44 18h1.793L7.27 4H5.36l10.444 16z"/></svg>
+          </a>
+          <a href="#" aria-label="LinkedIn" class="w-9 h-9 rounded-md glass grid place-items-center hover:border-primary/60">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.22 8h4.56v14H.22V8zm7.4 0h4.37v1.92h.06c.61-1.16 2.1-2.39 4.32-2.39 4.62 0 5.47 3.04 5.47 7v7.47h-4.55v-6.62c0-1.58-.03-3.62-2.21-3.62-2.21 0-2.55 1.72-2.55 3.5V22H7.62V8z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="font-mono text-xs uppercase tracking-widest text-primary mb-4">Product</h4>
+        <ul class="space-y-2 text-sm text-muted-fg">
+          <li><a href="#features" class="hover:text-primary">Features</a></li>
+          <li><a href="#pipeline" class="hover:text-primary">Pipeline</a></li>
+          <li><a href="#pricing" class="hover:text-primary">Pricing</a></li>
+          <li><a href="#" class="hover:text-primary">Changelog</a></li>
+          <li><a href="#" class="hover:text-primary">Roadmap</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-mono text-xs uppercase tracking-widest text-primary mb-4">Resources</h4>
+        <ul class="space-y-2 text-sm text-muted-fg">
+          <li><a href="#" class="hover:text-primary">Documentation</a></li>
+          <li><a href="#" class="hover:text-primary">API Reference</a></li>
+          <li><a href="#" class="hover:text-primary">Whitepaper</a></li>
+          <li><a href="#" class="hover:text-primary">Case Studies</a></li>
+          <li><a href="#" class="hover:text-primary">Blog</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-mono text-xs uppercase tracking-widest text-primary mb-4">Company</h4>
+        <ul class="space-y-2 text-sm text-muted-fg">
+          <li><a href="#" class="hover:text-primary">About</a></li>
+          <li><a href="#" class="hover:text-primary">Careers</a></li>
+          <li><a href="#" class="hover:text-primary">Press Kit</a></li>
+          <li><a href="#" class="hover:text-primary">Partners</a></li>
+          <li><a href="#" class="hover:text-primary">Contact</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="font-mono text-xs uppercase tracking-widest text-primary mb-4">Newsletter</h4>
+        <p class="text-sm text-muted-fg mb-3">DFIR insights, monthly. No spam.</p>
+        <form class="flex gap-2">
+          <input type="email" placeholder="you@domain.com" class="flex-1 bg-muted border border-border rounded-md px-3 py-2 text-xs font-mono focus:outline-none focus:border-primary"/>
+          <button class="px-3 py-2 rounded-md text-primary-fg text-xs font-mono" style="background:linear-gradient(135deg,hsl(188 95% 55%),hsl(270 80% 60%));">→</button>
+        </form>
+        <div class="mt-6 flex flex-wrap gap-2 text-[10px] font-mono">
+          <span class="px-2 py-1 rounded glass text-primary">SOC2</span>
+          <span class="px-2 py-1 rounded glass text-primary">ISO 27037</span>
+          <span class="px-2 py-1 rounded glass text-primary">NIST 800-86</span>
+          <span class="px-2 py-1 rounded glass text-primary">CJIS</span>
+          <span class="px-2 py-1 rounded glass text-primary">GDPR</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-fg font-mono">
+      <span>© 2026 Memoir Forensics, Inc. · All evidence reserved.</span>
+      <div class="flex flex-wrap gap-6">
+        <a href="#" class="hover:text-primary">Privacy</a>
+        <a href="#" class="hover:text-primary">Terms</a>
+        <a href="#" class="hover:text-primary">Security</a>
+        <a href="#" class="hover:text-primary">Responsible Disclosure</a>
+        <a href="#" class="hover:text-primary">Status ●</a>
+      </div>
+    </div>
+  </div>
 </footer>
 
 <script>
-window.addEventListener("scroll", function() {
-  const nav = document.querySelector("header");
-  if (window.scrollY > 50) {
-    nav.classList.add("bg-black/60");
-  } else {
-    nav.classList.remove("bg-black/60");
-  }
-});
-</script>
+  // Smooth reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (id.length > 1) {
+        const t = document.querySelector(id);
+        if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      }
+    });
+  });
+
+    const header = document.querySelector('header');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      header.classList.add('py-1', 'bg-bg/80/transparent', 'backdrop-blur-sm');
+      header.classList.remove('py-3');
+    } else {
+      header.classList.add('py-3');
+      header.classList.remove('py-1', 'bg-bg/100/transparent', 'backdrop-blur-sm');
+    }
+  });
+</script>
 </body>
 </html>

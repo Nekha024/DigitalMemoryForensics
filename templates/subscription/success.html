@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Payment Success</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Plus Jakarta Sans',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:#020617;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+}
+
+.success-card{
+
+    width:100%;
+    max-width:550px;
+
+    padding:50px 40px;
+
+    border-radius:24px;
+
+    background:rgba(255,255,255,0.05);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    backdrop-filter:blur(18px);
+
+    text-align:center;
+
+    box-shadow:
+    0 0 30px rgba(34,197,94,.25);
+}
+
+.success-icon{
+
+    width:120px;
+    height:120px;
+
+    margin:auto;
+    margin-bottom:30px;
+
+    border-radius:50%;
+
+    background:rgba(34,197,94,.12);
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    animation:pop 0.6s ease forwards;
+}
+
+@keyframes pop{
+
+    0%{
+        transform:scale(0);
+    }
+
+    70%{
+        transform:scale(1.15);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+}
+
+.checkmark{
+
+    font-size:60px;
+    color:#22c55e;
+
+    font-weight:bold;
+}
+
+h1{
+
+    font-size:44px;
+    margin-bottom:18px;
+
+    background:linear-gradient(to right,#22c55e,#4ade80);
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+p{
+    color:#cbd5e1;
+    font-size:17px;
+    line-height:1.8;
+}
+
+a{
+
+    display:inline-block;
+
+    margin-top:25px;
+
+    padding:14px 30px;
+
+    border-radius:14px;
+
+    text-decoration:none;
+
+    background:linear-gradient(135deg,#7c3aed,#9333ea);
+
+    color:white;
+
+    font-weight:700;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="success-card">
+
+    <div class="success-icon">
+
+        <div class="checkmark">
+            ✓
+        </div>
+
+    </div>
+
+    <h1>Payment Successful</h1>
+
+    <p>
+        Your subscription has been activated successfully.
+    </p>
+
+    <p>
+        Redirecting to home page in 10 seconds...
+    </p>
+
+    <a href="/cases/">
+        Go to Dashboard
+    </a>
+
+    <audio id="successSound">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
+    </audio>
+
+</div>
+
+<script>
+
+window.onload = function(){
+
+    const sound = document.getElementById("successSound");
+
+    sound.play().catch(function(error){
+
+        console.log("Autoplay blocked");
+
+    });
+
+    setTimeout(function(){
+
+        window.location.href = "/cases/";
+
+    }, 10000);
+
+};
+
+</script>
+
+</body>
+</html>

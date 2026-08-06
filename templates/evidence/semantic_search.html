@@ -1,173 +1,260 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Semantic Search</title>
+{% extends "base.html" %}
 
-<script src="https://cdn.tailwindcss.com"></script>
+{% block title %}Semantic Search{% endblock %}
+
+{% block content %}
+<!-- Custom Font & Styles -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-body{
-    background:#020617;
-    color:white;
-}
+    .search-container {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Header Icon Accent */
+    .search-header-icon {
+        background: rgba(6, 182, 212, 0.1);
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        color: #22d3ee;
+        transition: all 0.3s ease;
+    }
+    body.light-theme .search-header-icon {
+        background: rgba(8, 145, 178, 0.08);
+        border-color: rgba(8, 145, 178, 0.2);
+        color: #0891b2;
+    }
+    
+    /* Query Highlight Accent */
+    .query-highlight {
+        color: #22d3ee;
+    }
+    body.light-theme .query-highlight {
+        color: #0891b2;
+    }
+    
+    /* Document icon wrappers */
+    .doc-icon-wrapper {
+        background: rgba(6, 182, 212, 0.1);
+        color: #22d3ee;
+    }
+    body.light-theme .doc-icon-wrapper {
+        background: rgba(8, 145, 178, 0.08);
+        color: #0891b2;
+    }
+    
+    /* Scoring Badges */
+    .score-badge {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 99px;
+    }
+    .score-high {
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .score-medium {
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    .score-low {
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-muted);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    
+    /* Light Theme Scoring Badges Overrides */
+    body.light-theme .score-high {
+        background: rgba(16, 185, 129, 0.08);
+        color: #047857;
+        border-color: rgba(16, 185, 129, 0.25);
+    }
+    body.light-theme .score-medium {
+        background: rgba(245, 158, 11, 0.08);
+        color: #b45309;
+        border-color: rgba(245, 158, 11, 0.25);
+    }
+    body.light-theme .score-low {
+        background: rgba(100, 116, 139, 0.08);
+        color: #475569;
+        border-color: rgba(100, 116, 139, 0.18);
+    }
 
-/* NAVBAR */
-.navbar{
-    backdrop-filter: blur(10px);
-    background: rgba(0,0,0,0.4);
-    border-bottom:1px solid rgba(255,255,255,0.1);
-}
+    /* Result Card Hover Glows */
+    .result-card {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .result-card:hover {
+        border-color: rgba(6, 182, 212, 0.35);
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.05);
+        transform: translateY(-2px);
+    }
+    body.light-theme .result-card:hover {
+        border-color: rgba(8, 145, 178, 0.4);
+        box-shadow: 0 10px 25px rgba(8, 145, 178, 0.08);
+        transform: translateY(-2px);
+    }
 
-/* GLASS */
-.glass{
-    background:rgba(255,255,255,0.05);
-    backdrop-filter:blur(12px);
-    border:1px solid rgba(6,182,212,0.2);
-}
+    /* Code/Text Previews */
+    .content-preview {
+        color: #cbd5e1;
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    body.light-theme .content-preview {
+        color: #334155;
+        background: rgba(15, 23, 42, 0.02);
+        border-color: rgba(15, 23, 42, 0.06);
+    }
 
-/* INPUT */
-input, select{
-    width:100%;
-    padding:10px;
-    border-radius:6px;
-    background:transparent;
-    border:1px solid #334155;
-    color:white;
-    outline:none;
-}
-
-input:focus, select:focus{
-    border:1px solid #06b6d4;
-    box-shadow:0 0 10px rgba(6,182,212,0.3);
-}
-
-/* BUTTON */
-.btn{
-    padding:10px 16px;
-    border-radius:8px;
-    background:#06b6d4;
-    color:white;
-    transition:0.3s;
-}
-.btn:hover{
-    background:#0891b2;
-    box-shadow:0 0 10px #06b6d4;
-}
-
-/* RESULT CARD */
-.card{
-    transition:0.3s;
-}
-.card:hover{
-    transform:translateY(-5px);
-    box-shadow:0 0 20px rgba(6,182,212,0.6);
-}
+    /* Selection options color */
+    select option {
+        background: #0f172a;
+        color: #ffffff;
+    }
+    body.light-theme select option {
+        background: #ffffff;
+        color: #0f172a;
+    }
+    
+    /* General Theme Helpers */
+    .search-container .text-white {
+        color: var(--text-main) !important;
+    }
+    .search-container .text-slate-400 {
+        color: var(--text-muted) !important;
+    }
+    .search-container .border-white\/5 {
+        border-color: var(--border) !important;
+    }
 </style>
-</head>
 
-<body class="pt-24 px-6">
+<div class="search-container max-w-4xl mx-auto py-2">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8">
+        <div class="search-header-icon w-12 h-12 rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-brain text-lg"></i>
+        </div>
+        <div>
+            <h2 class="text-xl font-bold text-white tracking-tight">Semantic Index Search</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Locate critical clues by scanning memory fragments using concept vector descriptions</p>
+        </div>
+    </div>
 
-<!-- NAVBAR -->
-<header class="navbar fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-4">
+    <!-- Search Controls -->
+    <div class="glass p-6 rounded-2xl mb-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
 
-    <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
-
-    <nav class="flex gap-6 text-gray-300">
-        <a href="{% url 'cases:home' %}" class="hover:text-cyan-400">Dashboard</a>
-    </nav>
-
-    <span class="text-sm text-gray-400">
-        {{ request.user.username }}
-    </span>
-
-</header>
-
-<!-- SEARCH FORM -->
-<div class="max-w-4xl mx-auto">
-
-    <div class="glass p-6 rounded-xl mb-8">
-
-        <h2 class="text-2xl text-cyan-400 mb-6">Semantic Search</h2>
-
-        <form method="get" class="grid md:grid-cols-2 gap-4">
-
-            <!-- CASE SELECT -->
-            <div>
-                <label class="text-sm text-gray-300">Case</label>
-                <select name="case_id">
+        <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
+            <!-- Case Select -->
+            <div class="flex flex-col gap-1.5 md:col-span-4">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Case Context</label>
+                <select name="case_id" class="transition w-full">
                     <option value="">All Cases</option>
                     {% for case in cases %}
-                        <option value="{{ case.id }}" 
-                        {% if selected_case_id == case.id %}selected{% endif %}>
+                        <option value="{{ case.id }}" {% if selected_case_id == case.id %}selected{% endif %}>
                             {{ case.title }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
 
-            <!-- QUERY -->
-            <div>
-                <label class="text-sm text-gray-300">Search Query</label>
-                <input type="text" name="q" value="{{ query }}" placeholder="Enter keywords...">
+            <!-- Search Query -->
+            <div class="flex flex-col gap-1.5 md:col-span-6">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">Search Query</label>
+                <div class="relative">
+                    <input type="text" name="q" value="{{ query }}" required
+                           class="transition w-full"
+                           placeholder="Enter keywords, target concepts, or suspect descriptions...">
+                </div>
             </div>
 
-            <div class="md:col-span-2 text-right">
-                <button type="submit" class="btn">Search</button>
+            <!-- Submit Button -->
+            <div class="md:col-span-2">
+                <button type="submit" class="btn-primary text-xs w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition">
+                    <i class="fa-solid fa-magnifying-glass"></i> Search
+                </button>
             </div>
-
         </form>
-
     </div>
 
-    <!-- RESULTS -->
+    <!-- Results Section -->
     {% if query %}
-        <h3 class="text-xl text-cyan-400 mb-6">
-            Results for "{{ query }}"
-        </h3>
+        <div class="flex items-center justify-between mb-6 px-1">
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">
+                Matches for <span class="query-highlight">"{{ query }}"</span>
+            </h3>
+            <span class="text-xs px-2.5 py-1 rounded-full glass text-slate-400 font-medium">
+                {{ results|length }} fragments found
+            </span>
+        </div>
 
-        <div class="grid gap-6">
-
+        <div class="space-y-4">
             {% for result in results %}
-            <div class="glass card p-5 rounded-xl">
-
-                <div class="flex justify-between text-sm text-gray-400 mb-2">
-                    <span>File: <span class="text-cyan-400">{{ result.title }}</span></span>
-                    <span>Score: {{ result.score }}</span>
+            <div class="glass p-6 rounded-xl border border-white/5 result-card">
+                <!-- Metadata Header -->
+                <div class="flex flex-wrap justify-between items-center gap-3 border-b border-white/5 pb-4 mb-4">
+                    <div class="flex items-center gap-2.5">
+                        <div class="doc-icon-wrapper w-7 h-7 rounded-lg flex items-center justify-center">
+                            {% if result.file_type == 'pdf' %}
+                                <i class="fa-solid fa-file-pdf"></i>
+                            {% elif result.file_type == 'docx' %}
+                                <i class="fa-solid fa-file-word"></i>
+                            {% else %}
+                                <i class="fa-solid fa-file-lines"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs font-semibold text-white leading-none mb-0.5">{{ result.title }}</span>
+                            <span class="text-[10px] text-slate-500 uppercase tracking-wider leading-none">Chunk #{{ result.chunk_index }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Scoring badge -->
+                    <div>
+                        {% if result.score >= 0.3 %}
+                            <span class="score-badge score-high"><i class="fa-solid fa-circle-check mr-1"></i>High Match ({{ result.score }})</span>
+                        {% elif result.score >= 0.15 %}
+                            <span class="score-badge score-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Medium Match ({{ result.score }})</span>
+                        {% else %}
+                            <span class="score-badge score-low">Low Match ({{ result.score }})</span>
+                        {% endif %}
+                    </div>
                 </div>
 
-                <p class="text-gray-300 text-sm mb-3">
-                    Chunk #{{ result.chunk_index }}
-                </p>
-
-                <p class="text-gray-200 mb-4">
+                <!-- Text Content Area -->
+                <p class="content-preview leading-relaxed text-sm font-medium mb-4 p-4 rounded-xl font-mono text-justify selection:bg-cyan-500/30">
                     {{ result.content }}
                 </p>
 
-                <a href="{% url 'evidence_detail' result.evidence_id %}" 
-                   class="text-cyan-400 hover:underline">
-                   View Evidence →
-                </a>
-
+                <!-- Footer Navigation link -->
+                <div class="flex justify-end pt-1">
+                    <a href="{% url 'evidence_detail' result.evidence_id %}" class="text-cyan-400 font-semibold text-xs hover:underline inline-flex items-center gap-1">
+                        View Source Evidence <i class="fa-solid fa-angle-right text-[10px]"></i>
+                    </a>
+                </div>
             </div>
             {% empty %}
-                <p class="text-gray-400">No results found.</p>
+            <div class="text-center py-16 glass rounded-xl border border-white/5">
+                <div class="text-3xl mb-3">📂</div>
+                <p class="text-slate-400 font-medium text-sm">No semantic matches located within the target parameters.</p>
+                <p class="text-xs text-slate-500 mt-1">Try indexing your case context first, or broaden your query descriptions.</p>
+            </div>
             {% endfor %}
-
         </div>
     {% endif %}
 
-    <!-- BACK -->
-    <div class="mt-10">
-        <a href="{% url 'home' %}" 
-           class="px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600">
-            ← Back to Dashboard
+    <!-- Back Navigation Footer -->
+    <div class="mt-8 pt-4 border-t border-white/5">
+        <a href="{% url 'dashboard' %}" class="btn-outline inline-flex items-center text-xs py-2 px-4 rounded-lg font-semibold transition">
+            <i class="fa-solid fa-house mr-1.5"></i> Back to Dashboard
         </a>
     </div>
-
 </div>
-
-</body>
-</html>
+{% endblock %}

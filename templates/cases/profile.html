@@ -1,0 +1,309 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<!-- Custom Font & Styles -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+    .profile-container {
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* Form inputs custom styling */
+    .profile-form input[type="text"],
+    .profile-form input[type="email"] {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-main);
+        outline: none;
+        transition: all 0.3s ease;
+        margin-top: 6px;
+        font-size: 0.9rem;
+    }
+    .profile-form input[type="text"]:focus,
+    .profile-form input[type="email"]:focus {
+        border-color: #06b6d4;
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+    }
+    body.light-theme .profile-form input[type="text"],
+    body.light-theme .profile-form input[type="email"] {
+        background: rgba(0, 0, 0, 0.02);
+        border-color: var(--border);
+    }
+
+    /* Scoped theme variables overrides */
+    .profile-container .text-white {
+        color: var(--text-main) !important;
+    }
+    .profile-container .text-slate-400 {
+        color: var(--text-muted) !important;
+    }
+    .profile-container .text-slate-300 {
+        color: var(--text-muted) !important;
+    }
+    .profile-container .border-slate-800 {
+        border-color: var(--border) !important;
+    }
+
+    /* Card Background Adapters */
+    .profile-container .bg-slate-950\/40 {
+        background-color: rgba(15, 23, 42, 0.45) !important;
+    }
+    body.light-theme .profile-container .bg-slate-950\/40 {
+        background-color: rgba(0, 0, 0, 0.03) !important;
+    }
+
+    /* Custom accent colors override in light theme */
+    body.light-theme .profile-container .text-cyan-400 {
+        color: #0891b2 !important;
+    }
+    body.light-theme .profile-container .text-emerald-400 {
+        color: #047857 !important;
+    }
+    body.light-theme .profile-container .text-rose-400 {
+        color: #be123c !important;
+    }
+</style>
+
+<div class="profile-container max-w-7xl mx-auto py-2">
+    
+    <!-- CONTAINER 1: MAIN DASHBOARD VIEW -->
+    <div id="dashboard-view" class="transition-all duration-300 space-y-6">
+        
+        {% if not plans or not plans.active %}
+        <!-- Subscription Alert Banner -->
+        <div class="glass border border-amber-500/20 bg-amber-500/[0.03] rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="flex items-center gap-4 text-center sm:text-left flex-col sm:flex-row">
+                <div class="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 text-lg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white">Active Subscription Required</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Please subscribe to a plan to start uploading evidence, creating cases, and generating forensic reports.</p>
+                </div>
+            </div>
+            
+            <a href="{% url 'subscription_page' %}" class="btn-primary text-xs py-2.5 px-5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:shadow-amber-500/20 w-full sm:w-auto text-center font-bold uppercase tracking-wider">
+                Get Subscription
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Top Header Identity Card -->
+        <header class="glass relative overflow-hidden rounded-2xl p-6 md:p-8 border border-slate-800">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                <!-- User Profile Info -->
+                <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-3xl font-black text-white shadow-md tracking-wider">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5 flex-wrap justify-center sm:justify-start">
+                            <h2 class="text-2xl font-extrabold text-white tracking-tight">{{ user.username }}</h2>
+                            {% if plans.active %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-[9px] font-bold uppercase tracking-wide">
+                                Premium Tier
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-500/10 text-slate-400 border border-slate-500/20 text-[9px] font-bold uppercase tracking-wide">
+                                Free Tier
+                            </span>
+                            {% endif %}
+                        </div>
+                        <p class="text-slate-400 text-sm mt-1">{{ user.email }}</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-3.5 flex items-center gap-1.5 justify-center sm:justify-start">
+                            <i class="fa-solid fa-calendar-day"></i> Member since {{ user.date_joined|date:"d M Y" }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Profile Quick Actions -->
+                <div class="flex flex-wrap gap-3 w-full sm:w-auto justify-center">
+                    <button type="button" onclick="toggleViews()"
+                        class="btn-primary text-xs py-2.5 px-5 font-bold uppercase tracking-wider flex-1 sm:flex-none text-center cursor-pointer shadow-lg shadow-cyan-500/10">
+                        Edit Profile
+                    </button>
+                    <a href="{% url 'change_password' %}" class="btn-outline text-xs py-2.5 px-5 font-bold uppercase tracking-wider flex-1 sm:flex-none text-center">
+                        Change Password
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Detailed Configuration Bento Panels -->
+        <div class="grid md:grid-cols-2 gap-6">
+
+            <!-- Panel 1: Subscription Status -->
+            <section class="glass rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-4">
+                        <h3 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                            <i class="fa-solid fa-credit-card text-cyan-400"></i> Subscription Details
+                        </h3>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide {% if plans.active %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+                            {{ plans.active|yesno:"Active,Inactive" }}
+                        </span>
+                    </div>
+
+                    <div class="space-y-4 text-xs font-semibold">
+                        <div class="flex justify-between items-center py-0.5">
+                            <span class="text-slate-400">Current Plan</span>
+                            <span class="font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-0.5 rounded-lg uppercase tracking-wider">
+                                {{ plans.plan.name|default:"No Active Plan" }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-0.5">
+                            <span class="text-slate-400">Started On</span>
+                            <span class="text-white font-mono">
+                                {{ plans.created_at|date:"d M Y"|default:"-" }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-0.5">
+                            <span class="text-slate-400">Expires On</span>
+                            <span class="text-white font-mono">
+                                {{ plans.ended_at|date:"d M Y"|default:"-" }}
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center py-0.5 border-t border-slate-800/60 pt-3 mt-3">
+                            <span class="text-slate-400">Days Remaining</span>
+                            <span class="font-bold text-sm text-cyan-400 font-mono">
+                                {{ remaining_days|default:"0" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-800/80">
+                    <a href="{% url 'subscription_page' %}" class="btn-outline w-full block text-center font-bold text-xs uppercase tracking-wider py-2.5">
+                        Upgrade / Manage Plan
+                    </a>
+                </div>
+            </section>
+
+            <!-- Panel 2: Access & Security Settings -->
+            <section class="glass rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <div class="border-b border-slate-800/80 pb-4 mb-4">
+                        <h3 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-cyan-400"></i> Security Settings
+                        </h3>
+                    </div>
+
+                    <div class="space-y-4 text-xs font-semibold">
+                        <div class="p-3.5 rounded-xl border border-slate-800/80 bg-slate-950/40">
+                            <p class="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                                Password Status
+                            </p>
+                            <p class="text-white text-xs flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Encrypted & Secured
+                            </p>
+                        </div>
+
+                        <div class="p-3.5 rounded-xl border border-slate-800/80 bg-slate-950/40">
+                            <p class="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                                Last Login Session
+                            </p>
+                            <p class="text-white font-mono text-xs truncate">
+                                {{ user.last_login|date:"d M Y, H:i" }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-800/80">
+                    <a href="{% url 'change_password' %}" class="btn-outline w-full block text-center font-bold text-xs uppercase tracking-wider py-2.5">
+                        Manage Password Settings
+                    </a>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- CONTAINER 2: EDIT PROFILE FORM VIEW (HIDDEN BY DEFAULT) -->
+    <div id="edit-profile-view" class="hidden transition-all duration-300 max-w-xl mx-auto">
+        <div class="glass rounded-2xl p-6 border border-slate-800 relative">
+
+            <!-- Header inside form panel -->
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-4 mb-6">
+                <div>
+                    <h3 class="text-lg font-extrabold text-white tracking-tight">Edit Profile Details</h3>
+                    <p class="text-[10px] text-slate-400 mt-1">
+                        Update your account credentials and primary contact parameters.
+                    </p>
+                </div>
+                <button type="button" onclick="toggleViews()" class="btn-outline text-[10px] font-bold uppercase tracking-wider cursor-pointer py-1.5 px-3">
+                    Cancel
+                </button>
+            </div>
+
+            <!-- Form Processing Action -->
+            <form method="POST" action="" class="profile-form space-y-4">
+                {% csrf_token %}
+
+                <!-- Username Input Field -->
+                <div class="flex flex-col">
+                    <label for="username" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                        Username
+                    </label>
+                    <input type="text" id="username" name="username" value="{{ user.username }}" required>
+                </div>
+
+                <!-- Email Input Field -->
+                <div class="flex flex-col">
+                    <label for="email" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-1">
+                        Email Address
+                    </label>
+                    <input type="email" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+
+                <!-- Optional Form Helper Message -->
+                <p class="text-[10px] text-slate-500 leading-relaxed px-1">
+                    To safeguard system authentication metrics, passwords must be altered via the dedicated security control system.
+                </p>
+
+                <!-- Action Button Cluster -->
+                <div class="flex items-center justify-between pt-4 border-t border-slate-800 mt-6">
+                    <button type="button" onclick="toggleViews()" class="btn-outline text-[10px] py-2 px-3.5 font-bold uppercase tracking-wider cursor-pointer">
+                        Discard Changes
+                    </button>
+                    <button type="submit" class="btn-primary text-[10px] py-2 px-4 font-bold uppercase tracking-wider cursor-pointer">
+                        Save Identity
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<!-- Interactive View-State Control Script -->
+<script>
+    function toggleViews() {
+        const dashboard = document.getElementById('dashboard-view');
+        const editForm = document.getElementById('edit-profile-view');
+
+        if (dashboard.classList.contains('hidden')) {
+            dashboard.classList.remove('hidden');
+            editForm.classList.add('hidden');
+        } else {
+            dashboard.classList.add('hidden');
+            editForm.classList.remove('hidden');
+        }
+    }
+</script>
+{% endblock %}

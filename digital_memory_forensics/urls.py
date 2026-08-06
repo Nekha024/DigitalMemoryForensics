@@ -8,6 +8,8 @@ urlpatterns = [
     path("", include("accounts.urls")),
     path('cases/', include('cases.urls')),
     path('evidence/', include('evidence.urls')),
+    path('subscription/', include('subscription.urls')),
+
 ]
 
 if settings.DEBUG:

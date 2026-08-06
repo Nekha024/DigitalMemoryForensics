@@ -1,0 +1,324 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>{% block title %}Digital Memory Forensics{% endblock %}</title>
+
+<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+/* Theme Defaults (Dark Mode) */
+:root {
+    --bg-gradient-1: #0f172a;
+    --bg-gradient-2: #020617;
+    --bg-gradient-3: #082f49;
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --text-cyan: #06b6d4;
+    --glass-bg: rgba(15, 23, 42, 0.55);
+    --border: rgba(6, 182, 212, 0.15);
+    --navbar-bg: rgba(2, 6, 23, 0.75);
+    --sidebar-bg: rgba(15, 23, 42, 0.65);
+    --scrollbar-thumb: #164e63;
+    --table-border: rgba(255, 255, 255, 0.08);
+}
+
+/* Light Theme Variables - Rich, not washed out */
+body.light-theme {
+    --bg-gradient-1: #f8fafc;
+    --bg-gradient-2: #f1f5f9;
+    --bg-gradient-3: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --text-cyan: #0891b2;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --border: rgba(8, 145, 178, 0.2);
+    --navbar-bg: rgba(248, 250, 252, 0.85);
+    --sidebar-bg: rgba(241, 255, 255, 0.4);
+    --scrollbar-thumb: #cbd5e1;
+    --table-border: rgba(15, 23, 42, 0.08);
+}
+
+body {
+    background:
+    radial-gradient(circle at top left, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 40%),
+    radial-gradient(circle at bottom right, var(--bg-gradient-3) 0%, var(--bg-gradient-2) 50%);
+    color: var(--text-main);
+    min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Dynamic Global text overwrites for inherited internal styling */
+.text-cyan-400 { color: var(--text-cyan) !important; }
+.text-slate-400, .text-gray-400 { color: var(--text-muted) !important; }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 20px;
+}
+
+/* Glass */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    transition: background 0.3s ease, border 0.3s ease;
+}
+
+/* Navbar */
+.navbar {
+    background: var(--navbar-bg);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s ease, border 0.3s ease;
+}
+
+/* Sidebar */
+.sidebar {
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(18px);
+    border-right: 1px solid var(--border);
+    transition: background 0.3s ease, border 0.3s ease;
+}
+
+/* Menu Links */
+.menu-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    transition: .25s;
+    color: var(--text-muted);
+}
+
+.menu-link:hover {
+    background: rgba(6, 182, 212, 0.12);
+    color: var(--text-main);
+    transform: translateX(4px);
+}
+
+.menu-link.active {
+    background: rgba(6, 182, 212, 0.15);
+    color: var(--text-cyan);
+    border: 1px solid var(--border);
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: .3s;
+    color: white !important;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(6,182,212,.35);
+}
+
+.btn-outline {
+    border: 1px solid var(--border);
+    padding: 10px 18px;
+    border-radius: 10px;
+    transition: .3s;
+    color: var(--text-main);
+    cursor: pointer;
+}
+
+.btn-outline:hover {
+    background: rgba(6, 182, 212, 0.1);
+}
+
+/* Inputs */
+input,
+textarea,
+select {
+    width: 100%;
+    background: rgba(255,255,255,.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    color: var(--text-main);
+    margin-top: 6px;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+select option {
+    background: #0f172a;
+    color: #ffffff;
+}
+
+body.light-theme input, body.light-theme textarea, body.light-theme select {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 4px rgba(6,182,212,.12);
+}
+
+tr {
+    border-color: var(--table-border) !important;
+}
+</style>
+</head>
+
+<body>
+<script>
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-theme');
+    }
+</script>
+
+<header class="navbar fixed top-0 left-0 right-0 z-50 h-18 flex items-center justify-between px-8">
+
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+            🧠
+        </div>
+        <div>
+            <h1 class="font-bold text-xl tracking-widest text-cyan-400">
+                MEMOIR
+            </h1>
+            <p class="text-xs text-slate-400">
+                Digital Memory Forensics
+            </p>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-4">
+        
+        <button id="themeToggle" class="glass w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer hover:scale-105 transition" title="Toggle Visual Mode">
+            <span id="themeIcon">🌓</span>
+        </button>
+
+        <div class="glass px-4 py-2 rounded-xl flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                👤
+            </div>
+            <div>
+                <p class="text-sm font-medium">
+                    {{ request.user.username }}
+                </p>
+                <p class="text-xs text-slate-400">
+                    Investigator
+                </p>
+            </div>
+        </div>
+
+        <form action="{% url 'profile' %}" method="post" class="m-0">
+            {% csrf_token %}
+            <button class="btn-outline">Profile</button>
+        </form>
+
+        <form action="{% url 'logout' %}" method="post" class="m-0">
+            {% csrf_token %}
+            <button class="btn-primary">Logout</button>
+        </form>
+    </div>
+</header>
+
+<div class="flex pt-[72px]">
+
+    <aside class="sidebar w-72 min-h-screen p-6">
+        <div class="mb-8">
+            <p class="uppercase text-xs tracking-widest text-cyan-400 mb-4">
+                Navigation
+            </p>
+            <nav class="space-y-2">
+    <a href="{% url 'dashboard' %}" class="menu-link">
+        <i class="fa-solid fa-chart-line w-5 text-cyan-400"></i>
+        <span>Dashboard</span>
+    </a>
+
+    <a href="{% url 'home' %}" class="menu-link">
+        <i class=" fa-solid fa-folder-open w-5 text-cyan-400"></i>
+        <span>My Cases</span>
+    </a>
+
+    <a href="{% url 'create_case' %}" class="menu-link">
+        <i class="fa-solid fa-plus-circle w-5 text-cyan-400"></i>
+        <span>Create Case</span>
+    </a>
+
+    <a href="{% url 'upload_evidence' %}" class="menu-link">
+        <i class="fa-solid fa-cloud-arrow-up w-5 text-cyan-400"></i>
+        <span>Upload Evidence</span>
+    </a>
+
+    <a href="{% url 'semantic_search' %}" class="menu-link">
+        <i class="fa-solid fa-magnifying-glass w-5 text-cyan-400"></i>
+        <span>Semantic Search</span>
+    </a>
+
+    <a href="{% url 'how_it_works' %}" class="menu-link">
+        <i class="fa-solid fa-circle-question w-5 text-cyan-400"></i>
+        <span>How It Works</span>
+    </a>
+</nav>
+        </div>
+
+        <div class="glass rounded-2xl p-5">
+            <h3 class="font-semibold text-cyan-400 mb-3">System Status</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Cases</span>
+                    <span class="text-cyan-400 font-medium">Active</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Database</span>
+                    <span class="text-cyan-400 font-medium">Online</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">RAG Engine</span>
+                    <span class="text-cyan-400 font-medium">Ready</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-8">
+        <div class="glass rounded-3xl p-8 min-h-[calc(100vh-130px)]">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+</div>
+
+<script>
+    const themeToggleBtn = document.getElementById('themeToggle');
+    
+    themeToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light-theme');
+        
+        let theme = 'dark';
+        if (document.body.classList.contains('light-theme')) {
+            theme = 'light';
+        }
+        localStorage.setItem('theme', theme);
+        
+        // Dispatch event so sub-charts can redocrate automatically if needed
+        window.dispatchEvent(new Event('themeChanged'));
+    });
+</script>
+<script src='https://cdn.jotfor.ms/agent/embedjs/019edbf020497a18a73e9189b6829c58df19/embed.js'>
+</script>
+</body>
+</html>

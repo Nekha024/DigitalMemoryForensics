@@ -1,146 +1,285 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard - DMF</title>
+{% extends "base.html" %}
 
-<script src="https://cdn.tailwindcss.com"></script>
+{% block title %}Case Repositories{% endblock %}
+
+{% block content %}
+<!-- Custom Font & Styles -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-body{
-    background:#020617;
-    color:white;
-}
-
-/* NAVBAR */
-.navbar{
-    backdrop-filter: blur(10px);
-    background: rgba(0,0,0,0.4);
-    border-bottom:1px solid rgba(255,255,255,0.1);
-}
-
-/* SIDEBAR */
-.sidebar{
-    background: rgba(255,255,255,0.03);
-    backdrop-filter: blur(12px);
-    border-right:1px solid rgba(6,182,212,0.2);
-}
-
-/* GLASS */
-.glass{
-    background:rgba(255,255,255,0.05);
-    backdrop-filter:blur(12px);
-    border:1px solid rgba(6,182,212,0.2);
-}
-
-/* CARD */
-.card{
-    transition:0.3s;
-}
-.card:hover{
-    transform:translateY(-6px);
-    box-shadow:0 0 25px rgba(6,182,212,0.7);
-}
+    .dashboard-container {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Stat Card Custom Glows */
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -10px rgba(6, 182, 212, 0.15);
+    }
+    
+    /* Case Card Premium Design */
+    .case-card {
+        background: rgba(15, 23, 42, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .case-card:hover {
+        transform: translateY(-3px);
+        background: rgba(15, 23, 42, 0.55);
+        border-color: rgba(6, 182, 212, 0.25);
+        box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 15px rgba(6, 182, 212, 0.05);
+    }
+    
+    body.light-theme .case-card {
+        background: rgba(255, 255, 255, 0.7);
+        border-color: rgba(15, 23, 42, 0.08);
+    }
+    body.light-theme .case-card:hover {
+        background: rgba(255, 255, 255, 0.95);
+        border-color: rgba(8, 145, 178, 0.3);
+        box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.08);
+    }
+    
+    /* Filters Navigation Pill Tabs */
+    .filter-tab {
+        color: var(--text-muted);
+        border: 1px solid transparent;
+        transition: all 0.25s ease;
+    }
+    .filter-tab:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.03);
+    }
+    body.light-theme .filter-tab:hover {
+        background: rgba(15, 23, 42, 0.03);
+    }
+    .filter-tab.active {
+        color: var(--text-cyan);
+        background: rgba(6, 182, 212, 0.08);
+        border-color: var(--border);
+    }
+    
+    /* General helpers */
+    .dashboard-container .text-white {
+        color: var(--text-main) !important;
+    }
+    .dashboard-container .text-slate-400 {
+        color: var(--text-muted) !important;
+    }
+    .dashboard-container .border-white\/5 {
+        border-color: var(--border) !important;
+    }
 </style>
-</head>
 
-<body>
-
-<!-- NAVBAR -->
-<header class="navbar fixed top-0 left-0 w-full z-50 flex justify-between items-center px-10 py-4">
-
-    <h1 class="text-xl font-bold text-cyan-400">DMF System</h1>
-
-    <div class="flex items-center gap-4">
-        <span class="text-gray-300 text-sm">{{ request.user.username }}</span>
-
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button class="px-4 py-2 border border-cyan-400 rounded-lg hover:bg-cyan-500/20">
-                Logout
-            </button>
-        </form>
+<div class="dashboard-container max-w-5xl mx-auto py-2">
+    
+    <!-- Top Bar Header -->
+    <div class="flex justify-between items-center mb-8 pb-5 border-b border-white/5">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-lg">
+                <i class="fa-solid fa-folder-tree"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight text-white">Case Repositories</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Manage digital evidence scopes and investigator portfolios</p>
+            </div>
+        </div>
+        
+        <a href="{% url 'create_case' %}" class="btn-primary text-xs py-2 px-4 rounded-lg font-semibold transition inline-flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> Create New Case
+        </a>
     </div>
 
-</header>
-
-<!-- MAIN LAYOUT -->
-<div class="flex pt-20">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar w-60 min-h-screen p-6">
-
-        <h2 class="text-cyan-400 text-lg mb-6">Dashboard</h2>
-
-        <nav class="flex flex-col gap-4 text-gray-300">
-
-            <a href="{% url 'home' %}" class="hover:text-cyan-400">
-                 Home
-            </a>
-
-            <a href="{% url 'create_case' %}" class="hover:text-cyan-400">
-                 Create Case
-            </a>
-
-            <a href="{% url 'upload_evidence' %}" class="hover:text-cyan-400">
-                 Upload Evidence
-            </a>
-
-        </nav>
-
-    </aside>
-
-    <!-- CONTENT -->
-    <main class="flex-1 p-8">
-
-        <!-- HEADER -->
-        <div class="flex justify-between items-center mb-8">
-            <h2 class="text-2xl text-cyan-400">My Cases</h2>
-
-            <a href="{% url 'create_case' %}" 
-               class="bg-cyan-500 px-4 py-2 rounded-lg hover:bg-cyan-600">
-                + New Case
-            </a>
+    <!-- Stats Dashboard Overview -->
+    <div class="grid grid-cols-3 gap-4 mb-8">
+        <!-- Stat Card 1 -->
+        <div class="glass stat-card p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-cyan-500/5 rounded-full blur-xl pointer-events-none"></div>
+            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-base">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Repositories</span>
+                <span class="text-lg font-bold text-white block mt-0.5" id="total-cases-count">0</span>
+            </div>
+        </div>
+        
+        <!-- Stat Card 2 -->
+        <div class="glass stat-card p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-500/5 rounded-full blur-xl pointer-events-none"></div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-base">
+                <i class="fa-solid fa-circle-dot animate-pulse"></i>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Active Cases</span>
+                <span class="text-lg font-bold text-white block mt-0.5" id="active-cases-count">0</span>
+            </div>
         </div>
 
-        <!-- CASE GRID -->
-        <div class="grid md:grid-cols-3 gap-6">
+        <!-- Stat Card 3 -->
+        <div class="glass stat-card p-4 rounded-2xl flex items-center gap-4 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-full blur-xl pointer-events-none"></div>
+            <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-base">
+                <i class="fa-solid fa-box-archive"></i>
+            </div>
+            <div>
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Closed Cases</span>
+                <span class="text-lg font-bold text-white block mt-0.5" id="closed-cases-count">0</span>
+            </div>
+        </div>
+    </div>
 
+    <!-- Filters Row -->
+    <div class="flex items-center gap-2 mb-6">
+        <button onclick="filterStatus('all', this)" class="filter-tab active text-xs font-semibold px-3 py-1.5 rounded-lg">
+            All Cases
+        </button>
+        <button onclick="filterStatus('open', this)" class="filter-tab text-xs font-semibold px-3 py-1.5 rounded-lg">
+            Active
+        </button>
+        <button onclick="filterStatus('closed', this)" class="filter-tab text-xs font-semibold px-3 py-1.5 rounded-lg">
+            Closed
+        </button>
+    </div>
+
+    <!-- Grid List -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="caseGrid">
         {% for case in case_list %}
-            <a href="{% url 'case_detail' case.id %}">
-                <div class="glass card p-6 rounded-xl">
+        <div class="glass case-card p-5 rounded-2xl flex flex-col justify-between min-h-[175px]" data-status="{{ case.status }}">
+            <div>
+                <div class="flex items-start justify-between gap-3 mb-2">
+                    <div class="flex flex-col gap-1.5 min-w-0">
+                        <!-- Case Type Badge -->
+                        <div>
+                            {% if case.case_type == 'memory' %}
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 inline-flex items-center gap-1">
+                                    🧠 Memory
+                                </span>
+                            {% elif case.case_type == 'disk' %}
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20 inline-flex items-center gap-1">
+                                    💾 Disk
+                                </span>
+                            {% elif case.case_type == 'network' %}
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 inline-flex items-center gap-1">
+                                    🌐 Network
+                                </span>
+                            {% elif case.case_type == 'mobile' %}
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 inline-flex items-center gap-1">
+                                    📱 Mobile
+                                </span>
+                            {% else %}
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-slate-500/10 text-slate-400 border border-slate-500/20 inline-flex items-center gap-1">
+                                    💼 Other
+                                </span>
+                            {% endif %}
+                        </div>
 
-                    <h3 class="text-lg text-cyan-400 font-semibold">
-                        {{ case.title }}
-                    </h3>
-
-                    <p class="text-gray-400 text-sm mt-2">
-                        {{ case.description|truncatewords:10 }}
-                    </p>
-
-                    <div class="flex justify-between items-center mt-4 text-sm">
-                        <span class="text-gray-500">
-                            {{ case.created_at }}
-                        </span>
-
-                        <span class="px-2 py-1 rounded bg-cyan-500/20 text-cyan-400">
-                            {{ case.status }}
-                        </span>
+                        <!-- Case Title -->
+                        <h3 class="text-sm font-bold text-white tracking-tight leading-tight truncate">
+                            <a href="{% url 'case_detail' case.id %}" class="hover:text-cyan-400 transition-colors">
+                                {{ case.title }}
+                            </a>
+                        </h3>
                     </div>
-
+                    
+                    <!-- Small status indicator -->
+                    {% if case.status == 'open' %}
+                        <span class="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                            Active
+                        </span>
+                    {% else %}
+                        <span class="px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                            Closed
+                        </span>
+                    {% endif %}
                 </div>
-            </a>
-        {% empty %}
-            <p class="text-gray-400">No cases yet 🚀</p>
-        {% endfor %}
 
+                <p class="text-xs text-slate-400 leading-relaxed line-clamp-2 mt-1">
+                    {{ case.description|default:"No description provided for this forensic portfolio repository." }}
+                </p>
+            </div>
+
+            <!-- Footer Details -->
+            <div class="flex justify-between items-center text-[10px] mt-4 pt-3 border-t border-white/5">
+                <span class="text-slate-500 font-mono font-semibold">
+                    <i class="fa-regular fa-clock mr-1"></i>{{ case.created_at|date:"d M Y" }}
+                </span>
+
+                <div class="flex items-center gap-3">
+                    <a href="{% url 'case_detail' case.id %}" class="text-cyan-400 hover:text-cyan-300 font-bold uppercase tracking-wider inline-flex items-center gap-0.5">
+                        Inspect <i class="fa-solid fa-angle-right"></i>
+                    </a>
+                    
+                    <button type="button" 
+                            onclick="confirmDelete('{{ case.id }}', '{{ case.title|escapejs }}');"
+                            class="text-slate-500 hover:text-red-400 transition p-1"
+                            title="Delete Case">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    
+                    <form id="delete-case-form-{{ case.id }}" action="{% url 'delete_case' case.id %}" method="POST" class="hidden">
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
         </div>
-
-    </main>
-
+        {% empty %}
+        <div class="col-span-full text-center py-16 glass rounded-2xl border border-white/5">
+            <div class="w-12 h-12 rounded-full bg-slate-500/10 flex items-center justify-center text-slate-500 mx-auto mb-3">
+                <i class="fa-regular fa-folder-open text-lg"></i>
+            </div>
+            <p class="text-slate-400 text-sm font-semibold">No case repositories found.</p>
+            <p class="text-xs text-slate-500 mt-1">Click the top-right action button to add your first case file.</p>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
-</body>
-</html>
+<script>
+    // Live Stats Counter
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.case-card');
+        let activeCount = 0;
+        let closedCount = 0;
+        
+        cards.forEach(card => {
+            const status = card.getAttribute('data-status');
+            if (status === 'open') {
+                activeCount++;
+            } else if (status === 'closed') {
+                closedCount++;
+            }
+        });
+        
+        document.getElementById('total-cases-count').textContent = cards.length;
+        document.getElementById('active-cases-count').textContent = activeCount;
+        document.getElementById('closed-cases-count').textContent = closedCount;
+    });
+
+    function confirmDelete(caseId, caseTitle) {
+        if (confirm(`Are you sure you want to permanently delete "${caseTitle}"?`)) {
+            document.getElementById(`delete-case-form-${caseId}`).submit();
+        }
+    }
+
+    function filterStatus(status, tabElement) {
+        document.querySelectorAll('.filter-tab').forEach(btn => btn.classList.remove('active'));
+        tabElement.classList.add('active');
+
+        const cards = document.querySelectorAll('.case-card');
+        cards.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            if (status === 'all' || cardStatus === status) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>
+{% endblock %}

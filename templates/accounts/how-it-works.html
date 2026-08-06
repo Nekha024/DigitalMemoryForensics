@@ -1,0 +1,1740 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}How It Works - Interactive Lab{% endblock %}
+
+{% block content %}
+
+<!-- Custom Fonts and Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+    /* Styling System for the Interactive Forensics Lab */
+    .lab-container {
+        font-family: 'Outfit', sans-serif;
+        --cyan-glow: rgba(6, 182, 212, 0.3);
+        --purple-glow: rgba(168, 85, 247, 0.3);
+        --orange-glow: rgba(249, 115, 22, 0.3);
+        --magenta-glow: rgba(236, 72, 153, 0.3);
+    }
+    
+    .console-font {
+        font-family: 'Fira Code', monospace;
+    }
+
+    /* Grid background */
+    .lab-grid {
+        background-image:
+            linear-gradient(rgba(6, 182, 212, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
+        background-size: 30px 30px;
+    }
+
+    /* Custom Stepper Indicators */
+    .step-node {
+        position: relative;
+        z-index: 10;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .step-node.active .step-ring {
+        border-color: #06b6d4;
+        box-shadow: 0 0 15px var(--cyan-glow);
+        background: rgba(6, 182, 212, 0.2);
+    }
+
+    .step-node.completed .step-ring {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    /* Step Content Transitions */
+    .step-pane {
+        display: none;
+        opacity: 0;
+        transform: translateY(15px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .step-pane.active {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Glowing indicators */
+    .glow-cyan { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); }
+    .glow-purple { box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); }
+    
+    /* Interactive Chunk items */
+    .chunk-item {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .chunk-item:hover {
+        transform: translateX(4px);
+        background: rgba(255, 255, 255, 0.04);
+    }
+    
+    .chunk-item.active {
+        border-left-color: #06b6d4;
+        background: rgba(6, 182, 212, 0.08);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.05);
+    }
+
+    /* File Selector Cards */
+    .file-card {
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .file-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(6, 182, 212, 0.4);
+    }
+    
+    .file-card.selected {
+        border-color: #06b6d4;
+        background: rgba(6, 182, 212, 0.08);
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+    }
+
+    /* Custom scrollbar for raw content */
+    .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-thumb {
+        background: rgba(6, 182, 212, 0.2);
+        border-radius: 10px;
+    }
+    
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(6, 182, 212, 0.4);
+    }
+
+    /* Radar animation effect */
+    @keyframes radar-pulse {
+        0% {
+            transform: scale(0);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(3.5);
+            opacity: 0;
+        }
+    }
+
+    .radar-circle {
+        position: absolute;
+        border: 2px solid rgba(236, 72, 153, 0.5);
+        border-radius: 50%;
+        animation: radar-pulse 2.2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+        pointer-events: none;
+    }
+
+    /* Citation links */
+    .citation-link {
+        color: #06b6d4;
+        font-weight: 600;
+        background: rgba(6, 182, 212, 0.12);
+        padding: 1px 6px;
+        border-radius: 4px;
+        border: 1px solid rgba(6, 182, 212, 0.2);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .citation-link:hover {
+        background: rgba(6, 182, 212, 0.25);
+        box-shadow: 0 0 8px rgba(6, 182, 212, 0.3);
+    }
+    
+    /* Highlight animation */
+    @keyframes pulse-highlight {
+        0%, 100% { background-color: rgba(6, 182, 212, 0.08); }
+        50% { background-color: rgba(6, 182, 212, 0.25); }
+    }
+    .highlight-flash {
+        animation: pulse-highlight 1.5s infinite;
+    }
+
+    /* ── Light Theme Adapters ──────────────────────── */
+    body.light-theme .lab-grid {
+        background-image:
+            linear-gradient(rgba(8, 145, 178, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(8, 145, 178, 0.05) 1px, transparent 1px);
+    }
+    body.light-theme .step-node .step-ring {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #64748b !important;
+    }
+    body.light-theme .step-node.active .step-ring {
+        border-color: #0891b2 !important;
+        background: rgba(8, 145, 178, 0.08) !important;
+        color: #0891b2 !important;
+    }
+    body.light-theme .step-node.completed .step-ring {
+        border-color: #10b981 !important;
+        background: rgba(16, 185, 129, 0.08) !important;
+        color: #10b981 !important;
+    }
+    body.light-theme .file-card {
+        background: #ffffff !important;
+        border-color: rgba(15, 23, 42, 0.08) !important;
+    }
+    body.light-theme .file-card:hover {
+        border-color: rgba(8, 145, 178, 0.4) !important;
+    }
+    body.light-theme .file-card.selected {
+        border-color: #0891b2 !important;
+        background: rgba(8, 145, 178, 0.04) !important;
+        box-shadow: 0 0 15px rgba(8, 145, 178, 0.1) !important;
+    }
+    body.light-theme .chunk-item {
+        background: #ffffff !important;
+        border-color: rgba(15, 23, 42, 0.06) !important;
+    }
+    body.light-theme .chunk-item:hover {
+        background: rgba(15, 23, 42, 0.02) !important;
+    }
+    body.light-theme .chunk-item.active {
+        border-left-color: #0891b2 !important;
+        background: rgba(8, 145, 178, 0.04) !important;
+        box-shadow: 0 0 15px rgba(8, 145, 178, 0.05) !important;
+    }
+    body.light-theme #vectorCanvas,
+    body.light-theme #searchCanvas {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+    }
+    body.light-theme #canvasTooltip {
+        border-color: rgba(8, 145, 178, 0.3) !important;
+        box-shadow: 0 10px 25px rgba(8, 145, 178, 0.1) !important;
+    }
+    body.light-theme #rawTextArea {
+        background-color: rgba(15, 23, 42, 0.02) !important;
+        border-color: rgba(15, 23, 42, 0.05) !important;
+    }
+    
+    /* Dynamic line highlighting */
+    .raw-text-line {
+        color: #cbd5e1;
+        display: block;
+    }
+    body.light-theme .raw-text-line {
+        color: #475569;
+    }
+    .raw-text-line-highlight {
+        background: rgba(6, 182, 212, 0.2);
+        color: #22d3ee;
+        font-weight: 600;
+        padding: 0 4px;
+        border-radius: 4px;
+        display: block;
+    }
+    body.light-theme .raw-text-line-highlight {
+        background: rgba(8, 145, 178, 0.1);
+        color: #0891b2;
+    }
+    
+    /* Query Preset buttons */
+    .query-preset-btn {
+        background: rgba(15, 23, 42, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #cbd5e1;
+        transition: all 0.25s ease;
+    }
+    .query-preset-btn:hover {
+        border-color: rgba(6, 182, 212, 0.4);
+        color: #ffffff;
+        background: rgba(6, 182, 212, 0.04);
+    }
+    body.light-theme .query-preset-btn {
+        background: #ffffff;
+        border-color: rgba(15, 23, 42, 0.06);
+        color: #475569;
+    }
+    body.light-theme .query-preset-btn:hover {
+        border-color: rgba(8, 145, 178, 0.4);
+        color: #0891b2;
+        background: rgba(8, 145, 178, 0.04);
+    }
+    
+    /* Search Results items */
+    .search-result-item {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease;
+    }
+    .search-result-item .item-title {
+        color: #ffffff;
+    }
+    .search-result-item .item-text {
+        color: #94a3b8;
+    }
+    .search-result-item .match-badge {
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.12);
+    }
+    body.light-theme .search-result-item {
+        background: #ffffff;
+        border-color: rgba(15, 23, 42, 0.06);
+    }
+    body.light-theme .search-result-item:hover {
+        border-color: rgba(8, 145, 178, 0.25);
+    }
+    body.light-theme .search-result-item .item-title {
+        color: #0f172a;
+    }
+    body.light-theme .search-result-item .item-text {
+        color: #475569;
+    }
+    body.light-theme .search-result-item .match-badge {
+        color: #047857;
+        background: rgba(16, 185, 129, 0.08);
+    }
+    
+    /* Prompt Context Blocks */
+    body.light-theme #promptView {
+        background-color: rgba(15, 23, 42, 0.02) !important;
+        border-color: rgba(15, 23, 42, 0.06) !important;
+        color: #334155 !important;
+    }
+    body.light-theme #promptView .text-slate-500 {
+        color: #64748b !important;
+    }
+    body.light-theme #promptView .text-cyan-400 {
+        color: #0891b2 !important;
+    }
+    body.light-theme #promptView .text-emerald-400 {
+        color: #047857 !important;
+        background: rgba(16, 185, 129, 0.05) !important;
+        border-color: rgba(16, 185, 129, 0.15) !important;
+    }
+    body.light-theme #promptView .text-white {
+        color: #0f172a !important;
+        background: rgba(15, 23, 42, 0.04) !important;
+        border-color: rgba(15, 23, 42, 0.06) !important;
+    }
+    
+    .prompt-source-item {
+        color: #34d399;
+        background: rgba(2, 6, 23, 0.8);
+        border: 1px solid rgba(15, 23, 42, 0.9);
+        transition: all 0.2s ease;
+    }
+    .prompt-source-item .source-header {
+        color: #64748b;
+    }
+    body.light-theme .prompt-source-item {
+        color: #047857;
+        background: rgba(16, 185, 129, 0.04) !important;
+        border-color: rgba(16, 185, 129, 0.15) !important;
+    }
+    body.light-theme .prompt-source-item .source-header {
+        color: #475569 !important;
+    }
+    
+    /* Terminal Console */
+    body.light-theme #reportConsole {
+        border-color: rgba(15, 23, 42, 0.08) !important;
+    }
+    
+    /* Citation Link adjustments */
+    body.light-theme .citation-link {
+        color: #0891b2;
+        background: rgba(8, 145, 178, 0.08);
+        border-color: rgba(8, 145, 178, 0.2);
+    }
+    body.light-theme .citation-link:hover {
+        background: rgba(8, 145, 178, 0.18);
+        box-shadow: 0 0 8px rgba(8, 145, 178, 0.25);
+    }
+    
+    /* Global Color Variable Overrides */
+    .lab-container .text-white {
+        color: var(--text-main) !important;
+    }
+    .lab-container .text-slate-400 {
+        color: var(--text-muted) !important;
+    }
+    .lab-container .border-slate-800 {
+        border-color: var(--border) !important;
+    }
+    .lab-container .border-slate-700 {
+        border-color: var(--border) !important;
+    }
+    body.light-theme .bg-slate-950\/40,
+    body.light-theme .bg-slate-900\/40,
+    body.light-theme .bg-slate-950\/20,
+    body.light-theme .bg-slate-900\/20 {
+        background-color: rgba(15, 23, 42, 0.02) !important;
+    }
+    body.light-theme #dropZone {
+        background-color: rgba(8, 145, 178, 0.02) !important;
+        border-color: rgba(8, 145, 178, 0.2) !important;
+    }
+    body.light-theme #dropZone:hover {
+        border-color: #0891b2 !important;
+    }
+</style>
+
+<div class="lab-container max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+    
+    <!-- Header Section -->
+    <div class="text-center mb-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass border border-cyan-500/20 text-xs font-semibold text-cyan-400 uppercase tracking-wider mb-3">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            Forensic Simulation Playground
+        </div>
+        <h1 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl">
+            How Memoir Works
+        </h1>
+        <p class="mt-3 max-w-2xl mx-auto text-base text-slate-400">
+            Follow this interactive walkthrough to see how Memoir processes raw evidence, builds vector embeddings, maps them in coordinate spaces, and utilizes RAG for cyber investigations.
+        </p>
+    </div>
+
+    <!-- Multi-Step Navigation Indicator -->
+    <div class="relative mb-12 glass rounded-2xl p-6 border border-slate-800 lab-grid overflow-x-auto">
+        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-purple-500/5 pointer-events-none rounded-2xl"></div>
+        
+        <!-- Progress Line Background -->
+        <div class="absolute left-12 right-12 top-[52px] h-[3px] bg-slate-800 pointer-events-none hidden md:block">
+            <div id="progressBar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-500 w-[0%]"></div>
+        </div>
+
+        <div class="flex items-center justify-between min-w-[700px] px-4">
+            <!-- Step Nodes -->
+            <div class="step-node active flex flex-col items-center cursor-pointer group" onclick="goToStep(1)">
+                <div class="step-ring w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center bg-slate-900 text-white font-bold transition-all group-hover:border-cyan-500">
+                    <span class="step-num">1</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold text-slate-400 group-hover:text-white">Evidence Intake</span>
+            </div>
+            
+            <div class="step-node flex flex-col items-center cursor-pointer group" onclick="goToStep(2)">
+                <div class="step-ring w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center bg-slate-900 text-white font-bold transition-all group-hover:border-cyan-500">
+                    <span class="step-num">2</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold text-slate-400 group-hover:text-white">Semantic Chunking</span>
+            </div>
+
+            <div class="step-node flex flex-col items-center cursor-pointer group" onclick="goToStep(3)">
+                <div class="step-ring w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center bg-slate-900 text-white font-bold transition-all group-hover:border-cyan-500">
+                    <span class="step-num">3</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold text-slate-400 group-hover:text-white">Vector Indexing</span>
+            </div>
+
+            <div class="step-node flex flex-col items-center cursor-pointer group" onclick="goToStep(4)">
+                <div class="step-ring w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center bg-slate-900 text-white font-bold transition-all group-hover:border-cyan-500">
+                    <span class="step-num">4</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold text-slate-400 group-hover:text-white">Semantic Search</span>
+            </div>
+
+            <div class="step-node flex flex-col items-center cursor-pointer group" onclick="goToStep(5)">
+                <div class="step-ring w-12 h-12 rounded-full border-2 border-slate-700 flex items-center justify-center bg-slate-900 text-white font-bold transition-all group-hover:border-cyan-500">
+                    <span class="step-num">5</span>
+                </div>
+                <span class="mt-2 text-xs font-semibold text-slate-400 group-hover:text-white">RAG Analysis</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Step Container -->
+    <div class="min-h-[500px] mb-8">
+        
+        <!-- STEP 1: EVIDENCE INTAKE -->
+        <div id="step1" class="step-pane active">
+            <div class="grid lg:grid-cols-12 gap-8">
+                <!-- Instructions / Explanatory text -->
+                <div class="lg:col-span-5 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+                            <span class="text-cyan-400">01 /</span> Forensic Evidence Intake
+                        </h2>
+                        <p class="text-slate-400 leading-relaxed mb-4 text-sm">
+                            Every digital forensic investigation begins by establishing a <strong>chain of custody</strong>. Before files can be read or parsed, Memoir registers them under a specific Investigation Case.
+                        </p>
+                        <div class="space-y-4 my-6">
+                            <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-slate-800">
+                                <span class="text-xl">🔒</span>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-white">Cryptographic Integrity</h4>
+                                    <p class="text-xs text-slate-400 mt-1">The system generates SHA-256 hashes of all uploads to ensure evidence cannot be altered after ingestion.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-slate-800">
+                                <span class="text-xl">📋</span>
+                                <div>
+                                    <h4 class="text-sm font-semibold text-white">Metadata Logging</h4>
+                                    <p class="text-xs text-slate-400 mt-1">Timestamps, file size parameters, and file types are logged and associated with the Case model.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-slate-500 italic p-3 border-l border-slate-700 bg-slate-950/20">
+                        *In this interactive lab, we use simulated corporate intrusion case data to showcase how different data formats (JSON, TXT, CSV) undergo analysis.
+                    </div>
+                </div>
+
+                <!-- Simulation Interactive Area -->
+                <div class="lg:col-span-7">
+                    <div class="glass border border-slate-800 rounded-3xl p-6 h-full flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400 mb-4">Select Evidence File to Load:</h3>
+                            <div class="grid sm:grid-cols-3 gap-4 mb-6">
+                                <div class="file-card selected border border-slate-800 rounded-xl p-4 bg-slate-900/40 flex flex-col justify-between" id="card_blackwood" onclick="selectScenario('blackwood')">
+                                    <div>
+                                        <span class="text-2xl">💬</span>
+                                        <h4 class="text-sm font-bold text-white mt-2 mb-1">Slack Export</h4>
+                                        <p class="text-xs text-cyan-400 font-mono">slack_logs_export.json</p>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono mt-4">Size: 12.4 KB</span>
+                                </div>
+                                <div class="file-card border border-slate-800 rounded-xl p-4 bg-slate-900/40 flex flex-col justify-between" id="card_credentials" onclick="selectScenario('credentials')">
+                                    <div>
+                                        <span class="text-2xl">✉️</span>
+                                        <h4 class="text-sm font-bold text-white mt-2 mb-1">Draft Email</h4>
+                                        <p class="text-xs text-purple-400 font-mono">conf_email_draft.txt</p>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono mt-4">Size: 1.8 KB</span>
+                                </div>
+                                <div class="file-card border border-slate-800 rounded-xl p-4 bg-slate-900/40 flex flex-col justify-between" id="card_server_logs" onclick="selectScenario('server_logs')">
+                                    <div>
+                                        <span class="text-2xl">📊</span>
+                                        <h4 class="text-sm font-bold text-white mt-2 mb-1">Server Access</h4>
+                                        <p class="text-xs text-orange-400 font-mono">server_access.csv</p>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono mt-4">Size: 8.6 KB</span>
+                                </div>
+                            </div>
+                            
+                            <!-- File Intake Sandbox -->
+                            <div class="border border-dashed border-slate-700 hover:border-slate-500 rounded-2xl p-8 text-center bg-slate-950/20 transition-all flex flex-col items-center justify-center min-h-[200px]" id="dropZone">
+                                <div id="uploadNormalState">
+                                    <span class="text-4xl animate-bounce inline-block mb-3">📁</span>
+                                    <h4 class="text-sm font-bold text-white" id="selectedFileTitle">slack_logs_export.json</h4>
+                                    <p class="text-xs text-slate-400 mt-1">Ready to upload to case: <strong class="text-cyan-400">Operation Blackwood</strong></p>
+                                    <button class="btn-primary mt-6 text-xs px-6 py-2.5 flex items-center gap-2 mx-auto" onclick="startSimulatedUpload()">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        <span>Ingest & Verify File</span>
+                                    </button>
+                                </div>
+                                <div id="uploadActiveState" class="hidden w-full">
+                                    <span class="text-sm font-semibold text-cyan-400 uppercase tracking-widest block mb-4" id="uploadStatusLabel">Hashing & Verifying Integrity...</span>
+                                    <div class="w-full bg-slate-800 rounded-full h-2 mb-4 overflow-hidden">
+                                        <div class="bg-cyan-500 h-full w-[0%] transition-all duration-300" id="uploadProgressBarInner"></div>
+                                    </div>
+                                    <div class="console-font text-[11px] text-left bg-slate-950 p-3 rounded-lg border border-slate-800 text-green-400 max-h-[100px] overflow-y-auto custom-scroll" id="uploadConsoleLogs">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 2: SEMANTIC CHUNKING -->
+        <div id="step2" class="step-pane">
+            <div class="grid lg:grid-cols-12 gap-8">
+                <!-- Info -->
+                <div class="lg:col-span-4 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+                            <span class="text-cyan-400">02 /</span> Text Extraction & Chunking
+                        </h2>
+                        <p class="text-slate-400 leading-relaxed mb-4 text-sm">
+                            Memoir extracts raw text from PDF, DOCX, or text files. However, large documents cannot be parsed by LLM reasoning engines in one block due to token limitations and context noise.
+                        </p>
+                        <p class="text-slate-400 leading-relaxed mb-4 text-sm">
+                            We solve this by <strong>Semantic Chunking</strong>: splitting evidence into smaller overlapping sections (~150 tokens) to preserve contextual boundaries.
+                        </p>
+                        
+                        <div class="p-3.5 rounded-xl bg-slate-950/40 border border-slate-800 mt-6">
+                            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Interactive Sandbox Tip</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Click on any generated chunk in the right panel to highlight the exact text section on the left where it was extracted.
+                            </p>
+                        </div>
+                    </div>
+                    <button class="btn-primary text-xs w-full py-3 mt-6 md:mt-0" onclick="goToStep(3)">
+                        Index Chunks into Vector DB <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+
+                <!-- Split viewer -->
+                <div class="lg:col-span-8 grid md:grid-cols-2 gap-4">
+                    <!-- Left: Raw Text Viewer -->
+                    <div class="glass border border-slate-800 rounded-2xl p-4 flex flex-col h-[400px]">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">1. Raw Extracted Text</span>
+                            <span class="text-[10px] font-mono bg-slate-950 px-2 py-0.5 rounded text-cyan-400" id="rawFileMeta">slack_logs_export.json</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scroll text-xs leading-relaxed font-mono whitespace-pre-wrap p-2 rounded-xl" id="rawTextArea">
+                        </div>
+                    </div>
+
+                    <!-- Right: Chunks Generated -->
+                    <div class="glass border border-slate-800 rounded-2xl p-4 flex flex-col h-[400px]">
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">2. Generated Chunks</span>
+                            <span class="text-[10px] font-mono bg-slate-950 px-2 py-0.5 rounded text-emerald-400" id="chunksCountLabel">0 Chunks</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scroll space-y-3 p-1" id="chunksContainer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: VECTOR INDEXING -->
+        <div id="step3" class="step-pane">
+            <div class="grid lg:grid-cols-12 gap-8">
+                <!-- Explanatory Panel -->
+                <div class="lg:col-span-4 flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+                            <span class="text-cyan-400">03 /</span> Vector Space Indexing
+                        </h2>
+                        <p class="text-slate-400 leading-relaxed mb-3 text-sm">
+                            To find relevant facts semantically, Memoir converts text chunks into <strong>high-dimensional vector embeddings</strong>. Text snippets with similar meaning are mapped closer together in coordinate space.
+                        </p>
+                        <p class="text-slate-400 leading-relaxed mb-4 text-sm">
+                            We index these vectors in Qdrant. In this visualizer, you can explore the 2D projected representation of the Case Vector Space.
+                        </p>
+
+                        <!-- Legend -->
+                        <div class="border border-slate-800 bg-slate-950/40 p-4 rounded-xl space-y-2 text-xs">
+                            <h4 class="font-bold text-white mb-2 uppercase tracking-wide text-[10px]">Evidence Clusters</h4>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)]"></span>
+                                <span class="text-slate-300">Chat Logs (Slack Export)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.4)]"></span>
+                                <span class="text-slate-300">Emails (Draft Credentials)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(249,115,22,0.4)]"></span>
+                                <span class="text-slate-300">Server Logs (Access CSV)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-primary text-xs w-full py-3 mt-6" onclick="goToStep(4)">
+                        Query Vector Space <i class="fa-solid fa-magnifying-glass ml-1"></i>
+                    </button>
+                </div>
+
+                <!-- Canvas Visualizer -->
+                <div class="lg:col-span-8 relative">
+                    <div class="absolute top-4 right-4 z-20 flex gap-2">
+                        <button class="glass border border-slate-800 text-[10px] px-2.5 py-1 text-slate-400 rounded-md font-mono hover:text-white transition" onclick="resetCanvasCamera()">Reset View</button>
+                    </div>
+                    
+                    <div class="w-full h-[400px] relative glass border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+                        <!-- Custom floating node tooltip -->
+                        <div id="canvasTooltip" class="absolute hidden z-30 pointer-events-none glass border border-cyan-500/30 rounded-xl p-3 shadow-xl max-w-[280px]">
+                            <span id="tooltipCategory" class="text-[9px] font-bold uppercase tracking-wider text-cyan-400 font-mono">Category</span>
+                            <h4 id="tooltipTitle" class="text-xs font-bold text-white mt-1 mb-1">Title</h4>
+                            <p id="tooltipSnippet" class="text-[10px] text-slate-400 leading-normal line-clamp-3">Snippet</p>
+                        </div>
+                        
+                        <canvas id="vectorCanvas" class="w-full h-full bg-slate-950/60"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: SEMANTIC SEARCH -->
+        <div id="step4" class="step-pane">
+            <div class="grid lg:grid-cols-12 gap-8">
+                <!-- Left: Canvas search preview -->
+                <div class="lg:col-span-7 relative h-[400px] glass border border-slate-800 rounded-3xl overflow-hidden order-2 lg:order-1">
+                    <canvas id="searchCanvas" class="w-full h-full bg-slate-950/60"></canvas>
+                    <div class="absolute inset-0 pointer-events-none border border-slate-800 rounded-3xl"></div>
+                </div>
+
+                <!-- Right: Search query options & results -->
+                <div class="lg:col-span-5 flex flex-col justify-between order-1 lg:order-2">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+                            <span class="text-cyan-400">04 /</span> Semantic Search Sandbox
+                        </h2>
+                        <p class="text-slate-400 leading-relaxed mb-4 text-sm">
+                            Unlike traditional keyword search which matches exact characters, <strong>semantic retrieval</strong> calculates the vector distance (cosine similarity) to find contextually relevant answers.
+                        </p>
+                        
+                        <!-- Query Preset selection -->
+                        <div class="space-y-2 mb-4">
+                            <span class="text-xs font-semibold text-slate-400 block mb-1">Select a Forensic Query:</span>
+                            <button class="query-preset-btn w-full text-left p-3 rounded-xl text-xs transition flex items-center justify-between group" onclick="runSemanticQuery(1)">
+                                <span>1. "Who accessed the database and transferred files?"</span>
+                                <i class="fa-solid fa-arrow-right text-[10px] query-highlight opacity-0 group-hover:opacity-100 transition"></i>
+                            </button>
+                            <button class="query-preset-btn w-full text-left p-3 rounded-xl text-xs transition flex items-center justify-between group" onclick="runSemanticQuery(2)">
+                                <span>2. "How was unauthorized access achieved?"</span>
+                                <i class="fa-solid fa-arrow-right text-[10px] query-highlight opacity-0 group-hover:opacity-100 transition"></i>
+                            </button>
+                            <button class="query-preset-btn w-full text-left p-3 rounded-xl text-xs transition flex items-center justify-between group" onclick="runSemanticQuery(3)">
+                                <span>3. "What was the destination of the exfiltrated data?"</span>
+                                <i class="fa-solid fa-arrow-right text-[10px] query-highlight opacity-0 group-hover:opacity-100 transition"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Results list -->
+                    <div class="flex-1 mt-2 mb-4 overflow-y-auto max-h-[160px] custom-scroll space-y-2 hidden" id="searchResultsBlock">
+                        <span class="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-1">Top Retrieved Chunks</span>
+                        <div id="resultsList" class="space-y-2"></div>
+                    </div>
+
+                    <button class="btn-primary text-xs w-full py-3" id="btnGoToRAG" disabled onclick="goToStep(5)">
+                        Assemble RAG Prompt <i class="fa-solid fa-microchip ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 5: RAG REPORT GENERATION -->
+        <div id="step5" class="step-pane">
+            <div class="grid lg:grid-cols-12 gap-8">
+                <!-- Prompt Construction (Left) -->
+                <div class="lg:col-span-5 flex flex-col h-[480px]">
+                    <div class="glass border border-slate-800 rounded-2xl p-4 flex flex-col h-full">
+                        <div class="pb-3 border-b border-slate-800 mb-3 flex items-center justify-between">
+                            <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">RAG Prompt Constructor</h3>
+                            <span class="text-[9px] font-mono bg-slate-950 text-cyan-400 px-2 py-0.5 rounded">RAG Template</span>
+                        </div>
+                        <div class="flex-1 overflow-y-auto custom-scroll console-font text-[10px] bg-slate-950/60 rounded-xl p-3 text-slate-300 leading-normal space-y-3" id="promptView">
+                            <div class="text-slate-500">// System Prompt</div>
+                            <div class="text-cyan-400">SYSTEM: You are a professional Digital Memory Forensics Assistant. Examine the retrieved evidence chunks below and generate a detailed report answering the User's Query. Provide source tags for verification.</div>
+                            
+                            <div class="text-slate-500 mt-2">// Retrieved Evidence Context</div>
+                            <div class="text-emerald-400 bg-slate-950 p-2 rounded border border-slate-800">
+                                <div>[Source: Chunk 3 - Slack Logs]</div>
+                                <div class="text-[9px] text-slate-400 mt-1">t-blackwood: Initiating file transfer of 'client_pricing_db_v2.sql'...</div>
+                            </div>
+                            
+                            <div class="text-slate-500 mt-2">// User Question</div>
+                            <div class="text-white bg-slate-900 p-2 rounded">
+                                <span class="text-cyan-400">QUERY:</span> <span id="promptQuestionText">Who accessed the database and transferred files?</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Forensic report typing (Right) -->
+                <div class="lg:col-span-7 flex flex-col h-[480px]">
+                    <div class="glass border border-slate-800 rounded-3xl p-6 h-full flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
+                                <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                                    AI Analyst Console
+                                </h3>
+                                <button class="btn-primary text-[11px] py-1.5 px-4" id="btnGenerateReport" onclick="startRAGGeneration()">
+                                    Generate Report
+                                </button>
+                            </div>
+                            
+                            <!-- Console Report Screen -->
+                            <div class="console-font text-xs text-green-400 bg-slate-950 rounded-2xl p-4 h-[320px] overflow-y-auto custom-scroll border border-slate-900 leading-relaxed" id="reportConsole">
+                                <div class="text-slate-500">// Console ready. Select a query in Step 4 and click "Generate Report" above.</div>
+                                <div class="mt-2 text-cyan-400 cursor-blink select-none">_</div>
+                            </div>
+                        </div>
+
+                        <!-- CTAs and Links -->
+                        <div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/60 hidden" id="completionActions">
+                            <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check"></i> Analysis Complete
+                            </span>
+                            <div class="flex gap-2">
+                                <a href="{% url 'dashboard' %}" class="btn-outline text-[11px] py-1.5 px-3">Go to Dashboard</a>
+                                <a href="{% url 'create_case' %}" class="btn-primary text-[11px] py-1.5 px-3">Create Real Case</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Stepper Navigation Controls -->
+    <div class="flex items-center justify-between glass rounded-2xl p-4 border border-slate-800">
+        <button id="btnPrev" class="btn-outline text-xs px-4 py-2 flex items-center gap-1" onclick="changeStep(-1)">
+            <i class="fa-solid fa-arrow-left"></i> Previous Step
+        </button>
+        <span class="text-xs text-slate-500 font-semibold" id="stepIndicatorLabel">Step 1 of 5</span>
+        <button id="btnNext" class="btn-primary text-xs px-4 py-2 flex items-center gap-1" onclick="changeStep(1)">
+            Next Step <i class="fa-solid fa-arrow-right"></i>
+        </button>
+    </div>
+
+</div>
+
+<!-- GSAP + ScrollTrigger already loaded, but just in case, ensuring they are loaded -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<script>
+    // Mock scenarios corresponding to the database contents
+    const SCENARIOS = {
+        blackwood: {
+            caseName: "Case #4089: Operation Blackwood (IP Theft)",
+            fileName: "slack_logs_export.json",
+            fileSize: "12.4 KB",
+            fileType: "JSON",
+            hash: "sha256-a8e49b81f8c05763d59ea34ff0b0e9f1a26d2e8b2b73719b33a5f7823b1a8d05",
+            rawText: `[2026-07-09 14:22:10] admin: User 't-blackwood' logged in from unusual IP address 198.51.100.42.
+[2026-07-09 14:25:15] t-blackwood: Hey, I got access to the main staging server.
+[2026-07-09 14:26:02] stranger: Nice. Transfer the database files to the external drive at 203.0.113.111 immediately.
+[2026-07-09 14:28:44] t-blackwood: Initiating file transfer of 'client_pricing_db_v2.sql'. Size is 4.2 GB. MD5: 9a8b7c6d5e...
+[2026-07-09 14:32:00] admin: Alert: high volume outbound traffic detected to IP 203.0.113.111.`,
+            chunks: [
+                {
+                    id: 1,
+                    title: "Slack Chunk #1: Login Event",
+                    content: "User 't-blackwood' logged in from unusual IP address 198.51.100.42. t-blackwood: Hey, I got access to the main staging server.",
+                    vectorId: "point-4089-a1",
+                    x: 160, y: 220,
+                    color: "#06b6d4",
+                    category: "Chat Logs",
+                    highlightLines: [1, 2]
+                },
+                {
+                    id: 2,
+                    title: "Slack Chunk #2: Command Log",
+                    content: "stranger: Nice. Transfer the database files to the external drive at 203.0.113.111 immediately.",
+                    vectorId: "point-4089-a2",
+                    x: 180, y: 255,
+                    color: "#06b6d4",
+                    category: "Chat Logs",
+                    highlightLines: [3]
+                },
+                {
+                    id: 3,
+                    title: "Slack Chunk #3: Exfiltration Alert",
+                    content: "t-blackwood: Initiating file transfer of 'client_pricing_db_v2.sql'. Size is 4.2 GB. MD5: 9a8b7c6d5e... admin: Alert: high volume outbound traffic detected.",
+                    vectorId: "point-4089-a3",
+                    x: 215, y: 230,
+                    color: "#06b6d4",
+                    category: "Chat Logs",
+                    highlightLines: [4, 5]
+                }
+            ]
+        },
+        credentials: {
+            caseName: "Case #4090: Credential Leak Investigation",
+            fileName: "confidential_email_draft.txt",
+            fileSize: "1.8 KB",
+            fileType: "TXT",
+            hash: "sha256-ff7d08b3a0e1c2718e88e8b2b73719b33a5f7823b1a8d05fc2b7cfc8e9b81f1",
+            rawText: `Subject: Draft - Server Credentials & Backup Procedure
+To: self@company.com
+Date: July 08, 2026
+
+Note: The password for the staging database server is: 'StagingP@ssw0rd2026!'.
+Make sure to sync the daily backup to the main server.
+Only staging IP 198.51.100.42 has direct admin access without MFA.`,
+            chunks: [
+                {
+                    id: 4,
+                    title: "Email Chunk #1: Admin Password Leaked",
+                    content: "Note: The password for the staging database server is: 'StagingP@ssw0rd2026!'. Only staging IP 198.51.100.42 has direct admin access without MFA.",
+                    vectorId: "point-4090-b1",
+                    x: 275, y: 135,
+                    color: "#a855f7",
+                    category: "Emails",
+                    highlightLines: [5, 6, 7]
+                }
+            ]
+        },
+        server_logs: {
+            caseName: "Case #4091: Unauthorized Shell Access",
+            fileName: "server_access_log.csv",
+            fileSize: "8.6 KB",
+            fileType: "CSV",
+            hash: "sha256-b76e28f3a8b7c6d5e0f1a26d2e8b2b73719b33a5f7823b1a8d05fc2b7cfc8e9b",
+            rawText: `timestamp,event,user,source_ip,status
+2026-07-09 14:20:00,SSH Connect,root,198.51.100.42,SUCCESS
+2026-07-09 14:21:05,Database Dump,postgres,127.0.0.1,SUCCESS
+2026-07-09 14:22:15,FTP Upload,root,203.0.113.111,FAILED
+2026-07-09 14:23:40,FTP Upload,root,203.0.113.111,SUCCESS`,
+            chunks: [
+                {
+                    id: 5,
+                    title: "CSV Chunk #1: Server Auth Logs",
+                    content: "2026-07-09 14:20:00 SSH Connect by root from 198.51.100.42. 2026-07-09 14:21:05 Database Dump by postgres.",
+                    vectorId: "point-4091-c1",
+                    x: 345, y: 95,
+                    color: "#f97316",
+                    category: "Server Logs",
+                    highlightLines: [2, 3]
+                },
+                {
+                    id: 6,
+                    title: "CSV Chunk #2: Outbound FTP Exfiltration",
+                    content: "2026-07-09 14:22:15 FTP Upload to 203.0.113.111 FAILED. 2026-07-09 14:23:40 FTP Upload to 203.0.113.111 SUCCESS.",
+                    vectorId: "point-4091-c2",
+                    x: 375, y: 110,
+                    color: "#f97316",
+                    category: "Server Logs",
+                    highlightLines: [4, 5]
+                }
+            ]
+        }
+    };
+
+    // State Variables
+    let selectedScenarioKey = 'blackwood';
+    let currentStep = 1;
+    let isUploading = false;
+    let isChunkingCompleted = false;
+    let isIndexingCompleted = false;
+    let selectedQueryId = null;
+
+    // Vector space variables
+    let vectorNodes = [];
+    let canvas = document.getElementById('vectorCanvas');
+    let ctx = canvas.getContext('2d');
+    let searchCanvas = document.getElementById('searchCanvas');
+    let searchCtx = searchCanvas.getContext('2d');
+    let animationFrameId = null;
+    let searchAnimationFrameId = null;
+
+    // Camera variables for Vector Canvas
+    let scale = 1.0;
+    let originX = 0;
+    let originY = 0;
+    let hoverNode = null;
+
+    // Query Presets config
+    const QUERY_PRESETS = {
+        1: {
+            text: "Who accessed the database and transferred files?",
+            targetVector: { x: 200, y: 200 },
+            retrievedIds: [3, 5, 1],
+            similarityScores: { 3: 0.94, 5: 0.89, 1: 0.82 },
+            promptContext: `[Source: Slack Chunk #3 - Chat Logs]
+t-blackwood: Initiating file transfer of 'client_pricing_db_v2.sql'...
+[Source: CSV Chunk #1 - Server Logs]
+2026-07-09 14:21:05 Database Dump by postgres SUCCESS.
+[Source: Slack Chunk #1 - Chat Logs]
+User 't-blackwood' logged in from staging IP 198.51.100.42.`,
+            report: `=== FORENSIC ANALYSIS REPORT ===
+CASE ID: OPERATION BLACKWOOD (INTRUSION)
+TARGET QUERY: Who accessed the database and transferred files?
+------------------------------------------------------------
+1. ATTACKER PROFILE & ACCESS METHOD
+   A user account logged in from IP address <span class="citation-link" onclick="highlightCitation(1)">198.51.100.42</span> [Slack Chunk #1].
+   Access to the database server was established locally via user 'postgres' [CSV Chunk #1]
+   where a SQL dump of the pricing tables was saved at 14:21:05.
+
+2. DATA EXFILTRATION DETAILS
+   Following the backup execution, user <span class="citation-link" onclick="highlightCitation(3)">'t-blackwood'</span> coordinated the exfiltration process [Slack Chunk #3].
+   The database copy 'client_pricing_db_v2.sql' (4.2 GB) was exfiltrated.
+   Outbound traffic spikes were immediately registered [Slack Chunk #3].`
+        },
+        2: {
+            text: "How was unauthorized access achieved?",
+            targetVector: { x: 230, y: 170 },
+            retrievedIds: [4, 1, 5],
+            similarityScores: { 4: 0.96, 1: 0.88, 5: 0.78 },
+            promptContext: `[Source: Email Chunk #1 - Emails]
+Note: The password for the staging database server is: 'StagingP@ssw0rd2026!'.
+Only staging IP 198.51.100.42 has direct admin access without MFA.
+[Source: Slack Chunk #1 - Chat Logs]
+admin: User 't-blackwood' logged in from unusual IP address 198.51.100.42.`,
+            report: `=== FORENSIC ANALYSIS REPORT ===
+CASE ID: COMPROMISED CREDENTIALS INVESTIGATION
+TARGET QUERY: How was unauthorized access achieved?
+------------------------------------------------------------
+1. DRAFT EMAIL CREDENTIAL COMPROMISE
+   The initial breach was facilitated by credentials leaked in a draft email [Email Chunk #1].
+   Specifically, server database login details (<span class="citation-link" onclick="highlightCitation(4)">StagingP@ssw0rd2026!</span>) were stored in plain text.
+   Crucially, the email highlighted that staging IP <span class="citation-link" onclick="highlightCitation(4)">198.51.100.42</span> was whitelisted to bypass Multi-Factor Authentication (MFA).
+
+2. UNAUTHORIZED SESSION ENTRY
+   Subsequently, a connection request from the whitelisted IP was triggered [Slack Chunk #1].
+   Because no MFA was enforced, the root login succeeded without authentication challenges.`
+        },
+        3: {
+            text: "What was the destination of the exfiltrated data?",
+            targetVector: { x: 300, y: 160 },
+            retrievedIds: [6, 3, 2],
+            similarityScores: { 6: 0.97, 3: 0.93, 2: 0.81 },
+            promptContext: `[Source: CSV Chunk #2 - Server Logs]
+2026-07-09 14:23:40 FTP Upload to 203.0.113.111 SUCCESS.
+[Source: Slack Chunk #3 - Chat Logs]
+t-blackwood: Initiating file transfer of 'client_pricing_db_v2.sql'...
+[Source: Slack Chunk #2 - Chat Logs]
+stranger: Transfer files to external drive at 203.0.113.111.`,
+            report: `=== FORENSIC ANALYSIS REPORT ===
+CASE ID: DATA EXFILTRATION ROUTING REPORT
+TARGET QUERY: What was the destination of the exfiltrated data?
+------------------------------------------------------------
+1. EXFILTRATION DESTINATION
+   Forensic network trace records confirm that the database exfiltration destination was <span class="citation-link" onclick="highlightCitation(6)">203.0.113.111</span> [CSV Chunk #2].
+   Chat logs show instructions directing a transfer of files to this exact IP address [Slack Chunk #2].
+
+2. TRANSMISSION METHODOLOGY
+   Exfiltration took place via FTP. The attacker initiated the dump and connection around 14:22:15 [CSV Chunk #2].
+   After an initial handshake failure, an upload session succeeded at 14:23:40, exfiltrating the entire client pricing database backup [CSV Chunk #2, Slack Chunk #3].`
+        }
+    };
+
+    // Initialize the vector database node pool
+    function buildNodePool() {
+        vectorNodes = [];
+        // Flatten chunks of all scenarios into our vector database node pool
+        Object.keys(SCENARIOS).forEach(scenarioKey => {
+            const scenario = SCENARIOS[scenarioKey];
+            scenario.chunks.forEach(chunk => {
+                vectorNodes.push({
+                    ...chunk,
+                    scenarioKey: scenarioKey,
+                    // Store base coordinates for animations and floats
+                    bx: chunk.x,
+                    by: chunk.y,
+                    currentX: chunk.x,
+                    currentY: chunk.y,
+                    floatOffset: Math.random() * Math.PI * 2,
+                    scale: 0, // start small for spawn animation
+                    targetScale: 1
+                });
+            });
+        });
+    }
+
+    // Step navigation controller
+    function goToStep(stepNum) {
+        if (isUploading && stepNum !== 1) {
+            alert("Please wait for file intake to complete.");
+            return;
+        }
+        
+        // Block advancing if prerequisite steps aren't finished
+        if (stepNum > 2 && !isChunkingCompleted) {
+            alert("Please complete the Evidence Intake and Chunking steps first.");
+            return;
+        }
+
+        // Deactivate all steps
+        document.querySelectorAll('.step-pane').forEach(pane => {
+            pane.classList.remove('active');
+        });
+        document.querySelectorAll('.step-node').forEach((node, idx) => {
+            node.classList.remove('active');
+            if (idx + 1 < stepNum) {
+                node.classList.add('completed');
+            } else {
+                node.classList.remove('completed');
+            }
+        });
+
+        // Activate step
+        currentStep = stepNum;
+        const activePane = document.getElementById('step' + stepNum);
+        activePane.classList.add('active');
+        document.querySelectorAll('.step-node')[stepNum - 1].classList.add('active');
+
+        // Update Stepper Line
+        const percent = ((stepNum - 1) / 4) * 100;
+        document.getElementById('progressBar').style.width = percent + '%';
+
+        // Update indicators
+        document.getElementById('stepIndicatorLabel').innerText = `Step ${stepNum} of 5`;
+        document.getElementById('btnPrev').disabled = (stepNum === 1);
+        document.getElementById('btnNext').disabled = (stepNum === 5);
+
+        // Perform specific step initializations
+        if (stepNum === 2) {
+            initStep2();
+        } else if (stepNum === 3) {
+            initStep3();
+        } else if (stepNum === 4) {
+            initStep4();
+        } else if (stepNum === 5) {
+            initStep5();
+        }
+    }
+
+    function changeStep(dir) {
+        let target = currentStep + dir;
+        if (target >= 1 && target <= 5) {
+            goToStep(target);
+        }
+    }
+
+    // Step 1 Scenario selection
+    function selectScenario(scenarioKey) {
+        if (isUploading) return;
+        selectedScenarioKey = scenarioKey;
+        
+        // UI toggle selected class
+        document.querySelectorAll('.file-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById(`card_${scenarioKey}`).classList.add('selected');
+
+        const file = SCENARIOS[scenarioKey];
+        document.getElementById('selectedFileTitle').innerText = file.fileName;
+        document.querySelector('#selectedFileTitle + p').innerHTML = `Ready to upload to case: <strong class="text-cyan-400">${file.caseName.split(':')[1]}</strong>`;
+    }
+
+    // Step 1 Upload Simulation
+    function startSimulatedUpload() {
+        if (isUploading) return;
+        isUploading = true;
+
+        document.getElementById('uploadNormalState').classList.add('hidden');
+        document.getElementById('uploadActiveState').classList.remove('hidden');
+
+        const progressInner = document.getElementById('uploadProgressBarInner');
+        const consoleLogs = document.getElementById('uploadConsoleLogs');
+        const statusLabel = document.getElementById('uploadStatusLabel');
+        consoleLogs.innerHTML = '';
+
+        const scenario = SCENARIOS[selectedScenarioKey];
+        const logLines = [
+            `[10%] Ingesting raw stream of ${scenario.fileName}...`,
+            `[25%] Connection verified. Running file integrity checks...`,
+            `[45%] Cryptographic Hash Generated: ${scenario.hash}`,
+            `[70%] Verified integrity. Creating file record in case db...`,
+            `[85%] Starting raw content text extraction...`,
+            `[100%] Extraction success! Ingested ${scenario.fileSize} payload.`
+        ];
+
+        let logIdx = 0;
+        let progress = 0;
+
+        const interval = setInterval(() => {
+            progress += 10;
+            if (progress > 100) progress = 100;
+            progressInner.style.width = progress + '%';
+
+            // Add logs corresponding to progress steps
+            if (progress >= 10 && logIdx < 1) {
+                appendLog(logLines[0]);
+                logIdx = 1;
+            } else if (progress >= 25 && logIdx < 2) {
+                statusLabel.innerText = "Generating File Hash...";
+                appendLog(logLines[1]);
+                logIdx = 2;
+            } else if (progress >= 45 && logIdx < 3) {
+                statusLabel.innerText = "Adding File Metadata...";
+                appendLog(logLines[2]);
+                logIdx = 3;
+            } else if (progress >= 70 && logIdx < 4) {
+                statusLabel.innerText = "Extracting Text Data...";
+                appendLog(logLines[3]);
+                logIdx = 4;
+            } else if (progress >= 85 && logIdx < 5) {
+                appendLog(logLines[4]);
+                logIdx = 5;
+            } else if (progress === 100 && logIdx < 6) {
+                statusLabel.innerText = "Upload Complete!";
+                statusLabel.className = "text-sm font-semibold text-green-400 uppercase tracking-widest block mb-4";
+                appendLog(logLines[5]);
+                logIdx = 6;
+                clearInterval(interval);
+                
+                setTimeout(() => {
+                    isUploading = false;
+                    isChunkingCompleted = true; // Unlock step 2
+                    // Reset upload state
+                    document.getElementById('uploadNormalState').classList.remove('hidden');
+                    document.getElementById('uploadActiveState').classList.add('hidden');
+                    statusLabel.className = "text-sm font-semibold text-cyan-400 uppercase tracking-widest block mb-4";
+                    
+                    goToStep(2);
+                }, 1000);
+            }
+        }, 350);
+
+        function appendLog(txt) {
+            consoleLogs.innerHTML += `<div>${txt}</div>`;
+            consoleLogs.scrollTop = consoleLogs.scrollHeight;
+        }
+    }
+
+    // Step 2 Initialization & Animation
+    function initStep2() {
+        const scenario = SCENARIOS[selectedScenarioKey];
+        document.getElementById('rawFileMeta').innerText = scenario.fileName;
+        
+        // Show raw text
+        const rawTextArea = document.getElementById('rawTextArea');
+        rawTextArea.innerHTML = scenario.rawText;
+
+        const chunksContainer = document.getElementById('chunksContainer');
+        chunksContainer.innerHTML = '';
+        document.getElementById('chunksCountLabel').innerText = '0 Chunks';
+
+        // Animate chunks flying in
+        let chunkIdx = 0;
+        const addChunkWithAnimation = () => {
+            if (chunkIdx >= scenario.chunks.length) {
+                document.getElementById('chunksCountLabel').innerText = `${scenario.chunks.length} Chunks`;
+                return;
+            }
+
+            const chunk = scenario.chunks[chunkIdx];
+            const div = document.createElement('div');
+            div.className = 'chunk-item glass rounded-xl p-3 cursor-pointer text-xs';
+            div.id = `chunk_view_${chunk.id}`;
+            div.onclick = () => highlightChunkInRawText(chunk);
+            div.innerHTML = `
+                <div class="flex items-center justify-between font-semibold text-[10px] chunk-title mb-1">
+                    <span>${chunk.title}</span>
+                    <span class="font-mono chunk-meta-badge px-1 py-0.5 rounded text-[8px]">${chunk.vectorId}</span>
+                </div>
+                <p class="text-slate-400 leading-normal line-clamp-2">${chunk.content}</p>
+            `;
+
+            chunksContainer.appendChild(div);
+            gsap.from(div, { x: 50, opacity: 0, duration: 0.5, ease: "power2.out" });
+
+            chunkIdx++;
+            setTimeout(addChunkWithAnimation, 400);
+        };
+
+        setTimeout(addChunkWithAnimation, 300);
+    }
+
+    // Highlight text section on raw text panel
+    function highlightChunkInRawText(chunk) {
+        // Highlight in chunk selector list
+        document.querySelectorAll('.chunk-item').forEach(c => c.classList.remove('active'));
+        document.getElementById(`chunk_view_${chunk.id}`).classList.add('active');
+
+        // Highlight text in raw editor
+        const scenario = SCENARIOS[selectedScenarioKey];
+        const lines = scenario.rawText.split('\n');
+        let formattedText = '';
+        
+        lines.forEach((line, idx) => {
+            const lineNum = idx + 1;
+            if (chunk.highlightLines.includes(lineNum)) {
+                formattedText += `<span class="raw-text-line-highlight">${line}</span>`;
+            } else {
+                formattedText += `<span class="raw-text-line">${line}</span>`;
+            }
+        });
+
+        document.getElementById('rawTextArea').innerHTML = formattedText;
+    }
+
+    // Step 3 Vector space visualizer initialization
+    function initStep3() {
+        buildNodePool();
+        
+        // Setup Canvas size
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Reset camera positions
+        scale = 1.0;
+        originX = canvas.width / 2;
+        originY = canvas.height / 2;
+
+        // Trigger GSAP node growth
+        vectorNodes.forEach((node, index) => {
+            node.scale = 0;
+            gsap.to(node, {
+                scale: 1,
+                duration: 0.8,
+                delay: index * 0.1,
+                ease: "back.out(1.7)"
+            });
+        });
+
+        // Set up interactions
+        canvas.removeEventListener('mousemove', onCanvasMouseMove);
+        canvas.addEventListener('mousemove', onCanvasMouseMove);
+
+        // Start render loop
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        renderVectorSpace();
+    }
+
+    function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        canvas.style.width = rect.width + 'px';
+        canvas.style.height = rect.height + 'px';
+        
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+
+    function resetCanvasCamera() {
+        scale = 1.0;
+        originX = canvas.width / (2 * window.devicePixelRatio);
+        originY = canvas.height / (2 * window.devicePixelRatio);
+    }
+
+    // Canvas render loop
+    function renderVectorSpace() {
+        const width = canvas.width / window.devicePixelRatio;
+        const height = canvas.height / window.devicePixelRatio;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // 1. Draw Grid Lines
+        const isLightTheme = document.body.classList.contains('light-theme');
+        ctx.strokeStyle = isLightTheme ? 'rgba(8, 145, 178, 0.05)' : 'rgba(6, 182, 212, 0.03)';
+        ctx.lineWidth = 1;
+        const gridSize = 40;
+        
+        // Adjust grid for origin offsets
+        const startX = originX % gridSize;
+        const startY = originY % gridSize;
+
+        for (let x = startX; x < width; x += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+        for (let y = startY; y < height; y += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+
+        // Draw Axes
+        ctx.strokeStyle = isLightTheme ? 'rgba(15, 23, 42, 0.08)' : 'rgba(255, 255, 255, 0.05)';
+        ctx.beginPath();
+        ctx.moveTo(0, originY);
+        ctx.lineTo(width, originY);
+        ctx.moveTo(originX, 0);
+        ctx.lineTo(originX, height);
+        ctx.stroke();
+
+        // 2. Render Nodes
+        vectorNodes.forEach(node => {
+            // Apply slight floating movement
+            node.floatOffset += 0.015;
+            const fx = Math.cos(node.floatOffset) * 4;
+            const fy = Math.sin(node.floatOffset * 1.5) * 4;
+
+            // Map grid coordinates to screen coordinates centered around origin
+            const x = originX + (node.bx - 250) * scale + fx;
+            const y = originY + (node.by - 180) * scale + fy;
+
+            node.currentX = x;
+            node.currentY = y;
+
+            const size = 7 * node.scale;
+
+            // Outer glow
+            ctx.fillStyle = node.color;
+            ctx.shadowColor = node.color;
+            ctx.shadowBlur = 15;
+            
+            // Draw circle
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Reset shadows
+            ctx.shadowBlur = 0;
+
+            // Draw border ring if hovered
+            if (node === hoverNode) {
+                ctx.strokeStyle = isLightTheme ? '#0f172a' : '#ffffff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, size + 4, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        });
+
+        animationFrameId = requestAnimationFrame(renderVectorSpace);
+    }
+
+    // Node Interaction
+    function onCanvasMouseMove(e) {
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        // Search for nearest node
+        let foundNode = null;
+        for (let node of vectorNodes) {
+            const dx = node.currentX - mx;
+            const dy = node.currentY - my;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            
+            if (distance < 12) {
+                foundNode = node;
+                break;
+            }
+        }
+
+        const tooltip = document.getElementById('canvasTooltip');
+        if (foundNode) {
+            hoverNode = foundNode;
+            canvas.style.cursor = 'pointer';
+
+            // Populate tooltip
+            document.getElementById('tooltipCategory').innerText = foundNode.category;
+            document.getElementById('tooltipCategory').style.color = foundNode.color;
+            document.getElementById('tooltipTitle').innerText = foundNode.title;
+            document.getElementById('tooltipSnippet').innerText = foundNode.content;
+
+            // Position tooltip
+            tooltip.classList.remove('hidden');
+            tooltip.style.left = (foundNode.currentX + 15) + 'px';
+            tooltip.style.top = (foundNode.currentY - 20) + 'px';
+        } else {
+            hoverNode = null;
+            canvas.style.cursor = 'default';
+            tooltip.classList.add('hidden');
+        }
+    }
+
+    // Step 4 Sandbox setup
+    let searchRadarRadius = 0;
+    let isRadarActive = false;
+    let queryNodePosition = { x: 0, y: 0 };
+    let matchingTargetNodes = [];
+
+    function initStep4() {
+        const sRect = searchCanvas.parentElement.getBoundingClientRect();
+        searchCanvas.width = sRect.width * window.devicePixelRatio;
+        searchCanvas.height = sRect.height * window.devicePixelRatio;
+        searchCanvas.style.width = sRect.width + 'px';
+        searchCanvas.style.height = sRect.height + 'px';
+        searchCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        // Setup node positions for query Canvas
+        buildNodePool();
+        vectorNodes.forEach(node => {
+            node.scale = 1;
+        });
+
+        // Hide results list initially
+        document.getElementById('searchResultsBlock').classList.add('hidden');
+        document.getElementById('btnGoToRAG').disabled = true;
+
+        if (searchAnimationFrameId) cancelAnimationFrame(searchAnimationFrameId);
+        renderSearchCanvas();
+    }
+
+    function renderSearchCanvas() {
+        const width = searchCanvas.width / window.devicePixelRatio;
+        const height = searchCanvas.height / window.devicePixelRatio;
+
+        searchCtx.clearRect(0, 0, width, height);
+
+        const sOriginX = width / 2;
+        const sOriginY = height / 2;
+
+        // 1. Draw Grid Lines
+        const isLightTheme = document.body.classList.contains('light-theme');
+        searchCtx.strokeStyle = isLightTheme ? 'rgba(8, 145, 178, 0.05)' : 'rgba(6, 182, 212, 0.02)';
+        searchCtx.lineWidth = 1;
+        const gridSize = 40;
+        for (let x = 0; x < width; x += gridSize) {
+            searchCtx.beginPath();
+            searchCtx.moveTo(x, 0);
+            searchCtx.lineTo(x, height);
+            searchCtx.stroke();
+        }
+        for (let y = 0; y < height; y += gridSize) {
+            searchCtx.beginPath();
+            searchCtx.moveTo(0, y);
+            searchCtx.lineTo(width, y);
+            searchCtx.stroke();
+        }
+
+        // 2. Render normal nodes
+        vectorNodes.forEach(node => {
+            const x = sOriginX + (node.bx - 260);
+            const y = sOriginY + (node.by - 180);
+            node.currentX = x;
+            node.currentY = y;
+
+            searchCtx.fillStyle = node.color;
+            searchCtx.beginPath();
+            searchCtx.arc(x, y, 6, 0, Math.PI * 2);
+            searchCtx.fill();
+        });
+
+        // 3. Render radar sweep
+        if (isRadarActive) {
+            // Draw Query Node (Magenta pulse)
+            const qx = sOriginX + (queryNodePosition.x - 260);
+            const qy = sOriginY + (queryNodePosition.y - 180);
+
+            searchCtx.fillStyle = '#ec4899';
+            searchCtx.shadowColor = '#ec4899';
+            searchCtx.shadowBlur = 15;
+            searchCtx.beginPath();
+            searchCtx.arc(qx, qy, 7, 0, Math.PI * 2);
+            searchCtx.fill();
+            searchCtx.shadowBlur = 0;
+
+            // Radar expanding circle
+            searchRadarRadius += 4;
+            searchCtx.strokeStyle = 'rgba(236, 72, 153, 0.4)';
+            searchCtx.lineWidth = 1.5;
+            searchCtx.beginPath();
+            searchCtx.arc(qx, qy, searchRadarRadius, 0, Math.PI * 2);
+            searchCtx.stroke();
+
+            // Trace lines to intersected matches
+            matchingTargetNodes.forEach((node, index) => {
+                const dx = node.currentX - qx;
+                const dy = node.currentY - qy;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+
+                if (searchRadarRadius >= distance) {
+                    // Light up node
+                    searchCtx.strokeStyle = isLightTheme ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)';
+                    searchCtx.lineWidth = 1;
+                    searchCtx.beginPath();
+                    searchCtx.arc(node.currentX, node.currentY, 11, 0, Math.PI * 2);
+                    searchCtx.stroke();
+
+                    // Draw connecting line
+                    searchCtx.strokeStyle = 'rgba(236, 72, 153, 0.25)';
+                    searchCtx.setLineDash([4, 4]);
+                    searchCtx.beginPath();
+                    searchCtx.moveTo(qx, qy);
+                    searchCtx.lineTo(node.currentX, node.currentY);
+                    searchCtx.stroke();
+                    searchCtx.setLineDash([]);
+                }
+            });
+
+            // Stop radar sweep after size threshold
+            if (searchRadarRadius > 250) {
+                isRadarActive = false;
+            }
+        }
+
+        searchAnimationFrameId = requestAnimationFrame(renderSearchCanvas);
+    }
+
+    // Trigger radar and find chunks
+    function runSemanticQuery(queryId) {
+        selectedQueryId = queryId;
+        const config = QUERY_PRESETS[queryId];
+
+        // Trigger radar animation state
+        isRadarActive = true;
+        searchRadarRadius = 0;
+        queryNodePosition = config.targetVector;
+
+        // Retrieve matched node objects
+        matchingTargetNodes = vectorNodes.filter(node => config.retrievedIds.includes(node.id));
+
+        // Populate search list values
+        const resultsList = document.getElementById('resultsList');
+        resultsList.innerHTML = '';
+        document.getElementById('searchResultsBlock').classList.remove('hidden');
+
+        // Animate matches displaying on the right panel
+        config.retrievedIds.forEach((id, index) => {
+            const node = vectorNodes.find(n => n.id === id);
+            const score = config.similarityScores[id];
+            const div = document.createElement('div');
+            div.className = 'search-result-item p-3 rounded-xl flex items-center justify-between text-xs transition';
+            div.innerHTML = `
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="font-bold item-title">${node.title}</span>
+                        <span class="text-[9px] font-mono px-1 py-0.2 rounded" style="background-color: ${node.color}20; color: ${node.color}">${node.category}</span>
+                    </div>
+                    <p class="item-text line-clamp-1">${node.content}</p>
+                </div>
+                <span class="font-mono match-badge font-bold px-2 py-1 rounded text-[10px]">${(score * 100).toFixed(1)}% Match</span>
+            `;
+
+            // Delay presentation to match radar ripple
+            setTimeout(() => {
+                resultsList.appendChild(div);
+                gsap.from(div, { y: 10, opacity: 0, duration: 0.4 });
+            }, index * 250);
+        });
+
+        // Enable next button
+        document.getElementById('btnGoToRAG').disabled = false;
+    }
+
+    // Step 5 RAG Setup
+    function initStep5() {
+        const queryId = selectedQueryId || 1;
+        const config = QUERY_PRESETS[queryId];
+
+        document.getElementById('promptQuestionText').innerText = config.text;
+
+        // Render RAG prompt structure
+        const promptView = document.getElementById('promptView');
+        let chunksPromptHTML = '';
+
+        config.retrievedIds.forEach(id => {
+            const node = vectorNodes.find(n => n.id === id);
+            chunksPromptHTML += `
+                <div class="prompt-source-item p-2.5 rounded mb-2">
+                    <div class="font-bold text-[9px] source-header">// Source: ${node.title} [${node.vectorId}]</div>
+                    <div class="mt-1">${node.content}</div>
+                </div>
+            `;
+        });
+
+        promptView.innerHTML = `
+            <div class="text-slate-500">// System Prompt</div>
+            <div class="text-cyan-400">SYSTEM: You are a professional Digital Memory Forensics Assistant. Examine the retrieved evidence chunks below and generate a detailed report answering the User's Query. Provide source tags for verification.</div>
+            
+            <div class="text-slate-500 mt-3">// Retrieved Evidence Context</div>
+            ${chunksPromptHTML}
+            
+            <div class="text-slate-500 mt-3">// User Question</div>
+            <div class="text-white bg-slate-950 p-2.5 rounded border border-slate-900">
+                <span class="text-cyan-400 font-bold">QUERY:</span> ${config.text}
+            </div>
+        `;
+
+        // Clear console text
+        const reportConsole = document.getElementById('reportConsole');
+        reportConsole.innerHTML = `<div class="text-slate-500">// RAG context assembled. Click "Generate Report" above to begin reasoning.</div>`;
+        document.getElementById('completionActions').classList.add('hidden');
+    }
+
+    // Typing effect for RAG Console
+    function startRAGGeneration() {
+        const queryId = selectedQueryId || 1;
+        const config = QUERY_PRESETS[queryId];
+        const consoleEl = document.getElementById('reportConsole');
+        
+        document.getElementById('btnGenerateReport').disabled = true;
+
+        consoleEl.innerHTML = '';
+        
+        // Initial console logs
+        const bootLogs = [
+            "Initializing Memoir RAG reasoning pipeline...",
+            "Loading local instruction embeddings...",
+            "Consolidating context prompt payload...",
+            "Submitting payload to Gemini LLM Engine...",
+            "Generative tokens streaming:\n"
+        ];
+
+        let logIdx = 0;
+        function printBootLogs() {
+            if (logIdx < bootLogs.length) {
+                consoleEl.innerHTML += `<div class="text-slate-400 font-mono text-[10px]">> ${bootLogs[logIdx]}</div>`;
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+                logIdx++;
+                setTimeout(printBootLogs, 250);
+            } else {
+                // Start typing the actual markdown report
+                typeReportText(config.report);
+            }
+        }
+        
+        printBootLogs();
+    }
+
+    function typeReportText(fullHtml) {
+        const consoleEl = document.getElementById('reportConsole');
+        let currentText = '';
+        let charIndex = 0;
+        
+        // Strip tag-like strings or process them correctly
+        // Since we are outputting HTML markup directly, let's type it out word-by-word/tag-by-tag
+        const elements = tokenizeHtml(fullHtml);
+        let tokenIndex = 0;
+
+        function typeToken() {
+            if (tokenIndex >= elements.length) {
+                // Done typing
+                consoleEl.innerHTML += `<div class="text-cyan-400 mt-4 font-bold animate-pulse">// GENERATIVE INTERACTION COMPLETE</div>`;
+                consoleEl.scrollTop = consoleEl.scrollHeight;
+                document.getElementById('btnGenerateReport').disabled = false;
+                document.getElementById('completionActions').classList.remove('hidden');
+                return;
+            }
+
+            const token = elements[tokenIndex];
+            consoleEl.innerHTML = consoleEl.innerHTML.replace('<span class="text-white cursor-blink">_</span>', '') + token + '<span class="text-white cursor-blink">_</span>';
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            tokenIndex++;
+            setTimeout(typeToken, token.startsWith('<') ? 10 : 35);
+        }
+
+        typeToken();
+    }
+
+    // Helper token split to avoid showing raw HTML tags during typing
+    function tokenizeHtml(html) {
+        const tokens = [];
+        let i = 0;
+        while (i < html.length) {
+            if (html[i] === '<') {
+                let tag = '';
+                while (i < html.length && html[i] !== '>') {
+                    tag += html[i];
+                    i++;
+                }
+                if (i < html.length) {
+                    tag += '>';
+                    i++;
+                }
+                tokens.push(tag);
+            } else {
+                // Text token (character or word)
+                tokens.push(html[i]);
+                i++;
+            }
+        }
+        return tokens;
+    }
+
+    // Highlight reference chunk
+    function highlightCitation(chunkId) {
+        goToStep(2);
+        const chunk = SCENARIOS.blackwood.chunks.find(c => c.id === chunkId) ||
+                      SCENARIOS.credentials.chunks.find(c => c.id === chunkId) ||
+                      SCENARIOS.server_logs.chunks.find(c => c.id === chunkId);
+        
+        if (chunk) {
+            selectScenario(chunk.scenarioKey);
+            // Allow template to switch file scenarios, then highlight
+            setTimeout(() => {
+                highlightChunkInRawText(chunk);
+                // Scroll to the active chunk view
+                const chunkView = document.getElementById(`chunk_view_${chunk.id}`);
+                if (chunkView) {
+                    chunkView.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    chunkView.classList.add('highlight-flash');
+                    setTimeout(() => chunkView.classList.remove('highlight-flash'), 4500);
+                }
+            }, 200);
+        }
+    }
+
+    // Initial setup on window load
+    window.onload = function() {
+        selectScenario('blackwood');
+        buildNodePool();
+    };
+</script>
+
+{% endblock %}

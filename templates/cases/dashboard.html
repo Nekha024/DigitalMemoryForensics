@@ -1,0 +1,540 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Command Center{% endblock %}
+
+{% block content %}
+<!-- Custom Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+    .dashboard-container {
+        font-family: 'Outfit', sans-serif;
+    }
+    
+    /* Glowing Effects */
+    .glow-cyan {
+        box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+        border: 1px solid rgba(6, 182, 212, 0.25) !important;
+    }
+    .glow-green {
+        box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    }
+    .glow-purple {
+        box-shadow: 0 0 25px rgba(168, 85, 247, 0.15);
+        border: 1px solid rgba(168, 85, 247, 0.25) !important;
+    }
+    .glow-red {
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    }
+    .glow-yellow {
+        box-shadow: 0 0 25px rgba(245, 158, 11, 0.15);
+        border: 1px solid rgba(245, 158, 11, 0.25) !important;
+    }
+
+    /* Light Mode Glows */
+    body.light-theme .glow-cyan {
+        box-shadow: 0 4px 20px rgba(6, 182, 212, 0.1);
+        border-color: rgba(6, 182, 212, 0.2) !important;
+    }
+    body.light-theme .glow-green {
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.2) !important;
+    }
+    body.light-theme .glow-purple {
+        box-shadow: 0 4px 20px rgba(168, 85, 247, 0.1);
+        border-color: rgba(168, 85, 247, 0.2) !important;
+    }
+    body.light-theme .glow-red {
+        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.2) !important;
+    }
+    body.light-theme .glow-yellow {
+        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.1);
+        border-color: rgba(245, 158, 11, 0.2) !important;
+    }
+    
+    /* Stat Card Hover Effects */
+    .stat-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+    }
+    .stat-card:hover .icon-container {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    /* Grid background decoration */
+    .dashboard-grid-bg {
+        background-image:
+            linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+    
+    /* Quick Action Card Hover */
+    .action-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .action-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(6, 182, 212, 0.4);
+        box-shadow: 0 10px 25px rgba(6, 182, 212, 0.1);
+    }
+    .action-card:hover .action-icon {
+        transform: translateY(-2px);
+        color: #06b6d4;
+    }
+    
+    /* Recent cases table hover */
+    .table-row-hover {
+        transition: background-color 0.25s ease;
+    }
+    .table-row-hover:hover {
+        background-color: rgba(255, 255, 255, 0.03);
+    }
+    body.light-theme .table-row-hover:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    /* Scoped theme overrides for layout elements */
+    .dashboard-container .text-white {
+        color: var(--text-main) !important;
+    }
+    .dashboard-container .text-slate-400 {
+        color: var(--text-muted) !important;
+    }
+    .dashboard-container .text-slate-300 {
+        color: var(--text-muted) !important;
+    }
+    
+    /* Adapt borders to var(--border) */
+    .dashboard-container .border-slate-800,
+    .dashboard-container .border-slate-800\/80,
+    .dashboard-container .border-slate-800\/60 {
+        border-color: var(--border) !important;
+    }
+    
+    /* Clock text color */
+    .dashboard-container #liveTime {
+        color: var(--text-main) !important;
+    }
+    
+    /* Subcard backgrounds */
+    .dashboard-container .bg-slate-950\/40 {
+        background-color: rgba(15, 23, 42, 0.45) !important;
+    }
+    body.light-theme .dashboard-container .bg-slate-950\/40 {
+        background-color: rgba(0, 0, 0, 0.03) !important;
+    }
+
+    /* Adapt subtext colors to theme */
+    .dashboard-container .text-cyan-400\/80 {
+        color: rgba(6, 182, 212, 0.8) !important;
+    }
+    body.light-theme .dashboard-container .text-cyan-400\/80 {
+        color: #0891b2 !important;
+    }
+    .dashboard-container .text-emerald-400\/80 {
+        color: rgba(16, 185, 129, 0.8) !important;
+    }
+    body.light-theme .dashboard-container .text-emerald-400\/80 {
+        color: #047857 !important;
+    }
+    .dashboard-container .text-rose-400\/80 {
+        color: rgba(239, 68, 68, 0.8) !important;
+    }
+    body.light-theme .dashboard-container .text-rose-400\/80 {
+        color: #be123c !important;
+    }
+    .dashboard-container .text-amber-400\/80 {
+        color: rgba(245, 158, 11, 0.8) !important;
+    }
+    body.light-theme .dashboard-container .text-amber-400\/80 {
+        color: #b45309 !important;
+    }
+    .dashboard-container .text-purple-400\/80 {
+        color: rgba(168, 85, 247, 0.8) !important;
+    }
+    body.light-theme .dashboard-container .text-purple-400\/80 {
+        color: #7e22ce !important;
+    }
+    
+    /* Translucent icons colors */
+    body.light-theme .dashboard-container .icon-container.text-cyan-400 {
+        color: #0891b2 !important;
+        background-color: rgba(8, 145, 178, 0.08) !important;
+        border-color: rgba(8, 145, 178, 0.15) !important;
+    }
+    body.light-theme .dashboard-container .icon-container.text-emerald-400 {
+        color: #047857 !important;
+        background-color: rgba(16, 185, 129, 0.08) !important;
+        border-color: rgba(16, 185, 129, 0.15) !important;
+    }
+    body.light-theme .dashboard-container .icon-container.text-purple-400 {
+        color: #7e22ce !important;
+        background-color: rgba(168, 85, 247, 0.08) !important;
+        border-color: rgba(168, 85, 247, 0.15) !important;
+    }
+    body.light-theme .dashboard-container .icon-container.text-rose-400 {
+        color: #be123c !important;
+        background-color: rgba(239, 68, 68, 0.08) !important;
+        border-color: rgba(239, 68, 68, 0.15) !important;
+    }
+    body.light-theme .dashboard-container .icon-container.text-amber-400 {
+        color: #b45309 !important;
+        background-color: rgba(245, 158, 11, 0.08) !important;
+        border-color: rgba(245, 158, 11, 0.15) !important;
+    }
+</style>
+
+<div class="dashboard-container max-w-7xl mx-auto py-2">
+
+    <!-- Header Command Center Banner -->
+    <div class="relative mb-8 glass rounded-3xl p-6 border border-slate-800 dashboard-grid-bg overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 relative z-10">
+            <div>
+                <span class="text-xs font-bold text-cyan-400 uppercase tracking-widest block mb-1">Investigator Command Console</span>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">
+                    Welcome back, {{ request.user.username }}
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">
+                    System status check: <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> All Engines Operational</span>
+                </p>
+            </div>
+            <div class="flex items-center gap-3 bg-slate-950/40 border border-slate-800/80 px-4 py-2.5 rounded-2xl">
+                <div class="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400">
+                    <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase block">Session Token Active</span>
+                    <span class="text-xs font-mono text-slate-300" id="liveTime">Loading timestamp...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Glowing KPI Stats Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <!-- Card 1: Total Cases -->
+        <div class="stat-card glass p-6 rounded-2xl border border-slate-800 relative overflow-hidden flex items-center justify-between group glow-cyan">
+            <div class="relative z-10">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Cases</p>
+                <h2 class="text-4xl font-black text-white mt-2">{{ total_cases }}</h2>
+                <span class="text-[10px] text-cyan-400/80 font-semibold mt-1 inline-block">All investigative repos</span>
+            </div>
+            <div class="icon-container w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl transition-all duration-300">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+        </div>
+
+        <!-- Card 2: Open Cases -->
+        <div class="stat-card glass p-6 rounded-2xl border border-slate-800 relative overflow-hidden flex items-center justify-between group glow-green">
+            <div class="relative z-10">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Active Cases</p>
+                <h2 class="text-4xl font-black text-white mt-2">{{ open_cases }}</h2>
+                <span class="text-[10px] text-emerald-400/80 font-semibold mt-1 inline-block">Requiring attention</span>
+            </div>
+            <div class="icon-container w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl transition-all duration-300">
+                <i class="fa-solid fa-unlock-keyhole"></i>
+            </div>
+        </div>
+
+        <!-- Card 3: Evidence files -->
+        <div class="stat-card glass p-6 rounded-2xl border border-slate-800 relative overflow-hidden flex items-center justify-between group glow-purple">
+            <div class="relative z-10">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Evidence Files</p>
+                <h2 class="text-4xl font-black text-white mt-2">{{ evidence_count }}</h2>
+                <span class="text-[10px] text-purple-400/80 font-semibold mt-1 inline-block">Confidential Evidences</span>
+            </div>
+            <div class="icon-container w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 text-xl transition-all duration-300">
+                <i class="fa-solid fa-file-pdf"></i>
+            </div>
+        </div>
+
+        <!-- Card 4: Closed Cases -->
+        <div class="stat-card glass p-6 rounded-2xl border border-slate-800 relative overflow-hidden flex items-center justify-between group glow-red">
+            <div class="relative z-10">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Closed Cases</p>
+                <h2 class="text-4xl font-black text-white mt-2">{{ closed_cases }}</h2>
+                <span class="text-[10px] text-rose-400/80 font-semibold mt-1 inline-block">Completed reviews</span>
+            </div>
+            <div class="icon-container w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 text-xl transition-all duration-300">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+        </div>
+
+        <!-- Card 5: Subscription -->
+        <div class="stat-card glass p-6 rounded-2xl border border-slate-800 relative overflow-hidden flex items-center justify-between group glow-yellow">
+            <div class="relative z-10">
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Remaining Days</p>
+                <h2 class="text-4xl font-black text-white mt-2">{{ remaining_days }}</h2>
+                <span class="text-[10px] text-amber-400/80 font-semibold mt-1 inline-block">Plan validity</span>
+            </div>
+            <div class="icon-container w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 text-xl transition-all duration-300">
+                <i class="fa-solid fa-key"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Grid Viewport -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Status Overview Chart (Pie) -->
+        <div class="glass p-5 rounded-3xl border border-slate-800 flex flex-col justify-between">
+            <div>
+                <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-cyan-400"></i> Case Status Summary
+                </h3>
+                <span class="text-slate-400 text-xs block mb-4">Proportion of active vs closed cases</span>
+            </div>
+            <div class="relative flex items-center justify-center h-[230px] p-2">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Monthly Trends Chart (Bar) -->
+        <div class="glass p-5 rounded-3xl border border-slate-800 lg:col-span-2 flex flex-col justify-between">
+            <div>
+                <h3 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-simple text-cyan-400"></i> Monthly Cases Load
+                </h3>
+                <span class="text-slate-400 text-xs block mb-4">Tracking monthly investigation volume</span>
+            </div>
+            <div class="relative h-[230px]">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modernized Quick Actions Dashboard Panel -->
+    <div class="mb-8">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 px-1">Forensic Tools Quick Access</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <a href="{% url 'create_case' %}" class="action-card glass p-5 rounded-2xl border border-slate-800 flex flex-col justify-between h-[130px] group">
+                <div class="flex items-center justify-between">
+                    <span class="action-icon text-cyan-400 text-xl transition-all duration-300"><i class="fa-solid fa-folder-plus"></i></span>
+                    <span class="text-slate-500 group-hover:text-cyan-400 transition text-xs"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-0.5">Create Case</h4>
+                    <p class="text-[10px] text-slate-400 leading-normal">Initialize a new repository & secure chain of custody.</p>
+                </div>
+            </a>
+            <a href="{% url 'home' %}" class="action-card glass p-5 rounded-2xl border border-slate-800 flex flex-col justify-between h-[130px] group">
+                <div class="flex items-center justify-between">
+                    <span class="action-icon text-emerald-400 text-xl transition-all duration-300"><i class="fa-solid fa-briefcase"></i></span>
+                    <span class="text-slate-500 group-hover:text-emerald-400 transition text-xs"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-0.5">My Cases</h4>
+                    <p class="text-[10px] text-slate-400 leading-normal">Browse and manage active case files.</p>
+                </div>
+            </a>
+            <a href="{% url 'semantic_search' %}" class="action-card glass p-5 rounded-2xl border border-slate-800 flex flex-col justify-between h-[130px] group">
+                <div class="flex items-center justify-between">
+                    <span class="action-icon text-purple-400 text-xl transition-all duration-300"><i class="fa-solid fa-brain"></i></span>
+                    <span class="text-slate-500 group-hover:text-purple-400 transition text-xs"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-0.5">Semantic Search</h4>
+                    <p class="text-[10px] text-slate-400 leading-normal">Query evidence semantically across vectors.</p>
+                </div>
+            </a>
+            <a href="{% url 'how_it_works' %}" class="action-card glass p-5 rounded-2xl border border-slate-800 flex flex-col justify-between h-[130px] group">
+                <div class="flex items-center justify-between">
+                    <span class="action-icon text-pink-400 text-xl transition-all duration-300"><i class="fa-solid fa-circle-play"></i></span>
+                    <span class="text-slate-500 group-hover:text-pink-400 transition text-xs"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold text-white mb-0.5">Interactive Lab</h4>
+                    <p class="text-[10px] text-slate-400 leading-normal">Explore how the AI RAG pipeline processes files.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Polished Recent Cases Viewport -->
+    <div class="glass rounded-3xl border border-slate-800 p-6">
+        <div class="flex items-center justify-between mb-6 pb-3 border-b border-slate-800/80">
+            <div>
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-cyan-400"></i> Recent Investigations
+                </h3>
+                <span class="text-xs text-slate-400">List of recently modified case repositories</span>
+            </div>
+            <a href="{% url 'home' %}" class="btn-outline text-[10px] py-1.5 px-3 uppercase tracking-wider font-semibold">View All</a>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b border-slate-800">
+                        <th class="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-400">Case Details</th>
+                        <th class="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-400">Status</th>
+                        <th class="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-400">Creation Date</th>
+                        <th class="text-right py-3 px-4 text-xs font-bold uppercase tracking-wider text-slate-400">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in recent_cases %}
+                    <tr class="border-b border-slate-800/60 table-row-hover">
+                        <td class="py-4 px-4">
+                            <span class="text-sm font-bold text-white block">{{ case.title }}</span>
+                            <span class="text-[10px] text-slate-400 block mt-0.5 line-clamp-1 max-w-sm">{{ case.description|default:"No description provided." }}</span>
+                        </td>
+                        <td class="py-4 px-4">
+                            {% if case.status == 'open' %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-wide">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Open
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-500/10 text-slate-400 border border-slate-500/20 text-[10px] font-bold uppercase tracking-wide">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Closed
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-4 text-slate-400 text-xs font-mono">
+                            {{ case.created_at|date:"d M Y" }}
+                        </td>
+                        <td class="py-4 px-4 text-right">
+                            <a href="{% url 'case_detail' case.id %}" class="btn-primary text-[10px] py-1.5 px-3 flex items-center gap-1.5 inline-flex align-middle">
+                                <i class="fa-solid fa-folder-open"></i> Enter Case
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="py-8 text-center text-slate-400 text-sm">
+                            <div class="flex flex-col items-center justify-center gap-2">
+                                <span class="text-3xl">📁</span>
+                                <span>No investigation cases registered.</span>
+                                <a href="{% url 'create_case' %}" class="text-cyan-400 hover:underline mt-1 font-semibold text-xs">Create your first case now</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js and Custom Script Setup -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Live Clock display
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('liveTime').innerText = now.toLocaleString('en-US', {
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+            year: 'numeric', month: 'short', day: '2-digit'
+        });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    let statusChart, monthlyChart;
+
+    function getThemeColors() {
+        const isLight = document.body.classList.contains('light-theme');
+        return {
+            text: isLight ? '#475569' : '#94a3b8',
+            grid: isLight ? 'rgba(15,23,42,0.06)' : 'rgba(255,255,255,0.06)',
+            accentCyan: isLight ? '#0891b2' : '#06b6d4',
+            accentGreen: isLight ? '#10b981' : '#10b981',
+            accentRed: isLight ? '#ef4444' : '#ef4444',
+            cardBg: isLight ? '#ffffff' : '#0f172a'
+        }
+    }
+
+    function buildCharts() {
+        const colors = getThemeColors();
+        
+        if(statusChart) statusChart.destroy();
+        if(monthlyChart) monthlyChart.destroy();
+
+        // 1. Case Status Pie/Doughnut Chart
+        statusChart = new Chart(document.getElementById('statusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Active Cases', 'Closed Cases'],
+                datasets: [{
+                    data: [{{ open_cases|default:0 }}, {{ closed_cases|default:0 }}],
+                    backgroundColor: [colors.accentGreen, colors.accentRed],
+                    hoverOffset: 4,
+                    borderWidth: 2,
+                    borderColor: colors.cardBg
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: colors.text,
+                            font: { family: 'Outfit', size: 11, weight: 'bold' },
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Monthly Line/Bar chart
+        monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ months|safe|default:"[]" }},
+                datasets: [{
+                    label: 'New Cases Created',
+                    data: {{ monthly_counts|safe|default:"[]" }},
+                    backgroundColor: colors.accentCyan,
+                    hoverBackgroundColor: '#22d3ee',
+                    borderRadius: 6,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: { 
+                        grid: { color: colors.grid },
+                        ticks: {
+                            color: colors.text,
+                            font: { family: 'Outfit', size: 10 }
+                        }
+                    },
+                    y: { 
+                        grid: { color: colors.grid },
+                        ticks: {
+                            color: colors.text,
+                            font: { family: 'Outfit', size: 10 },
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Initial Build
+    buildCharts();
+
+    // Re-render when theme changes
+    window.addEventListener('themeChanged', buildCharts);
+</script>
+{% endblock %}

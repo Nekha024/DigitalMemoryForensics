@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Custom Font & Scoped Styles -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    .sub-wrapper {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .sub-title {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .sub-title h1 {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(to right, #00d9ff, #00aaff, #66ffff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0,217,255,.2);
+    }
+    
+    .sub-title p {
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+    
+    /* Toggle */
+    .sub-toggle-wrapper {
+        width: max-content;
+        margin: 0 auto 35px auto;
+        padding: 5px;
+        border-radius: 14px;
+        background: transparent;
+        border: 1px solid var(--border);
+        display: flex;
+        gap: 8px;
+    }
+    
+    .sub-toggle-btn {
+        padding: 8px 18px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .25s;
+    }
+    .sub-toggle-btn:hover {
+        color: var(--text-main);
+    }
+    .sub-toggle-btn.active {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        box-shadow: 0 0 12px rgba(6, 182, 212, 0.3);
+    }
+    
+    /* Cards Grid */
+    .sub-grid {
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        gap: 25px;
+        flex-wrap: wrap;
+        padding: 10px 0;
+    }
+    
+    .sub-card {
+        width: 290px;
+        padding: 30px 25px;
+        border-radius: 20px;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    body.light-theme .sub-card {
+        background: rgba(0, 0, 0, 0.02);
+    }
+    
+    .sub-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(6, 182, 212, 0.45);
+        box-shadow: 0 8px 30px rgba(6, 182, 212, 0.15);
+    }
+    
+    .sub-card h2 {
+        font-size: 22px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    
+    /* Price */
+    .sub-price {
+        font-size: 40px;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 20px;
+        background: linear-gradient(to right, #06b6d4, #00d9ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+    }
+    body.light-theme .sub-price {
+        background: linear-gradient(to right, #0891b2, #06b6d4);
+        -webkit-background-clip: text;
+    }
+    
+    .sub-desc {
+        color: var(--text-muted);
+        text-align: center;
+        line-height: 1.6;
+        font-size: 13px;
+        margin-bottom: 20px;
+        flex-grow: 1;
+    }
+    
+    .sub-duration {
+        text-align: center;
+        margin-bottom: 25px;
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 600;
+    }
+    
+    /* Subscribe Button */
+    .sub-subscribe-btn {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .3s;
+    }
+    .sub-subscribe-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+    }
+    
+    /* Popular Badge */
+    .sub-card.popular {
+        border-color: rgba(6, 182, 212, 0.45);
+        box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+    }
+    .sub-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #06b6d4;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<div class="sub-wrapper">
+    <div class="sub-title">
+        <h1>Subscription Plans</h1>
+        <p>Choose the perfect forensic ingestion package</p>
+    </div>
+
+    <!-- Toggle -->
+    <div class="sub-toggle-wrapper">
+        <button class="sub-toggle-btn active" data-type="month">
+            1 Month
+        </button>
+        <button class="sub-toggle-btn" data-type="six">
+            6 Months
+        </button>
+        <button class="sub-toggle-btn" data-type="year">
+            1 Year
+        </button>
+    </div>
+
+    <!-- Cards Grid -->
+    <div class="sub-grid">
+        {% for plan in plans %}
+        <div class="sub-card {% if forloop.counter == 2 %}popular{% endif %}">
+            {% if forloop.counter == 2 %}
+            <div class="sub-badge">
+                POPULAR
+            </div>
+            {% endif %}
+
+            <h2>{{ plan.name }}</h2>
+
+            <!-- Price -->
+            <div class="sub-price"
+                 data-month="{{ plan.price }}"
+                 data-six="{% if plan.name == 'SILVER' %}799{% elif plan.name == 'GOLD' %}1099{% else %}1599{% endif %}"
+                 data-year="{% if plan.name == 'SILVER' %}1499{% elif plan.name == 'GOLD' %}1999{% else %}2999{% endif %}">
+                ₹{{ plan.price }}
+            </div>
+
+            <p class="sub-desc">
+                {{ plan.description }}
+            </p>
+
+            <!-- Duration -->
+            <p class="sub-duration">
+                1 Month Access
+            </p>
+
+            <form method="POST" class="m-0">
+                {% csrf_token %}
+                <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                <input type="hidden" name="billing_type" value="month" class="billing-input">
+                <button type="submit" class="sub-subscribe-btn">
+                    Subscribe
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    const buttons = document.querySelectorAll(".sub-toggle-btn");
+    const prices = document.querySelectorAll(".sub-price");
+    const billingInputs = document.querySelectorAll(".billing-input");
+    const durations = document.querySelectorAll(".sub-duration");
+
+    buttons.forEach(button => {
+        button.addEventListener("click", () => {
+            buttons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
+
+            const type = button.getAttribute("data-type");
+
+            prices.forEach(price => {
+                const value = price.getAttribute(`data-${type}`);
+                price.style.transform = "scale(1.1)";
+                price.style.opacity = "0.5";
+
+                setTimeout(() => {
+                    price.innerHTML = `₹${value}`;
+                    price.style.transform = "scale(1)";
+                    price.style.opacity = "1";
+                }, 180);
+            });
+
+            billingInputs.forEach(input => {
+                input.value = type;
+            });
+
+            durations.forEach(duration => {
+                duration.style.opacity = "0";
+
+                setTimeout(() => {
+                    if (type === "month") {
+                        duration.innerHTML = "1 Month Access";
+                    } else if (type === "six") {
+                        duration.innerHTML = "6 Months Access";
+                    } else {
+                        duration.innerHTML = "1 Year Access";
+                    }
+                    duration.style.opacity = "1";
+                }, 180);
+            });
+        });
+    });
+</script>
+{% endblock %}
